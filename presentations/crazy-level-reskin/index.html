@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>这关太疯狂换皮美术方向分析</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #101827;
+      --muted: #5b6472;
+      --line: #e5e7eb;
+      --paper: #fff7ed;
+      --accent: #ff6b9d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fff7ed 0%, #ffffff 46%);
+    }
+    main {
+      width: min(1120px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 56px 0 64px;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.02fr 0.98fr;
+      gap: 36px;
+      align-items: center;
+      min-height: 520px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      padding: 9px 16px;
+      border-radius: 999px;
+      background: #fed7aa;
+      color: #9a3412;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 22px;
+    }
+    h1 {
+      font-size: clamp(42px, 6vw, 72px);
+      line-height: 1.02;
+      margin: 0 0 22px;
+      letter-spacing: 0;
+    }
+    .lead {
+      color: #374151;
+      font-size: 21px;
+      line-height: 1.7;
+      margin: 0 0 30px;
+      max-width: 640px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 22px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 800;
+      background: var(--ink);
+      color: white;
+    }
+    .button.secondary {
+      background: white;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    .cover {
+      width: 100%;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(15, 23, 42, .16);
+      border: 1px solid rgba(15, 23, 42, .08);
+      display: block;
+    }
+    section { margin-top: 64px; }
+    h2 {
+      font-size: clamp(30px, 4vw, 44px);
+      margin: 0 0 16px;
+      letter-spacing: 0;
+    }
+    .section-copy {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.7;
+      margin: 0 0 28px;
+      max-width: 760px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+    }
+    figure {
+      margin: 0;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(15, 23, 42, .06);
+    }
+    figure img {
+      width: 100%;
+      display: block;
+    }
+    figcaption {
+      padding: 16px 18px 18px;
+      color: #374151;
+      font-weight: 700;
+    }
+    .notes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .note {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 22px;
+      min-height: 136px;
+    }
+    .note strong {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    .note span {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    footer {
+      margin-top: 72px;
+      color: #6b7280;
+      font-size: 14px;
+    }
+    @media (max-width: 860px) {
+      main { padding-top: 34px; }
+      .hero, .grid, .notes { grid-template-columns: 1fr; }
+      .hero { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="hero">
+      <div>
+        <div class="eyebrow">微信小游戏 · 合成色块换皮</div>
+        <h1>《这关太疯狂》换皮美术方向分析</h1>
+        <p class="lead">围绕北美、东南亚、中东与全球通用市场，整理可落地的美术风格、UI语言、角色设计和参考图方向。</p>
+        <div class="actions">
+          <a class="button" href="crazy-level-reskin-style-analysis.pptx" download>下载 PPT</a>
+          <a class="button secondary" href="#styles">查看风格预览</a>
+        </div>
+      </div>
+      <img class="cover" src="cover.png" alt="PPT封面预览">
+    </div>
+
+    <section id="styles">
+      <h2>四个换皮方向</h2>
+      <p class="section-copy">同一个“三合一色块合成”内核，可以通过不同物件、角色和UI语言适配不同市场。</p>
+      <div class="grid">
+        <figure>
+          <img src="north-america.png" alt="北美玩具糖果方向预览">
+          <figcaption>北美：玩具工厂 / 糖果积木</figcaption>
+        </figure>
+        <figure>
+          <img src="southeast-asia.png" alt="东南亚热带夜市方向预览">
+          <figcaption>东南亚：热带水果 / 夜市小吃</figcaption>
+        </figure>
+        <figure>
+          <img src="middle-east.png" alt="中东沙漠宝石方向预览">
+          <figcaption>中东：沙漠宝石 / 巴扎藏宝</figcaption>
+        </figure>
+        <figure>
+          <img src="global.png" alt="全球萌宠星球方向预览">
+          <figcaption>全球通用：萌宠星球</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>推荐落地顺序</h2>
+      <div class="notes">
+        <div class="note"><strong>先测全球通用</strong><span>萌宠星球文化门槛最低，也方便加入收集册和稀有宠物。</span></div>
+        <div class="note"><strong>再测北美糖果</strong><span>糖果和玩具是成熟休闲题材，适合高品质买量素材。</span></div>
+        <div class="note"><strong>地区包后置</strong><span>东南亚夜市和中东宝石适合做区域化皮肤包，降低首版成本。</span></div>
+      </div>
+    </section>
+
+    <footer>Published for GitHub Pages · PPT and preview images are provided for internal style reference.</footer>
+  </main>
+</body>
+</html>
