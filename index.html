@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>股指期货策略发布入口</title>
+  <title>策略研究发布入口</title>
   <style>
     body {
       margin: 0;
@@ -45,6 +45,7 @@
       color: #174f82;
       font-size: 12px;
     }
+    .tag.etf { background: #eafaf1; color: #17633b; }
     @media (max-width: 760px) {
       .grid { grid-template-columns: 1fr; }
     }
@@ -52,11 +53,16 @@
 </head>
 <body>
   <main>
-    <h1>股指期货策略发布入口</h1>
-    <p>这里发布的是 IF / IH / IC / IM 股指期货策略资料，不是 ETF 方案。优先查看最新固定版对比报告。</p>
+    <h1>策略研究发布入口</h1>
+    <p>这里汇总股指期货与 ETF 策略资料。优先查看最新固定版和跨平台同步报告。</p>
     <section class="grid">
+      <a class="card" href="docs/">
+        <span class="tag etf">ETF 最新</span>
+        <div class="title">五福 ETF V9：固定版与双平台验收</div>
+        <p>包含同花顺 / 聚宽分钟级对比、V9 固定版策略说明、数据口径、参数、限制和后续优化路径。</p>
+      </a>
       <a class="card" href="index-futures-v69-fixed-20260707/">
-        <span class="tag">最新</span>
+        <span class="tag">股指期货最新</span>
         <div class="title">V69 固定版：同花顺 / 聚宽 / 本地对比</div>
         <p>包含整体思路、交易策略、核心参数、三端完整脚本代码和 V71 反例对比。</p>
       </a>
