@@ -3,1462 +3,230 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>???? V69 ?????</title>
+  <title>股指期货 V69 固定版说明</title>
   <style>
     :root {
-      --ink:#172033; --muted:#5c667a; --line:#dfe5ef; --bg:#f5f7fb; --panel:#fff;
-      --accent:#1261a6; --good:#16794c;
+      --ink: #172033;
+      --muted: #5c667a;
+      --line: #dfe5ef;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --accent: #1261a6;
+      --good: #16794c;
     }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:Arial,"Microsoft YaHei",sans-serif; color:var(--ink); background:var(--bg); line-height:1.65; }
-    header { background:#132033; color:white; padding:34px 24px 28px; }
-    main { max-width:1180px; margin:0 auto; padding:22px 18px 48px; }
-    h1 { margin:0 0 10px; font-size:30px; line-height:1.25; }
-    h2 { margin:30px 0 12px; font-size:22px; }
-    h3 { margin:18px 0 8px; font-size:17px; }
-    p { margin:8px 0; }
-    a { color:var(--accent); text-decoration:none; }
-    a:hover { text-decoration:underline; }
-    .sub { color:#d7e3f2; max-width:900px; }
-    .section, .card, .code-card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px; box-shadow:0 1px 2px rgba(17,24,39,.04); }
-    .grid { display:grid; gap:14px; }
-    .cards { grid-template-columns:repeat(4,minmax(0,1fr)); }
-    .label { color:var(--muted); font-size:13px; }
-    .metric { font-size:25px; font-weight:700; margin-top:4px; }
-    .good { color:var(--good); }
-    .pill { display:inline-block; padding:3px 9px; border-radius:999px; background:#eaf2fb; color:#174f82; font-size:12px; margin:2px 4px 2px 0; }
-    table { width:100%; border-collapse:collapse; background:white; font-size:14px; }
-    th,td { border-bottom:1px solid #e7edf5; padding:9px 10px; vertical-align:top; text-align:left; }
-    th { background:#eef3f9; color:#24324a; }
-    .note { border-left:4px solid var(--accent); padding-left:12px; color:#334155; }
-    details.code-card { margin:14px 0; padding:0; overflow:hidden; }
-    details.code-card summary { cursor:pointer; list-style:none; display:flex; justify-content:space-between; gap:12px; align-items:center; padding:14px 16px; font-weight:700; background:#eef3f9; }
-    details.code-card summary::-webkit-details-marker { display:none; }
-    details.code-card p { padding:0 16px; }
-    pre { margin:12px 16px 16px; overflow:auto; max-height:620px; background:#101827; color:#e7edf7; padding:14px; border-radius:8px; font-size:13px; line-height:1.45; }
-    code { font-family:Consolas,"SFMono-Regular",Menlo,monospace; }
-    @media(max-width:880px) { .cards { grid-template-columns:1fr; } h1 { font-size:24px; } table { font-size:13px; } }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.65;
+    }
+    header {
+      background: #132033;
+      color: white;
+      padding: 34px 24px 28px;
+    }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 22px 18px 48px;
+    }
+    h1 { margin: 0 0 10px; font-size: 30px; line-height: 1.25; }
+    h2 { margin: 30px 0 12px; font-size: 22px; }
+    h3 { margin: 18px 0 8px; font-size: 17px; }
+    p { margin: 8px 0; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .sub { color: #d7e3f2; max-width: 900px; }
+    .section, .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(17, 24, 39, .04);
+    }
+    .grid { display: grid; gap: 14px; }
+    .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .label { color: var(--muted); font-size: 13px; }
+    .metric { font-size: 25px; font-weight: 700; margin-top: 4px; }
+    .good { color: var(--good); }
+    .pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #eaf2fb;
+      color: #174f82;
+      font-size: 12px;
+      margin: 2px 4px 2px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      font-size: 14px;
+    }
+    th, td {
+      border-bottom: 1px solid #e7edf5;
+      padding: 9px 10px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th { background: #eef3f9; color: #24324a; }
+    .note {
+      border-left: 4px solid var(--accent);
+      padding-left: 12px;
+      color: #334155;
+    }
+    pre {
+      overflow: auto;
+      background: #101827;
+      color: #e7edf7;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    code { font-family: Consolas, "SFMono-Regular", Menlo, monospace; }
+    @media (max-width: 880px) {
+      .cards { grid-template-columns: 1fr; }
+      h1 { font-size: 24px; }
+      table { font-size: 13px; }
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>???? V69 ?????</h1>
-    <p class="sub">??????????????IF / IH / IC / IM ???? 1 ????????? ETF ???</p>
+    <h1>股指期货 V69 固定版说明</h1>
+    <p class="sub">本页只说明当前固定版本本身：IF / IH / IC / IM 股指期货 1 分钟策略。这里不是 ETF 方案。</p>
   </header>
   <main>
     <section class="grid cards">
-      <div class="card"><div class="label">??</div><div class="metric">V69</div><p>??????????????????</p></div>
-      <div class="card"><div class="label">??</div><div class="metric">IF / IH / IC / IM</div><p>???????</p></div>
-      <div class="card"><div class="label">??</div><div class="metric">1 ??</div><p>?????????????</p></div>
-      <div class="card"><div class="label">?????</div><div class="metric good">2,048,149</div><p>?????????????</p></div>
+      <div class="card">
+        <div class="label">版本</div>
+        <div class="metric">V69</div>
+        <p>允许对锁，平昨复用加方向和今仓约束。</p>
+      </div>
+      <div class="card">
+        <div class="label">标的</div>
+        <div class="metric">IF / IH / IC / IM</div>
+        <p>四类股指期货。</p>
+      </div>
+      <div class="card">
+        <div class="label">周期</div>
+        <div class="metric">1 分钟</div>
+        <p>按分钟信号与持仓状态运行。</p>
+      </div>
+      <div class="card">
+        <div class="label">十段净收益</div>
+        <div class="metric good">2,048,149</div>
+        <p>固定口径下的本地十段结果。</p>
+      </div>
     </section>
 
     <section class="section">
-      <h2>1. ????</h2>
-      <p>????????????????????? IF?IH?IC?IM ????????? 1 ?? K ???????????????????????</p>
-      <p>???????VWAP ?????????????????????????????????????????????????????????????????????????</p>
-      <p class="note">??????????????????????????????????????????????????????????????????????????????????</p>
+      <h2>1. 整体思路</h2>
+      <p>这套策略是股指期货日内多品种组合策略，交易 IF、IH、IC、IM 四类合约。信号使用 1 分钟 K 线，重点捕捉两类机会：趋势回踩和开盘区间突破。</p>
+      <p>策略不把箱体、VWAP 偏离等状态作为直接开仓信号，而是作为环境观察和风险过滤。组合层面控制总敞口、同向敞口、同品种重复敞口和跨品种近似信号，避免同一市场波动被重复下注。</p>
+      <p class="note">当前版本最关键的执行假设是：当天新仓退出时可以用反向开仓形成有效对锁；隔夜留下的对锁旧仓可以在次日单边平昨并复用为开仓筹码，但必须方向匹配，且不能被同方向今仓挡住。</p>
     </section>
 
     <section class="section">
-      <h2>2. ????</h2>
-      <h3>????</h3>
-      <p><span class="pill">??</span>?????????????? EMA / VWAP ??????????</p>
-      <p><span class="pill">??</span>ADX ??????????????????????????</p>
-      <p><span class="pill">??</span>? R ???????????? 1.20R??????????????????????</p>
-      <h3>??????</h3>
-      <p><span class="pill">??</span>09:45 ??????????????????????</p>
-      <p><span class="pill">??</span>?????????? 0.80 ATR?????????????????</p>
-      <p><span class="pill">??</span>????????? 1.00R??????????????????????</p>
-      <h3>???????</h3>
-      <p>???????????????????????????????????????????????????????????????????????????????</p>
+      <h2>2. 交易策略</h2>
+      <h3>趋势回踩</h3>
+      <p><span class="pill">逻辑</span>主趋势清晰时，等待价格回踩到 EMA / VWAP 附近，再顺趋势入场。</p>
+      <p><span class="pill">准入</span>ADX 达到趋势阈值，回踩幅度不过深，方向与品种强弱不冲突。</p>
+      <p><span class="pill">退出</span>以 R 倍数止盈，趋势模块目标为 1.20R；不满足继续持有条件时按持仓和对锁规则处理。</p>
+      <h3>开盘区间突破</h3>
+      <p><span class="pill">逻辑</span>09:45 后确认开盘区间；向上突破做多，向下突破做空。</p>
+      <p><span class="pill">准入</span>开盘区间宽度至少达到 0.80 ATR，突破方向和即时环境不能明显冲突。</p>
+      <p><span class="pill">退出</span>开盘突破模块目标为 1.00R，尾盘前若无法平今则进入对锁或强制处理逻辑。</p>
+      <h3>对锁和平昨复用</h3>
+      <p>当天新开仓不直接用高成本平今退出，而是允许开反向腿形成对锁。次日旧锁仓可以作为“平昨筹码”复用，但必须检查方向：只有平掉旧仓后能形成目标方向敞口，才允许复用。</p>
     </section>
 
     <section class="section">
-      <h2>3. ????</h2>
+      <h2>3. 核心参数</h2>
       <table>
-        <thead><tr><th>??</th><th>?</th><th>??</th></tr></thead>
+        <thead><tr><th>参数</th><th>值</th><th>说明</th></tr></thead>
         <tbody>
-          <tr><td>????</td><td>IF, IH, IC, IM</td><td>??????? ETF?</td></tr>
-          <tr><td>????</td><td>1m</td><td>???????????</td></tr>
-          <tr><td>????</td><td>09:45</td><td>???????????</td></tr>
-          <tr><td>????</td><td>14:35</td><td>?????????????</td></tr>
-          <tr><td>????</td><td>14:55</td><td>????????????</td></tr>
-          <tr><td>????????</td><td>4 ?</td><td>????????</td></tr>
-          <tr><td>????</td><td>2 ?</td><td>?????????</td></tr>
-          <tr><td>???????</td><td>4 ?</td><td>?????????</td></tr>
-          <tr><td>??????</td><td>80 ?</td><td>??????????????????</td></tr>
-          <tr><td>????????</td><td>5%</td><td>?????????????</td></tr>
-          <tr><td>?????</td><td>6 ??</td><td>??????????</td></tr>
-          <tr><td>ATR / EMA / ADX</td><td>14 / 20 / 14</td><td>?????????????</td></tr>
-          <tr><td>?? ADX ??</td><td>18</td><td>?????????</td></tr>
-          <tr><td>????????</td><td>0.80 ATR</td><td>???????????</td></tr>
-          <tr><td>????</td><td>1.20R</td><td>???????</td></tr>
-          <tr><td>????</td><td>1.00R</td><td>?????????</td></tr>
-          <tr><td>????</td><td>IF/IH=300?IC/IM=200</td><td>???????????????</td></tr>
-          <tr><td>????</td><td>IF/IH=66.7?IC/IM=100.0</td><td>????? R ???</td></tr>
+          <tr><td>交易品种</td><td>IF, IH, IC, IM</td><td>股指期货，不含 ETF。</td></tr>
+          <tr><td>信号频率</td><td>1m</td><td>每分钟更新信号和持仓。</td></tr>
+          <tr><td>最早开仓</td><td>09:45</td><td>开盘区间形成后才交易。</td></tr>
+          <tr><td>最后开仓</td><td>14:35</td><td>尾盘不再新增普通风险敞口。</td></tr>
+          <tr><td>强制处理</td><td>14:55</td><td>尾盘处理剩余敞口和对锁。</td></tr>
+          <tr><td>组合最多活动敞口</td><td>4 手</td><td>组合层风险上限。</td></tr>
+          <tr><td>同向最多</td><td>2 手</td><td>限制单边方向暴露。</td></tr>
+          <tr><td>同品种锁仓上限</td><td>4 对</td><td>限制对锁库存膨胀。</td></tr>
+          <tr><td>每日开仓上限</td><td>80 次</td><td>防止异常行情或接口循环造成过度交易。</td></tr>
+          <tr><td>最小可用资金比例</td><td>5%</td><td>保证组合不贴近保证金边界。</td></tr>
+          <tr><td>跨品种冷却</td><td>6 分钟</td><td>过滤相近的重复信号。</td></tr>
+          <tr><td>ATR / EMA / ADX</td><td>14 / 20 / 14</td><td>波动、趋势和趋势强度指标。</td></tr>
+          <tr><td>趋势 ADX 下限</td><td>18</td><td>趋势回踩准入阈值。</td></tr>
+          <tr><td>开盘区间最小宽度</td><td>0.80 ATR</td><td>过滤太窄的假突破区间。</td></tr>
+          <tr><td>趋势止盈</td><td>1.20R</td><td>趋势回踩模块。</td></tr>
+          <tr><td>开盘止盈</td><td>1.00R</td><td>开盘区间突破模块。</td></tr>
+          <tr><td>合约乘数</td><td>IF/IH=300，IC/IM=200</td><td>用于盈亏、手续费和保证金估算。</td></tr>
+          <tr><td>风险点数</td><td>IF/IH=66.7，IC/IM=100.0</td><td>各品种基础 R 口径。</td></tr>
         </tbody>
       </table>
     </section>
 
     <section class="section">
-      <h2>4. ????????</h2>
+      <h2>4. 当前版本结果摘要</h2>
       <table>
-        <thead><tr><th>??</th><th>??</th></tr></thead>
+        <thead><tr><th>指标</th><th>数值</th></tr></thead>
         <tbody>
-          <tr><td>?????</td><td>14,333</td></tr>
-          <tr><td>??????</td><td>7,331</td></tr>
-          <tr><td>???</td><td>2,048,148.84</td></tr>
+          <tr><td>候选信号数</td><td>14,333</td></tr>
+          <tr><td>已闭合交易数</td><td>7,331</td></tr>
+          <tr><td>净收益</td><td>2,048,148.84</td></tr>
           <tr><td>Gross PnL</td><td>2,487,229.30</td></tr>
-          <tr><td>?????</td><td>412,026.81</td></tr>
-          <tr><td>?????</td><td>27,053.69</td></tr>
-          <tr><td>????</td><td>439,080.50</td></tr>
-          <tr><td>??</td><td>50.84%</td></tr>
-          <tr><td>??????</td><td>3,879</td></tr>
-          <tr><td>???????</td><td>3,366</td></tr>
+          <tr><td>交易手续费</td><td>412,026.81</td></tr>
+          <tr><td>锁仓释放费</td><td>27,053.69</td></tr>
+          <tr><td>总手续费</td><td>439,080.50</td></tr>
+          <tr><td>胜率</td><td>50.84%</td></tr>
+          <tr><td>避免平今次数</td><td>3,879</td></tr>
+          <tr><td>旧筹码复用次数</td><td>3,366</td></tr>
         </tbody>
       </table>
     </section>
 
     <section class="section">
-      <h2>5. ????</h2>
-      <p>???????????????????????????????????? API?</p>
-      
-      <details class="code-card">
-        <summary><span>??? / SuperMind</span><a href="scripts/ths_v69_index_futures_fixed.py">????</a></summary>
-        <p>?????????????????????? V69_STAGE?</p>
-        <pre><code># -*- coding:utf-8 -*-
-&quot;&quot;&quot;
-V69 当前策略同花顺回测脚本
-
-参考本地 V69：
-1. 1分钟K线，四类股指期货 IF/IH/IC/IM。
-2. 主策略只交易：趋势回踩、开盘区间突破。
-3. 箱体、VWAP偏离只做观察，不直接开仓。
-4. 组合最多4手敞口；同品种不同时持有多笔敞口；同向最多2手。
-5. 当天新开仓退出时允许反向开仓形成有效对锁。
-6. 昨日对锁旧仓可平单边作为开仓筹码；复用时必须方向匹配。
-7. 如果同品种同方向今仓会挡住平昨，则不复用旧筹码，改为新开；由旧筹码形成的敞口退出时直接平昨，不再滚动续锁。
-
-注意：
-- 同花顺普通回测对“对锁不额外占保证金、平今/平昨精确拆分”的支持因版本而异。
-- 本脚本按参考文件格式写成 Python 策略，交易函数沿用 order_future(code, qty, &quot;open/close&quot;, &quot;long/short&quot;, None)。
-- 跨换月建议按单周期分别回测，修改 V69_STAGE 为 2106/2206/.../2606。
-&quot;&quot;&quot;
-
-import pandas as pd
-
-
-V69_STAGE = &quot;2606&quot;
-V69_PRODUCTS = [&quot;IF&quot;, &quot;IH&quot;, &quot;IC&quot;, &quot;IM&quot;]
-V69_OFFICIAL_START = &quot;&quot;
-
-
-def init(context):
-    set_subportfolios([
-        {&quot;cash&quot;: 0, &quot;type&quot;: &quot;stock&quot;},
-        {&quot;cash&quot;: 1000000, &quot;type&quot;: &quot;future&quot;},
-    ])
-    log.info(&quot;V69当前策略：允许对锁 + 旧筹码方向约束 + 平昨今仓阻挡检查&quot;)
-
-    set_commission(PerShare(type=&quot;future&quot;, cost=0.000023))
-    set_slippage(PriceSlippage(0), &quot;future&quot;)
-    set_margin_rate(&quot;IF&quot;, 0.12, 0.13)
-    set_margin_rate(&quot;IH&quot;, 0.12, 0.13)
-    set_margin_rate(&quot;IC&quot;, 0.12, 0.13)
-    set_margin_rate(&quot;IM&quot;, 0.12, 0.13)
-
-    context.v69_stage = V69_STAGE
-    context.official_start = V69_OFFICIAL_START
-    context.v69_products = list(V69_PRODUCTS)
-    context.contracts = dict((product, product + context.v69_stage) for product in context.v69_products)
-    context.ins = context.contracts[&quot;IF&quot;]
-    for code in context.contracts.values():
-        subscribe(code)
-
-    context.initial_cash = 1000000
-    context.signal_frequency = &quot;1m&quot;
-    context.signal_bar_count = 420
-    context.min_signal_bars = 80
-
-    context.v69_multiplier = {&quot;IF&quot;: 300, &quot;IH&quot;: 300, &quot;IC&quot;: 200, &quot;IM&quot;: 200}
-    context.v69_margin_rate = {&quot;IF&quot;: 0.12, &quot;IH&quot;: 0.12, &quot;IC&quot;: 0.12, &quot;IM&quot;: 0.12}
-    context.risk_points = {&quot;IF&quot;: 66.7, &quot;IH&quot;: 66.7, &quot;IC&quot;: 100.0, &quot;IM&quot;: 100.0}
-
-    context.first_open_hhmm = 945
-    context.last_open_hhmm = 1435
-    context.force_lock_hhmm = 1455
-    context.open_range_end_hhmm = 945
-    context.no_trade_before_hhmm = 945
-    context.max_active_lots = 4
-    context.max_same_direction_lots = 2
-    context.max_lock_pairs_per_product = 4
-    context.max_daily_open = 80
-    context.v69_min_available_cash_ratio = 0.05
-    context.min_action_interval_min = 1
-    context.cross_product_cool_min = 6
-
-    context.atr_n = 14
-    context.ema_n = 20
-    context.adx_n = 14
-    context.trend_adx_min = 18
-    context.open_range_min_atr = 0.80
-    context.pullback_buffer_atr = 0.20
-    context.stop_floor_ratio = 0.35
-    context.stop_atr_mult = 1.00
-    context.trend_tp_r = 1.20
-    context.opening_tp_r = 1.00
-
-    context.ledger = {}
-    context.open_positions = []
-    context.lock_inventory = {}
-    context.opening_range = {}
-    context.last_action_min = -99999
-    context.last_route_signature = {}
-    context.daily_open_count = 0
-    context.daily_realized_pnl = 0.0
-    context.tail_locked = False
-    context.last_bar_key = &quot;&quot;
-
-    for product, code in context.contracts.items():
-        context.ledger[code] = {
-            &quot;product&quot;: product,
-            &quot;long_today&quot;: 0,
-            &quot;short_today&quot;: 0,
-            &quot;long_yday&quot;: 0,
-            &quot;short_yday&quot;: 0,
-            &quot;long_y_price&quot;: 0.0,
-            &quot;short_y_price&quot;: 0.0,
-        }
-        context.lock_inventory[code] = []
-        context.opening_range[code] = {&quot;high&quot;: 0.0, &quot;low&quot;: 0.0, &quot;ready&quot;: False}
-
-
-def before_trading(context):
-    for code, book in context.ledger.items():
-        book[&quot;long_yday&quot;] += book[&quot;long_today&quot;]
-        book[&quot;short_yday&quot;] += book[&quot;short_today&quot;]
-        book[&quot;long_today&quot;] = 0
-        book[&quot;short_today&quot;] = 0
-    context.open_positions = []
-    context.opening_range = dict((code, {&quot;high&quot;: 0.0, &quot;low&quot;: 0.0, &quot;ready&quot;: False}) for code in context.contracts.values())
-    context.daily_open_count = 0
-    context.daily_realized_pnl = 0.0
-    context.tail_locked = False
-    context.last_action_min = -99999
-    context.last_route_signature = {}
-    context.last_bar_key = &quot;&quot;
-
-
-def _hhmm(dt):
-    return int(dt.strftime(&quot;%H%M&quot;))
-
-
-def _minute_of_day(dt):
-    return dt.hour * 60 + dt.minute
-
-
-def _product_from_code(context, code):
-    for product, contract in context.contracts.items():
-        if contract == code:
-            return product
-    return code[:2]
-
-
-def _latest_price(context, code, now_dt):
-    df = get_price_future(
-        code,
-        None,
-        now_dt,
-        context.signal_frequency,
-        [&quot;open&quot;, &quot;high&quot;, &quot;low&quot;, &quot;close&quot;, &quot;volume&quot;],
-        bar_count=2,
-    )
-    if df is None or len(df) == 0:
-        return None
-    return float(df[&quot;close&quot;].iloc[-1])
-
-
-def _calc_indicators(df, context):
-    df = df.copy()
-    prev_close = df[&quot;close&quot;].shift(1)
-    tr1 = df[&quot;high&quot;] - df[&quot;low&quot;]
-    tr2 = (df[&quot;high&quot;] - prev_close).abs()
-    tr3 = (df[&quot;low&quot;] - prev_close).abs()
-    df[&quot;tr&quot;] = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    df[&quot;atr&quot;] = df[&quot;tr&quot;].rolling(context.atr_n).mean()
-    df[&quot;ema20&quot;] = df[&quot;close&quot;].ewm(span=context.ema_n, adjust=False).mean()
-    df[&quot;vwap&quot;] = (df[&quot;close&quot;] * df[&quot;volume&quot;]).cumsum() / df[&quot;volume&quot;].replace(0, pd.NA).cumsum()
-    up_move = df[&quot;high&quot;] - df[&quot;high&quot;].shift(1)
-    dn_move = df[&quot;low&quot;].shift(1) - df[&quot;low&quot;]
-    plus_dm = up_move.where((up_move &gt; dn_move) &amp; (up_move &gt; 0), 0.0)
-    minus_dm = dn_move.where((dn_move &gt; up_move) &amp; (dn_move &gt; 0), 0.0)
-    plus_di = 100 * plus_dm.rolling(context.adx_n).mean() / df[&quot;tr&quot;].rolling(context.adx_n).mean()
-    minus_di = 100 * minus_dm.rolling(context.adx_n).mean() / df[&quot;tr&quot;].rolling(context.adx_n).mean()
-    df[&quot;pdi&quot;] = plus_di
-    df[&quot;mdi&quot;] = minus_di
-    df[&quot;adx&quot;] = (abs(plus_di - minus_di) / (plus_di + minus_di).replace(0, pd.NA) * 100).rolling(context.adx_n).mean()
-    df[&quot;ema_slope3&quot;] = df[&quot;ema20&quot;] - df[&quot;ema20&quot;].shift(3)
-    return df
-
-
-def _get_signal_frame(context, code, now_dt):
-    df = get_price_future(
-        code,
-        None,
-        now_dt,
-        context.signal_frequency,
-        [&quot;open&quot;, &quot;high&quot;, &quot;low&quot;, &quot;close&quot;, &quot;volume&quot;],
-        bar_count=int(context.signal_bar_count),
-    )
-    if df is None or len(df) &lt; int(context.min_signal_bars):
-        return None
-    return _calc_indicators(df, context)
-
-
-def _update_opening_range(context, code, df, hhmm):
-    info = context.opening_range[code]
-    if info[&quot;ready&quot;]:
-        return
-    today = df.copy()
-    if hasattr(today.index, &quot;date&quot;):
-        today = today[today.index.date == today.index[-1].date()]
-    if len(today) == 0:
-        return
-    opening = today[today.index.map(lambda x: _hhmm(x) &lt;= context.open_range_end_hhmm)]
-    if len(opening) &gt; 0:
-        info[&quot;high&quot;] = float(opening[&quot;high&quot;].max())
-        info[&quot;low&quot;] = float(opening[&quot;low&quot;].min())
-    if hhmm &gt; context.open_range_end_hhmm and info[&quot;high&quot;] &gt; 0 and info[&quot;low&quot;] &gt; 0:
-        info[&quot;ready&quot;] = True
-
-
-def _classify_candidate(context, code, df):
-    product = _product_from_code(context, code)
-    last = df.iloc[-1]
-    prev = df.iloc[-2]
-    required = [&quot;atr&quot;, &quot;ema20&quot;, &quot;vwap&quot;, &quot;adx&quot;, &quot;pdi&quot;, &quot;mdi&quot;, &quot;ema_slope3&quot;]
-    if any(pd.isna(last[x]) for x in required):
-        return None
-    price = float(last[&quot;close&quot;])
-    atr = float(last[&quot;atr&quot;])
-    if atr &lt;= 0:
-        return None
-    info = context.opening_range[code]
-
-    trend_up = (
-        price &gt; float(last[&quot;ema20&quot;])
-        and float(last[&quot;ema_slope3&quot;]) &gt; 0
-        and price &gt; float(last[&quot;vwap&quot;])
-        and float(last[&quot;adx&quot;]) &gt;= context.trend_adx_min
-        and float(last[&quot;pdi&quot;]) &gt; float(last[&quot;mdi&quot;])
-    )
-    trend_down = (
-        price &lt; float(last[&quot;ema20&quot;])
-        and float(last[&quot;ema_slope3&quot;]) &lt; 0
-        and price &lt; float(last[&quot;vwap&quot;])
-        and float(last[&quot;adx&quot;]) &gt;= context.trend_adx_min
-        and float(last[&quot;mdi&quot;]) &gt; float(last[&quot;pdi&quot;])
-    )
-    pullback_up = trend_up and float(last[&quot;low&quot;]) &lt;= float(last[&quot;ema20&quot;]) + context.pullback_buffer_atr * atr and price &gt; float(last[&quot;ema20&quot;])
-    pullback_down = trend_down and float(last[&quot;high&quot;]) &gt;= float(last[&quot;ema20&quot;]) - context.pullback_buffer_atr * atr and price &lt; float(last[&quot;ema20&quot;])
-
-    opening_width = info[&quot;high&quot;] - info[&quot;low&quot;] if info[&quot;ready&quot;] else 0.0
-    opening_up = info[&quot;ready&quot;] and price &gt; info[&quot;high&quot;] and opening_width &gt;= context.open_range_min_atr * atr and price &gt; float(last[&quot;vwap&quot;]) and float(last[&quot;pdi&quot;]) &gt; float(last[&quot;mdi&quot;])
-    opening_down = info[&quot;ready&quot;] and price &lt; info[&quot;low&quot;] and opening_width &gt;= context.open_range_min_atr * atr and price &lt; float(last[&quot;vwap&quot;]) and float(last[&quot;mdi&quot;]) &gt; float(last[&quot;pdi&quot;])
-
-    if pullback_up:
-        module = &quot;TREND_PULLBACK&quot;
-        side = &quot;long&quot;
-        tp_r = context.trend_tp_r
-        score = 3.0 + min(float(last[&quot;adx&quot;]) / 20.0, 2.0)
-        reason = &quot;趋势回踩做多&quot;
-    elif pullback_down:
-        module = &quot;TREND_PULLBACK&quot;
-        side = &quot;short&quot;
-        tp_r = context.trend_tp_r
-        score = 3.0 + min(float(last[&quot;adx&quot;]) / 20.0, 2.0)
-        reason = &quot;趋势回踩做空&quot;
-    elif opening_up:
-        module = &quot;OPENING_RANGE_BREAKOUT&quot;
-        side = &quot;long&quot;
-        tp_r = context.opening_tp_r
-        score = 2.0 + min(opening_width / atr, 2.0)
-        reason = &quot;开盘区间向上突破&quot;
-    elif opening_down:
-        module = &quot;OPENING_RANGE_BREAKOUT&quot;
-        side = &quot;short&quot;
-        tp_r = context.opening_tp_r
-        score = 2.0 + min(opening_width / atr, 2.0)
-        reason = &quot;开盘区间向下突破&quot;
-    else:
-        return None
-
-    stop_points = max(context.stop_floor_ratio * context.risk_points[product], context.stop_atr_mult * atr)
-    expected_profit = stop_points * tp_r * context.v69_multiplier[product]
-    expected_margin = price * context.v69_multiplier[product] * context.v69_margin_rate[product]
-    efficiency = expected_profit / expected_margin if expected_margin &gt; 0 else 0
-    return {
-        &quot;code&quot;: code,
-        &quot;product&quot;: product,
-        &quot;side&quot;: side,
-        &quot;price&quot;: price,
-        &quot;atr&quot;: atr,
-        &quot;stop_points&quot;: stop_points,
-        &quot;take_profit_points&quot;: stop_points * tp_r,
-        &quot;score&quot;: score,
-        &quot;efficiency&quot;: efficiency,
-        &quot;module&quot;: module,
-        &quot;reason&quot;: reason,
-        &quot;bar_time&quot;: df.index[-1],
-    }
-
-
-def _active_lots(context):
-    return len(context.open_positions)
-
-
-def _same_direction_lots(context, side):
-    return sum(1 for pos in context.open_positions if pos[&quot;side&quot;] == side)
-
-
-def _has_product_exposure(context, code):
-    return any(pos[&quot;code&quot;] == code for pos in context.open_positions)
-
-
-def _available_cash_est(context):
-    # 同花顺实盘账户对象字段因版本不同，这里用初始资金做保守估算占位。
-    used_margin = 0.0
-    for pos in context.open_positions:
-        product = _product_from_code(context, pos[&quot;code&quot;])
-        used_margin += pos[&quot;entry_price&quot;] * context.v69_multiplier[product] * context.v69_margin_rate[product]
-    return context.initial_cash + context.daily_realized_pnl - used_margin
-
-
-def _can_open_candidate(context, cand, now_min):
-    if context.daily_open_count &gt;= context.max_daily_open:
-        return False
-    if now_min - context.last_action_min &lt; context.min_action_interval_min:
-        return False
-    if _active_lots(context) &gt;= context.max_active_lots:
-        return False
-    if _same_direction_lots(context, cand[&quot;side&quot;]) &gt;= context.max_same_direction_lots:
-        return False
-    if _has_product_exposure(context, cand[&quot;code&quot;]):
-        return False
-    if _available_cash_est(context) &lt; context.initial_cash * context.v69_min_available_cash_ratio:
-        return False
-    return True
-
-
-def _close_yday_chip_for_entry(context, code, side, price, reason):
-    # side 是目标开仓方向；做多时平旧空，做空时平旧多。
-    book = context.ledger[code]
-    if side == &quot;long&quot;:
-        if book[&quot;short_yday&quot;] &lt;= 0:
-            return False
-        if book[&quot;short_today&quot;] &gt; 0:
-            log.info(&quot;{}：有今日空仓，平旧空会被优先平今，放弃旧筹码复用 {}&quot;.format(code, reason))
-            return False
-        order_future(code, 1, &quot;close&quot;, &quot;short&quot;, None)
-        book[&quot;short_yday&quot;] -= 1
-        book[&quot;long_yday&quot;] += 1
-        book[&quot;long_y_price&quot;] = price
-        log.info(&quot;{}：平旧空一脚作为多头筹码 {}&quot;.format(code, reason))
-        return True
-    if book[&quot;long_yday&quot;] &lt;= 0:
-        return False
-    if book[&quot;long_today&quot;] &gt; 0:
-        log.info(&quot;{}：有今日多仓，平旧多会被优先平今，放弃旧筹码复用 {}&quot;.format(code, reason))
-        return False
-    order_future(code, 1, &quot;close&quot;, &quot;long&quot;, None)
-    book[&quot;long_yday&quot;] -= 1
-    book[&quot;short_yday&quot;] += 1
-    book[&quot;short_y_price&quot;] = price
-    log.info(&quot;{}：平旧多一脚作为空头筹码 {}&quot;.format(code, reason))
-    return True
-
-
-def _open_new_position(context, cand, now_min):
-    code = cand[&quot;code&quot;]
-    side = cand[&quot;side&quot;]
-    price = cand[&quot;price&quot;]
-    product = cand[&quot;product&quot;]
-    order_future(code, 1, &quot;open&quot;, side, None)
-    book = context.ledger[code]
-    if side == &quot;long&quot;:
-        book[&quot;long_today&quot;] += 1
-    else:
-        book[&quot;short_today&quot;] += 1
-    context.open_positions.append({
-        &quot;code&quot;: code,
-        &quot;side&quot;: side,
-        &quot;entry_price&quot;: price,
-        &quot;entry_min&quot;: now_min,
-        &quot;entry_type&quot;: &quot;new_open&quot;,
-        &quot;stop_points&quot;: cand[&quot;stop_points&quot;],
-        &quot;take_profit_points&quot;: cand[&quot;take_profit_points&quot;],
-        &quot;module&quot;: cand[&quot;module&quot;],
-        &quot;product&quot;: product,
-    })
-    context.daily_open_count += 1
-    context.last_action_min = now_min
-    log.info(&quot;{} 新开{}：{} price={:.2f} score={:.2f} eff={:.5f}&quot;.format(code, side, cand[&quot;reason&quot;], price, cand[&quot;score&quot;], cand[&quot;efficiency&quot;]))
-
-
-def _open_from_old_chip(context, cand, now_min):
-    code = cand[&quot;code&quot;]
-    side = cand[&quot;side&quot;]
-    price = cand[&quot;price&quot;]
-    if not _close_yday_chip_for_entry(context, code, side, price, cand[&quot;reason&quot;]):
-        return False
-    context.open_positions.append({
-        &quot;code&quot;: code,
-        &quot;side&quot;: side,
-        &quot;entry_price&quot;: price,
-        &quot;entry_min&quot;: now_min,
-        &quot;entry_type&quot;: &quot;old_chip&quot;,
-        &quot;stop_points&quot;: cand[&quot;stop_points&quot;],
-        &quot;take_profit_points&quot;: cand[&quot;take_profit_points&quot;],
-        &quot;module&quot;: cand[&quot;module&quot;],
-        &quot;product&quot;: cand[&quot;product&quot;],
-    })
-    context.daily_open_count += 1
-    context.last_action_min = now_min
-    log.info(&quot;{} 复用旧筹码形成{}敞口：{}&quot;.format(code, side, cand[&quot;reason&quot;]))
-    return True
-
-
-def _enter_candidate(context, cand, now_min):
-    code = cand[&quot;code&quot;]
-    if _open_from_old_chip(context, cand, now_min):
-        return
-    _open_new_position(context, cand, now_min)
-
-
-def _position_hit_exit(pos, price):
-    if pos[&quot;side&quot;] == &quot;long&quot;:
-        pnl_points = price - pos[&quot;entry_price&quot;]
-    else:
-        pnl_points = pos[&quot;entry_price&quot;] - price
-    if pnl_points &lt;= -pos[&quot;stop_points&quot;]:
-        return True, &quot;止损&quot;, pnl_points
-    if pnl_points &gt;= pos[&quot;take_profit_points&quot;]:
-        return True, &quot;止盈&quot;, pnl_points
-    return False, &quot;&quot;, pnl_points
-
-
-def _close_old_chip_exposure(context, pos, price, reason):
-    code = pos[&quot;code&quot;]
-    side = pos[&quot;side&quot;]
-    book = context.ledger[code]
-    if side == &quot;long&quot;:
-        order_future(code, 1, &quot;close&quot;, &quot;long&quot;, None)
-        book[&quot;long_yday&quot;] = max(book[&quot;long_yday&quot;] - 1, 0)
-    else:
-        order_future(code, 1, &quot;close&quot;, &quot;short&quot;, None)
-        book[&quot;short_yday&quot;] = max(book[&quot;short_yday&quot;] - 1, 0)
-    product = pos[&quot;product&quot;]
-    points = price - pos[&quot;entry_price&quot;] if side == &quot;long&quot; else pos[&quot;entry_price&quot;] - price
-    context.daily_realized_pnl += points * context.v69_multiplier[product]
-    log.info(&quot;{} 旧筹码{}敞口直接平昨：{} pnl_points={:.2f}&quot;.format(code, side, reason, points))
-
-
-def _lock_new_open_position(context, pos, price, reason):
-    code = pos[&quot;code&quot;]
-    side = pos[&quot;side&quot;]
-    opposite = &quot;short&quot; if side == &quot;long&quot; else &quot;long&quot;
-    inv = context.lock_inventory[code]
-    if len(inv) &gt;= context.max_lock_pairs_per_product:
-        # 锁仓额度不足时只好平今；实盘可选择跳过或人工处理。
-        order_future(code, 1, &quot;close&quot;, side, None)
-        log.info(&quot;{} 锁仓额度不足，直接平今 {}&quot;.format(code, reason))
-    else:
-        order_future(code, 1, &quot;open&quot;, opposite, None)
-        inv.append({&quot;side&quot;: opposite, &quot;price&quot;: price})
-        book = context.ledger[code]
-        if opposite == &quot;long&quot;:
-            book[&quot;long_today&quot;] += 1
-        else:
-            book[&quot;short_today&quot;] += 1
-        log.info(&quot;{} 新开仓退出，用反向腿对锁：{}&quot;.format(code, reason))
-    product = pos[&quot;product&quot;]
-    points = price - pos[&quot;entry_price&quot;] if side == &quot;long&quot; else pos[&quot;entry_price&quot;] - price
-    context.daily_realized_pnl += points * context.v69_multiplier[product]
-
-
-def _manage_positions(context, now_dt, hhmm):
-    now_min = _minute_of_day(now_dt)
-    remaining = []
-    for pos in context.open_positions:
-        price = _latest_price(context, pos[&quot;code&quot;], now_dt)
-        if price is None:
-            remaining.append(pos)
-            continue
-        hit, reason, _ = _position_hit_exit(pos, price)
-        if not hit and hhmm &lt; context.force_lock_hhmm:
-            remaining.append(pos)
-            continue
-        if not hit:
-            reason = &quot;尾盘处理&quot;
-        if pos[&quot;entry_type&quot;] == &quot;old_chip&quot;:
-            _close_old_chip_exposure(context, pos, price, reason)
-        else:
-            _lock_new_open_position(context, pos, price, reason)
-        context.last_action_min = now_min
-    context.open_positions = remaining
-
-
-def _build_candidates(context, now_dt, hhmm):
-    out = []
-    for product, code in context.contracts.items():
-        df = _get_signal_frame(context, code, now_dt)
-        if df is None:
-            continue
-        _update_opening_range(context, code, df, hhmm)
-        cand = _classify_candidate(context, code, df)
-        if cand is not None:
-            out.append(cand)
-    out.sort(key=lambda x: (x[&quot;score&quot;], x[&quot;efficiency&quot;]), reverse=True)
-    return out
-
-
-def handle_bar(context, bar_dict):
-    now_dt = get_datetime()
-    if getattr(context, &quot;official_start&quot;, &quot;&quot;):
-        if now_dt.strftime(&quot;%Y-%m-%d&quot;) &lt; context.official_start:
-            return
-    hhmm = _hhmm(now_dt)
-    now_min = _minute_of_day(now_dt)
-
-    bar_key = &quot;{}-{}&quot;.format(now_dt.strftime(&quot;%Y-%m-%d %H:%M&quot;), context.v69_stage)
-    if context.last_bar_key == bar_key:
-        return
-    context.last_bar_key = bar_key
-
-    _manage_positions(context, now_dt, hhmm)
-    if hhmm &gt;= context.force_lock_hhmm:
-        return
-    if hhmm &lt; context.first_open_hhmm or hhmm &gt; context.last_open_hhmm:
-        return
-    if context.daily_open_count &gt;= context.max_daily_open:
-        return
-
-    candidates = _build_candidates(context, now_dt, hhmm)
-    for cand in candidates:
-        if not _can_open_candidate(context, cand, now_min):
-            continue
-        sig = &quot;{}-{}-{}&quot;.format(cand[&quot;code&quot;], cand[&quot;side&quot;], cand[&quot;module&quot;])
-        if context.last_route_signature.get(sig, -99999) + context.cross_product_cool_min &gt; now_min:
-            continue
-        _enter_candidate(context, cand, now_min)
-        context.last_route_signature[sig] = now_min
-        break
-
-
-def after_trading(context):
-    log.info(&quot;V69收盘：当日开仓{}次｜活动敞口{}手｜已实现{:.2f}&quot;.format(
-        context.daily_open_count,
-        len(context.open_positions),
-        context.daily_realized_pnl,
-    ))
-</code></pre>
-      </details>
-    
-      <details class="code-card">
-        <summary><span>?? / JoinQuant</span><a href="scripts/jq_v69_index_futures_fixed.py">????</a></summary>
-        <p>???? Python3 ?????????????????</p>
-        <pre><code># -*- coding:utf-8 -*-
-&quot;&quot;&quot;
-V69 当前策略聚宽回测脚本
-
-参考本地 V69：
-1. 1分钟K线，四类股指期货 IF/IH/IC/IM。
-2. 主策略只交易：趋势回踩、开盘区间突破。
-3. 箱体、VWAP偏离只做观察，不直接开仓。
-4. 组合最多4手敞口；同品种不同时持有多笔敞口；同向最多2手。
-5. 当天新开仓退出时允许反向开仓形成有效对锁。
-6. 昨日对锁旧仓可平单边作为开仓筹码；复用时必须方向匹配。
-7. 如果同品种同方向今仓会挡住平昨，则不复用旧筹码，改为新开；由旧筹码形成的敞口退出时直接平昨，不再滚动续锁。
-
-注意：
-- 本脚本按聚宽 Python3 格式改造：initialize + run_daily(every_bar) + attribute_history + order/order_target。
-- 聚宽金融期货默认会区分平今费用；旧筹码复用、对锁库存仍用脚本内 ledger 做策略层标记。
-- 默认每天选择聚宽当月可交易合约；如需固定跑某一期，改 V69_CONTRACT_MODE 为 &quot;fixed_stage&quot;，并修改 V69_STAGE。
-&quot;&quot;&quot;
-
-import pandas as pd
-
-
-V69_STAGE = &quot;2606&quot;
-V69_CONTRACT_MODE = &quot;current_month&quot;  # current_month / fixed_stage
-V69_CONTRACT_MONTH = &quot;current_month&quot;  # current_month / next_month / next_quarter / skip_quarter
-V69_PRODUCTS = [&quot;IF&quot;, &quot;IH&quot;, &quot;IC&quot;, &quot;IM&quot;]
-V69_OFFICIAL_START = &quot;&quot;
-
-
-def initialize(context):
-    set_benchmark(&quot;000300.XSHG&quot;)
-    set_option(&quot;use_real_price&quot;, True)
-    set_option(&quot;order_volume_ratio&quot;, 1)
-    set_option(&quot;futures_margin_rate&quot;, 0.13)
-    set_subportfolios([SubPortfolioConfig(cash=context.portfolio.cash, type=&quot;index_futures&quot;)])
-    set_order_cost(
-        OrderCost(open_commission=0.000023, close_commission=0.000023, close_today_commission=0.0023),
-        type=&quot;index_futures&quot;,
-    )
-    log.info(&quot;V69聚宽策略：允许对锁 + 旧筹码方向约束 + 平昨今仓阻挡检查&quot;)
-
-    context.v69_stage = V69_STAGE
-    context.v69_contract_mode = V69_CONTRACT_MODE
-    context.v69_contract_month = V69_CONTRACT_MONTH
-    context.official_start = V69_OFFICIAL_START
-    context.v69_products = list(V69_PRODUCTS)
-    context.contracts = {}
-    context.ins = &quot;IF1512.CCFX&quot;
-
-    context.initial_cash = 1000000
-    context.signal_frequency = &quot;1m&quot;
-    context.signal_bar_count = 420
-    context.min_signal_bars = 80
-
-    context.v69_multiplier = {&quot;IF&quot;: 300, &quot;IH&quot;: 300, &quot;IC&quot;: 200, &quot;IM&quot;: 200}
-    context.v69_margin_rate = {&quot;IF&quot;: 0.12, &quot;IH&quot;: 0.12, &quot;IC&quot;: 0.12, &quot;IM&quot;: 0.12}
-    context.risk_points = {&quot;IF&quot;: 66.7, &quot;IH&quot;: 66.7, &quot;IC&quot;: 100.0, &quot;IM&quot;: 100.0}
-
-    context.first_open_hhmm = 945
-    context.last_open_hhmm = 1435
-    context.force_lock_hhmm = 1455
-    context.open_range_end_hhmm = 945
-    context.no_trade_before_hhmm = 945
-    context.max_active_lots = 4
-    context.max_same_direction_lots = 2
-    context.max_lock_pairs_per_product = 4
-    context.max_daily_open = 80
-    context.v69_min_available_cash_ratio = 0.05
-    context.min_action_interval_min = 1
-    context.cross_product_cool_min = 6
-
-    context.atr_n = 14
-    context.ema_n = 20
-    context.adx_n = 14
-    context.trend_adx_min = 18
-    context.open_range_min_atr = 0.80
-    context.pullback_buffer_atr = 0.20
-    context.stop_floor_ratio = 0.35
-    context.stop_atr_mult = 1.00
-    context.trend_tp_r = 1.20
-    context.opening_tp_r = 1.00
-
-    context.ledger = {}
-    context.open_positions = []
-    context.lock_inventory = {}
-    context.opening_range = {}
-    context.last_action_min = -99999
-    context.last_route_signature = {}
-    context.daily_open_count = 0
-    context.daily_realized_pnl = 0.0
-    context.tail_locked = False
-    context.last_bar_key = &quot;&quot;
-    context.last_diag_date = &quot;&quot;
-    context.last_diag_hhmm = -1
-
-    _refresh_contracts(context)
-
-    run_daily(before_trading, time=&quot;before_open&quot;, reference_security=context.ins)
-    run_daily(trade, time=&quot;every_bar&quot;, reference_security=context.ins)
-
-
-def before_trading(context):
-    _refresh_contracts(context)
-    for code, book in context.ledger.items():
-        book[&quot;long_yday&quot;] += book[&quot;long_today&quot;]
-        book[&quot;short_yday&quot;] += book[&quot;short_today&quot;]
-        book[&quot;long_today&quot;] = 0
-        book[&quot;short_today&quot;] = 0
-    context.open_positions = []
-    context.opening_range = dict((code, {&quot;high&quot;: 0.0, &quot;low&quot;: 0.0, &quot;ready&quot;: False}) for code in context.contracts.values())
-    context.daily_open_count = 0
-    context.daily_realized_pnl = 0.0
-    context.tail_locked = False
-    context.last_action_min = -99999
-    context.last_route_signature = {}
-    context.last_bar_key = &quot;&quot;
-
-
-def _ensure_product_book(context, product, code):
-    if code not in context.ledger:
-        context.ledger[code] = {
-            &quot;product&quot;: product,
-            &quot;long_today&quot;: 0,
-            &quot;short_today&quot;: 0,
-            &quot;long_yday&quot;: 0,
-            &quot;short_yday&quot;: 0,
-            &quot;long_y_price&quot;: 0.0,
-            &quot;short_y_price&quot;: 0.0,
-        }
-    if code not in context.lock_inventory:
-        context.lock_inventory[code] = []
-    if code not in context.opening_range:
-        context.opening_range[code] = {&quot;high&quot;: 0.0, &quot;low&quot;: 0.0, &quot;ready&quot;: False}
-
-
-def _get_stock_index_future_code(context, product, month):
-    if context.v69_contract_mode == &quot;fixed_stage&quot;:
-        return product + context.v69_stage + &quot;.CCFX&quot;
-    display_name_dict = {
-        &quot;IF&quot;: [&quot;沪深300指数期货&quot;, &quot;沪深300股指期货&quot;],
-        &quot;IH&quot;: [&quot;上证50股指期货&quot;, &quot;上证50指数期货&quot;],
-        &quot;IC&quot;: [&quot;中证500股指期货&quot;, &quot;中证500指数期货&quot;],
-        &quot;IM&quot;: [&quot;中证1000股指期货&quot;, &quot;中证1000指数期货&quot;],
-    }
-    month_dict = {&quot;current_month&quot;: 0, &quot;next_month&quot;: 1, &quot;next_quarter&quot;: 2, &quot;skip_quarter&quot;: 3}
-    dt = context.current_dt.date()
-    display_names = display_name_dict.get(product, [])
-    offset = month_dict.get(month, 0)
-    try:
-        all_futures = get_all_securities(types=[&quot;futures&quot;], date=dt)
-        active = all_futures[(all_futures.start_date &lt;= dt) &amp; (all_futures.end_date &gt;= dt)]
-        matched = active[active.display_name.isin(display_names)]
-        if len(matched) == 0:
-            matched = active[active.index.map(lambda x: str(x).startswith(product))]
-        if len(matched) == 0:
-            log.info(&quot;{} 当天未找到可交易合约，日期 {}&quot;.format(product, dt))
-            return &quot;&quot;
-        matched = matched.sort_index()
-        if len(matched) &gt; 4 and month in (&quot;next_quarter&quot;, &quot;skip_quarter&quot;):
-            offset += 1
-        offset = min(offset, len(matched) - 1)
-        return matched.index[offset]
-    except Exception as exc:
-        log.info(&quot;{} 获取聚宽期货合约失败：{}&quot;.format(product, exc))
-        return &quot;&quot;
-
-
-def _refresh_contracts(context):
-    contracts = {}
-    for product in context.v69_products:
-        code = _get_stock_index_future_code(context, product, context.v69_contract_month)
-        if not code:
-            continue
-        contracts[product] = code
-        _ensure_product_book(context, product, code)
-    if contracts:
-        old = getattr(context, &quot;contracts&quot;, {})
-        context.contracts = contracts
-        context.ins = contracts.get(&quot;IF&quot;, list(contracts.values())[0])
-        if old != contracts:
-            log.info(&quot;V69合约刷新：{}&quot;.format(context.contracts))
-
-
-def _hhmm(dt):
-    return int(dt.strftime(&quot;%H%M&quot;))
-
-
-def _minute_of_day(dt):
-    return dt.hour * 60 + dt.minute
-
-
-def _product_from_code(context, code):
-    for product, contract in context.contracts.items():
-        if contract == code:
-            return product
-    return code[:2]
-
-
-def _jq_history(code, count, unit, fields):
-    try:
-        df = attribute_history(code, count, unit, fields, df=True)
-    except Exception as exc:
-        log.info(&quot;{} 获取行情失败：{}&quot;.format(code, exc))
-        return None
-    if df is None or len(df) == 0:
-        return None
-    return df
-
-
-def _jq_position_amount(context, code, side):
-    try:
-        if side == &quot;long&quot;:
-            pos = context.portfolio.long_positions[code]
-        else:
-            pos = context.portfolio.short_positions[code]
-        if hasattr(pos, &quot;total_amount&quot;):
-            return int(pos.total_amount)
-        if hasattr(pos, &quot;closeable_amount&quot;):
-            return int(pos.closeable_amount)
-    except Exception:
-        return 0
-    return 0
-
-
-def _jq_order_open(code, side, qty):
-    order(code, int(qty), side=side)
-
-
-def _jq_order_close(context, code, side, qty):
-    current_amount = _jq_position_amount(context, code, side)
-    target_amount = max(current_amount - int(qty), 0)
-    order_target(code, target_amount, side=side)
-
-
-def _pop_lock_inventory(context, code, side):
-    inv = context.lock_inventory.get(code, [])
-    for idx, item in enumerate(inv):
-        if item.get(&quot;side&quot;) == side:
-            inv.pop(idx)
-            return True
-    return False
-
-
-def _latest_price(context, code, now_dt):
-    df = _jq_history(code, 2, context.signal_frequency, [&quot;open&quot;, &quot;high&quot;, &quot;low&quot;, &quot;close&quot;, &quot;volume&quot;])
-    if df is None or len(df) == 0:
-        return None
-    return float(df[&quot;close&quot;].iloc[-1])
-
-
-def _calc_indicators(df, context):
-    df = df.copy()
-    prev_close = df[&quot;close&quot;].shift(1)
-    tr1 = df[&quot;high&quot;] - df[&quot;low&quot;]
-    tr2 = (df[&quot;high&quot;] - prev_close).abs()
-    tr3 = (df[&quot;low&quot;] - prev_close).abs()
-    df[&quot;tr&quot;] = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    df[&quot;atr&quot;] = df[&quot;tr&quot;].rolling(context.atr_n).mean()
-    df[&quot;ema20&quot;] = df[&quot;close&quot;].ewm(span=context.ema_n, adjust=False).mean()
-    df[&quot;vwap&quot;] = (df[&quot;close&quot;] * df[&quot;volume&quot;]).cumsum() / df[&quot;volume&quot;].replace(0, float(&quot;nan&quot;)).cumsum()
-    up_move = df[&quot;high&quot;] - df[&quot;high&quot;].shift(1)
-    dn_move = df[&quot;low&quot;].shift(1) - df[&quot;low&quot;]
-    plus_dm = up_move.where((up_move &gt; dn_move) &amp; (up_move &gt; 0), 0.0)
-    minus_dm = dn_move.where((dn_move &gt; up_move) &amp; (dn_move &gt; 0), 0.0)
-    plus_di = 100 * plus_dm.rolling(context.adx_n).mean() / df[&quot;tr&quot;].rolling(context.adx_n).mean()
-    minus_di = 100 * minus_dm.rolling(context.adx_n).mean() / df[&quot;tr&quot;].rolling(context.adx_n).mean()
-    df[&quot;pdi&quot;] = plus_di
-    df[&quot;mdi&quot;] = minus_di
-    df[&quot;adx&quot;] = (abs(plus_di - minus_di) / (plus_di + minus_di).replace(0, float(&quot;nan&quot;)) * 100).rolling(context.adx_n).mean()
-    df[&quot;ema_slope3&quot;] = df[&quot;ema20&quot;] - df[&quot;ema20&quot;].shift(3)
-    return df
-
-
-def _get_signal_frame(context, code, now_dt):
-    df = _jq_history(
-        code,
-        int(context.signal_bar_count),
-        context.signal_frequency,
-        [&quot;open&quot;, &quot;high&quot;, &quot;low&quot;, &quot;close&quot;, &quot;volume&quot;],
-    )
-    if df is None or len(df) &lt; int(context.min_signal_bars):
-        return None
-    return _calc_indicators(df, context)
-
-
-def _update_opening_range(context, code, df, hhmm):
-    info = context.opening_range[code]
-    if info[&quot;ready&quot;]:
-        return
-    today = df.copy()
-    if hasattr(today.index, &quot;date&quot;):
-        today = today[today.index.date == today.index[-1].date()]
-    if len(today) == 0:
-        return
-    opening = today[today.index.map(lambda x: _hhmm(x) &lt;= context.open_range_end_hhmm)]
-    if len(opening) &gt; 0:
-        info[&quot;high&quot;] = float(opening[&quot;high&quot;].max())
-        info[&quot;low&quot;] = float(opening[&quot;low&quot;].min())
-    if hhmm &gt; context.open_range_end_hhmm and info[&quot;high&quot;] &gt; 0 and info[&quot;low&quot;] &gt; 0:
-        info[&quot;ready&quot;] = True
-
-
-def _classify_candidate(context, code, df):
-    product = _product_from_code(context, code)
-    last = df.iloc[-1]
-    prev = df.iloc[-2]
-    required = [&quot;atr&quot;, &quot;ema20&quot;, &quot;vwap&quot;, &quot;adx&quot;, &quot;pdi&quot;, &quot;mdi&quot;, &quot;ema_slope3&quot;]
-    if any(pd.isnull(last[x]) for x in required):
-        return None
-    price = float(last[&quot;close&quot;])
-    atr = float(last[&quot;atr&quot;])
-    if atr &lt;= 0:
-        return None
-    info = context.opening_range[code]
-
-    trend_up = (
-        price &gt; float(last[&quot;ema20&quot;])
-        and float(last[&quot;ema_slope3&quot;]) &gt; 0
-        and price &gt; float(last[&quot;vwap&quot;])
-        and float(last[&quot;adx&quot;]) &gt;= context.trend_adx_min
-        and float(last[&quot;pdi&quot;]) &gt; float(last[&quot;mdi&quot;])
-    )
-    trend_down = (
-        price &lt; float(last[&quot;ema20&quot;])
-        and float(last[&quot;ema_slope3&quot;]) &lt; 0
-        and price &lt; float(last[&quot;vwap&quot;])
-        and float(last[&quot;adx&quot;]) &gt;= context.trend_adx_min
-        and float(last[&quot;mdi&quot;]) &gt; float(last[&quot;pdi&quot;])
-    )
-    pullback_up = trend_up and float(last[&quot;low&quot;]) &lt;= float(last[&quot;ema20&quot;]) + context.pullback_buffer_atr * atr and price &gt; float(last[&quot;ema20&quot;])
-    pullback_down = trend_down and float(last[&quot;high&quot;]) &gt;= float(last[&quot;ema20&quot;]) - context.pullback_buffer_atr * atr and price &lt; float(last[&quot;ema20&quot;])
-
-    opening_width = info[&quot;high&quot;] - info[&quot;low&quot;] if info[&quot;ready&quot;] else 0.0
-    opening_up = info[&quot;ready&quot;] and price &gt; info[&quot;high&quot;] and opening_width &gt;= context.open_range_min_atr * atr and price &gt; float(last[&quot;vwap&quot;]) and float(last[&quot;pdi&quot;]) &gt; float(last[&quot;mdi&quot;])
-    opening_down = info[&quot;ready&quot;] and price &lt; info[&quot;low&quot;] and opening_width &gt;= context.open_range_min_atr * atr and price &lt; float(last[&quot;vwap&quot;]) and float(last[&quot;mdi&quot;]) &gt; float(last[&quot;pdi&quot;])
-
-    if pullback_up:
-        module = &quot;TREND_PULLBACK&quot;
-        side = &quot;long&quot;
-        tp_r = context.trend_tp_r
-        score = 3.0 + min(float(last[&quot;adx&quot;]) / 20.0, 2.0)
-        reason = &quot;趋势回踩做多&quot;
-    elif pullback_down:
-        module = &quot;TREND_PULLBACK&quot;
-        side = &quot;short&quot;
-        tp_r = context.trend_tp_r
-        score = 3.0 + min(float(last[&quot;adx&quot;]) / 20.0, 2.0)
-        reason = &quot;趋势回踩做空&quot;
-    elif opening_up:
-        module = &quot;OPENING_RANGE_BREAKOUT&quot;
-        side = &quot;long&quot;
-        tp_r = context.opening_tp_r
-        score = 2.0 + min(opening_width / atr, 2.0)
-        reason = &quot;开盘区间向上突破&quot;
-    elif opening_down:
-        module = &quot;OPENING_RANGE_BREAKOUT&quot;
-        side = &quot;short&quot;
-        tp_r = context.opening_tp_r
-        score = 2.0 + min(opening_width / atr, 2.0)
-        reason = &quot;开盘区间向下突破&quot;
-    else:
-        return None
-
-    stop_points = max(context.stop_floor_ratio * context.risk_points[product], context.stop_atr_mult * atr)
-    expected_profit = stop_points * tp_r * context.v69_multiplier[product]
-    expected_margin = price * context.v69_multiplier[product] * context.v69_margin_rate[product]
-    efficiency = expected_profit / expected_margin if expected_margin &gt; 0 else 0
-    return {
-        &quot;code&quot;: code,
-        &quot;product&quot;: product,
-        &quot;side&quot;: side,
-        &quot;price&quot;: price,
-        &quot;atr&quot;: atr,
-        &quot;stop_points&quot;: stop_points,
-        &quot;take_profit_points&quot;: stop_points * tp_r,
-        &quot;score&quot;: score,
-        &quot;efficiency&quot;: efficiency,
-        &quot;module&quot;: module,
-        &quot;reason&quot;: reason,
-        &quot;bar_time&quot;: df.index[-1],
-    }
-
-
-def _active_lots(context):
-    return len(context.open_positions)
-
-
-def _same_direction_lots(context, side):
-    return sum(1 for pos in context.open_positions if pos[&quot;side&quot;] == side)
-
-
-def _has_product_exposure(context, code):
-    return any(pos[&quot;code&quot;] == code for pos in context.open_positions)
-
-
-def _available_cash_est(context):
-    # 同花顺实盘账户对象字段因版本不同，这里用初始资金做保守估算占位。
-    used_margin = 0.0
-    for pos in context.open_positions:
-        product = _product_from_code(context, pos[&quot;code&quot;])
-        used_margin += pos[&quot;entry_price&quot;] * context.v69_multiplier[product] * context.v69_margin_rate[product]
-    return context.initial_cash + context.daily_realized_pnl - used_margin
-
-
-def _can_open_candidate(context, cand, now_min):
-    if context.daily_open_count &gt;= context.max_daily_open:
-        return False
-    if now_min - context.last_action_min &lt; context.min_action_interval_min:
-        return False
-    if _active_lots(context) &gt;= context.max_active_lots:
-        return False
-    if _same_direction_lots(context, cand[&quot;side&quot;]) &gt;= context.max_same_direction_lots:
-        return False
-    if _has_product_exposure(context, cand[&quot;code&quot;]):
-        return False
-    if _available_cash_est(context) &lt; context.initial_cash * context.v69_min_available_cash_ratio:
-        return False
-    return True
-
-
-def _close_yday_chip_for_entry(context, code, side, price, reason):
-    # side 是目标开仓方向；做多时平旧空，做空时平旧多。
-    book = context.ledger[code]
-    if side == &quot;long&quot;:
-        if book[&quot;short_yday&quot;] &lt;= 0:
-            return False
-        if book[&quot;short_today&quot;] &gt; 0:
-            log.info(&quot;{}：有今日空仓，平旧空会被优先平今，放弃旧筹码复用 {}&quot;.format(code, reason))
-            return False
-        _pop_lock_inventory(context, code, &quot;short&quot;)
-        _jq_order_close(context, code, &quot;short&quot;, 1)
-        book[&quot;short_yday&quot;] -= 1
-        book[&quot;long_yday&quot;] += 1
-        book[&quot;long_y_price&quot;] = price
-        log.info(&quot;{}：平旧空一脚作为多头筹码 {}&quot;.format(code, reason))
-        return True
-    if book[&quot;long_yday&quot;] &lt;= 0:
-        return False
-    if book[&quot;long_today&quot;] &gt; 0:
-        log.info(&quot;{}：有今日多仓，平旧多会被优先平今，放弃旧筹码复用 {}&quot;.format(code, reason))
-        return False
-    _pop_lock_inventory(context, code, &quot;long&quot;)
-    _jq_order_close(context, code, &quot;long&quot;, 1)
-    book[&quot;long_yday&quot;] -= 1
-    book[&quot;short_yday&quot;] += 1
-    book[&quot;short_y_price&quot;] = price
-    log.info(&quot;{}：平旧多一脚作为空头筹码 {}&quot;.format(code, reason))
-    return True
-
-
-def _open_new_position(context, cand, now_min):
-    code = cand[&quot;code&quot;]
-    side = cand[&quot;side&quot;]
-    price = cand[&quot;price&quot;]
-    product = cand[&quot;product&quot;]
-    _jq_order_open(code, side, 1)
-    book = context.ledger[code]
-    if side == &quot;long&quot;:
-        book[&quot;long_today&quot;] += 1
-    else:
-        book[&quot;short_today&quot;] += 1
-    context.open_positions.append({
-        &quot;code&quot;: code,
-        &quot;side&quot;: side,
-        &quot;entry_price&quot;: price,
-        &quot;entry_min&quot;: now_min,
-        &quot;entry_type&quot;: &quot;new_open&quot;,
-        &quot;stop_points&quot;: cand[&quot;stop_points&quot;],
-        &quot;take_profit_points&quot;: cand[&quot;take_profit_points&quot;],
-        &quot;module&quot;: cand[&quot;module&quot;],
-        &quot;product&quot;: product,
-    })
-    context.daily_open_count += 1
-    context.last_action_min = now_min
-    log.info(&quot;{} 新开{}：{} price={:.2f} score={:.2f} eff={:.5f}&quot;.format(code, side, cand[&quot;reason&quot;], price, cand[&quot;score&quot;], cand[&quot;efficiency&quot;]))
-
-
-def _open_from_old_chip(context, cand, now_min):
-    code = cand[&quot;code&quot;]
-    side = cand[&quot;side&quot;]
-    price = cand[&quot;price&quot;]
-    if not _close_yday_chip_for_entry(context, code, side, price, cand[&quot;reason&quot;]):
-        return False
-    context.open_positions.append({
-        &quot;code&quot;: code,
-        &quot;side&quot;: side,
-        &quot;entry_price&quot;: price,
-        &quot;entry_min&quot;: now_min,
-        &quot;entry_type&quot;: &quot;old_chip&quot;,
-        &quot;stop_points&quot;: cand[&quot;stop_points&quot;],
-        &quot;take_profit_points&quot;: cand[&quot;take_profit_points&quot;],
-        &quot;module&quot;: cand[&quot;module&quot;],
-        &quot;product&quot;: cand[&quot;product&quot;],
-    })
-    context.daily_open_count += 1
-    context.last_action_min = now_min
-    log.info(&quot;{} 复用旧筹码形成{}敞口：{}&quot;.format(code, side, cand[&quot;reason&quot;]))
-    return True
-
-
-def _enter_candidate(context, cand, now_min):
-    code = cand[&quot;code&quot;]
-    if _open_from_old_chip(context, cand, now_min):
-        return
-    _open_new_position(context, cand, now_min)
-
-
-def _position_hit_exit(pos, price):
-    if pos[&quot;side&quot;] == &quot;long&quot;:
-        pnl_points = price - pos[&quot;entry_price&quot;]
-    else:
-        pnl_points = pos[&quot;entry_price&quot;] - price
-    if pnl_points &lt;= -pos[&quot;stop_points&quot;]:
-        return True, &quot;止损&quot;, pnl_points
-    if pnl_points &gt;= pos[&quot;take_profit_points&quot;]:
-        return True, &quot;止盈&quot;, pnl_points
-    return False, &quot;&quot;, pnl_points
-
-
-def _close_old_chip_exposure(context, pos, price, reason):
-    code = pos[&quot;code&quot;]
-    side = pos[&quot;side&quot;]
-    book = context.ledger[code]
-    if side == &quot;long&quot;:
-        _jq_order_close(context, code, &quot;long&quot;, 1)
-        book[&quot;long_yday&quot;] = max(book[&quot;long_yday&quot;] - 1, 0)
-    else:
-        _jq_order_close(context, code, &quot;short&quot;, 1)
-        book[&quot;short_yday&quot;] = max(book[&quot;short_yday&quot;] - 1, 0)
-    product = pos[&quot;product&quot;]
-    points = price - pos[&quot;entry_price&quot;] if side == &quot;long&quot; else pos[&quot;entry_price&quot;] - price
-    context.daily_realized_pnl += points * context.v69_multiplier[product]
-    log.info(&quot;{} 旧筹码{}敞口直接平昨：{} pnl_points={:.2f}&quot;.format(code, side, reason, points))
-
-
-def _lock_new_open_position(context, pos, price, reason):
-    code = pos[&quot;code&quot;]
-    side = pos[&quot;side&quot;]
-    opposite = &quot;short&quot; if side == &quot;long&quot; else &quot;long&quot;
-    inv = context.lock_inventory[code]
-    if len(inv) &gt;= context.max_lock_pairs_per_product:
-        # 锁仓额度不足时只好平今；实盘可选择跳过或人工处理。
-        _jq_order_close(context, code, side, 1)
-        log.info(&quot;{} 锁仓额度不足，直接平今 {}&quot;.format(code, reason))
-    else:
-        _jq_order_open(code, opposite, 1)
-        inv.append({&quot;side&quot;: opposite, &quot;price&quot;: price})
-        book = context.ledger[code]
-        if opposite == &quot;long&quot;:
-            book[&quot;long_today&quot;] += 1
-        else:
-            book[&quot;short_today&quot;] += 1
-        log.info(&quot;{} 新开仓退出，用反向腿对锁：{}&quot;.format(code, reason))
-    product = pos[&quot;product&quot;]
-    points = price - pos[&quot;entry_price&quot;] if side == &quot;long&quot; else pos[&quot;entry_price&quot;] - price
-    context.daily_realized_pnl += points * context.v69_multiplier[product]
-
-
-def _manage_positions(context, now_dt, hhmm):
-    now_min = _minute_of_day(now_dt)
-    remaining = []
-    for pos in context.open_positions:
-        price = _latest_price(context, pos[&quot;code&quot;], now_dt)
-        if price is None:
-            remaining.append(pos)
-            continue
-        hit, reason, _ = _position_hit_exit(pos, price)
-        if not hit and hhmm &lt; context.force_lock_hhmm:
-            remaining.append(pos)
-            continue
-        if not hit:
-            reason = &quot;尾盘处理&quot;
-        if pos[&quot;entry_type&quot;] == &quot;old_chip&quot;:
-            _close_old_chip_exposure(context, pos, price, reason)
-        else:
-            _lock_new_open_position(context, pos, price, reason)
-        context.last_action_min = now_min
-    context.open_positions = remaining
-
-
-def _build_candidates(context, now_dt, hhmm):
-    out = []
-    checked = 0
-    enough_bars = 0
-    for product, code in context.contracts.items():
-        checked += 1
-        df = _get_signal_frame(context, code, now_dt)
-        if df is None:
-            continue
-        enough_bars += 1
-        _update_opening_range(context, code, df, hhmm)
-        cand = _classify_candidate(context, code, df)
-        if cand is not None:
-            out.append(cand)
-    out.sort(key=lambda x: (x[&quot;score&quot;], x[&quot;efficiency&quot;]), reverse=True)
-    if hhmm in (1000, 1100, 1400):
-        diag_key = &quot;{}-{}&quot;.format(now_dt.strftime(&quot;%Y-%m-%d&quot;), hhmm)
-        if getattr(context, &quot;last_diag_hhmm&quot;, &quot;&quot;) != diag_key:
-            context.last_diag_hhmm = diag_key
-            log.info(
-                &quot;V69诊断 {} 合约{}个 行情足够{}个 候选{}个 活动{}手 今日开仓{}次&quot;.format(
-                    now_dt.strftime(&quot;%H:%M&quot;),
-                    checked,
-                    enough_bars,
-                    len(out),
-                    len(context.open_positions),
-                    context.daily_open_count,
-                )
-            )
-            if len(out) &gt; 0:
-                top = out[0]
-                log.info(
-                    &quot;V69候选第一名 {} {} {} price={:.2f} score={:.2f} eff={:.5f}&quot;.format(
-                        top[&quot;code&quot;], top[&quot;side&quot;], top[&quot;reason&quot;], top[&quot;price&quot;], top[&quot;score&quot;], top[&quot;efficiency&quot;]
-                    )
-                )
-    return out
-
-
-def trade(context):
-    now_dt = context.current_dt
-    if getattr(context, &quot;official_start&quot;, &quot;&quot;):
-        if now_dt.strftime(&quot;%Y-%m-%d&quot;) &lt; context.official_start:
-            return
-    hhmm = _hhmm(now_dt)
-    now_min = _minute_of_day(now_dt)
-
-    bar_key = &quot;{}-{}&quot;.format(now_dt.strftime(&quot;%Y-%m-%d %H:%M&quot;), context.v69_stage)
-    if context.last_bar_key == bar_key:
-        return
-    context.last_bar_key = bar_key
-
-    _manage_positions(context, now_dt, hhmm)
-    if hhmm &gt;= context.force_lock_hhmm:
-        return
-    if hhmm &lt; context.first_open_hhmm or hhmm &gt; context.last_open_hhmm:
-        return
-    if context.daily_open_count &gt;= context.max_daily_open:
-        return
-
-    candidates = _build_candidates(context, now_dt, hhmm)
-    for cand in candidates:
-        if not _can_open_candidate(context, cand, now_min):
-            continue
-        sig = &quot;{}-{}-{}&quot;.format(cand[&quot;code&quot;], cand[&quot;side&quot;], cand[&quot;module&quot;])
-        if context.last_route_signature.get(sig, -99999) + context.cross_product_cool_min &gt; now_min:
-            continue
-        _enter_candidate(context, cand, now_min)
-        context.last_route_signature[sig] = now_min
-        break
-
-
-def handle_data(context, data):
-    trade(context)
-
-
-def after_trading(context):
-    log.info(&quot;V69收盘：当日开仓{}次｜活动敞口{}手｜已实现{:.2f}&quot;.format(
-        context.daily_open_count,
-        len(context.open_positions),
-        context.daily_realized_pnl,
-    ))
-</code></pre>
-      </details>
-    
-      <details class="code-card">
-        <summary><span>??????</span><a href="scripts/local_v69_index_futures_fixed_spec.py">????</a></summary>
-        <p>???????????????????</p>
-        <pre><code># -*- coding: utf-8 -*-
-&quot;&quot;&quot;
-V69 股指期货固定版本地方案说明脚本。
-
-用途：
-- 固定当前股指期货策略的本地研究口径。
-- 输出整体思路、交易模块、核心参数和十段结果摘要。
-&quot;&quot;&quot;
-
-from __future__ import annotations
-
-from pprint import pprint
-
-
-VERSION = &quot;V69 股指期货固定版&quot;
-
-UNIVERSE = {
-    &quot;products&quot;: [&quot;IF&quot;, &quot;IH&quot;, &quot;IC&quot;, &quot;IM&quot;],
-    &quot;frequency&quot;: &quot;1m&quot;,
-    &quot;initial_cash&quot;: 1_000_000,
-    &quot;instrument_type&quot;: &quot;index_futures&quot;,
-}
-
-STRATEGY_IDEA = {
-    &quot;core&quot;: &quot;只交易趋势回踩和开盘区间突破；箱体与VWAP偏离只作为环境观察。&quot;,
-    &quot;lock_rule&quot;: &quot;当天新开仓退出时允许反向开仓形成有效对锁。&quot;,
-    &quot;old_chip_rule&quot;: &quot;昨日对锁旧仓可平单边作为开仓筹码，但必须方向匹配。&quot;,
-    &quot;today_position_guard&quot;: &quot;如果同品种同方向今仓会挡住平昨，则不复用旧筹码，改为新开。&quot;,
-}
-
-MODULES = {
-    &quot;TREND_PULLBACK&quot;: {
-        &quot;name&quot;: &quot;趋势回踩&quot;,
-        &quot;direction&quot;: &quot;顺主趋势，等待价格回踩到EMA/VWAP附近后入场。&quot;,
-        &quot;entry_quality&quot;: &quot;ADX达到趋势阈值，回踩幅度不过深，方向和品种强弱一致。&quot;,
-        &quot;take_profit&quot;: &quot;1.20R&quot;,
-    },
-    &quot;OPENING_RANGE_BREAKOUT&quot;: {
-        &quot;name&quot;: &quot;开盘区间突破&quot;,
-        &quot;direction&quot;: &quot;09:45后观察开盘区间，向上突破做多，向下突破做空。&quot;,
-        &quot;entry_quality&quot;: &quot;开盘区间宽度达到最低ATR要求，突破方向与即时趋势不冲突。&quot;,
-        &quot;take_profit&quot;: &quot;1.00R&quot;,
-    },
-}
-
-PARAMETERS = {
-    &quot;first_open_hhmm&quot;: 945,
-    &quot;last_open_hhmm&quot;: 1435,
-    &quot;force_lock_hhmm&quot;: 1455,
-    &quot;open_range_end_hhmm&quot;: 945,
-    &quot;max_active_lots&quot;: 4,
-    &quot;max_same_direction_lots&quot;: 2,
-    &quot;max_lock_pairs_per_product&quot;: 4,
-    &quot;max_daily_open&quot;: 80,
-    &quot;min_available_cash_ratio&quot;: 0.05,
-    &quot;min_action_interval_min&quot;: 1,
-    &quot;cross_product_cool_min&quot;: 6,
-    &quot;atr_n&quot;: 14,
-    &quot;ema_n&quot;: 20,
-    &quot;adx_n&quot;: 14,
-    &quot;trend_adx_min&quot;: 18,
-    &quot;open_range_min_atr&quot;: 0.80,
-    &quot;pullback_buffer_atr&quot;: 0.20,
-    &quot;stop_floor_ratio&quot;: 0.35,
-    &quot;stop_atr_mult&quot;: 1.00,
-    &quot;trend_tp_r&quot;: 1.20,
-    &quot;opening_tp_r&quot;: 1.00,
-    &quot;multiplier&quot;: {&quot;IF&quot;: 300, &quot;IH&quot;: 300, &quot;IC&quot;: 200, &quot;IM&quot;: 200},
-    &quot;risk_points&quot;: {&quot;IF&quot;: 66.7, &quot;IH&quot;: 66.7, &quot;IC&quot;: 100.0, &quot;IM&quot;: 100.0},
-}
-
-BACKTEST_SUMMARY = {
-    &quot;candidate_signals&quot;: 14333,
-    &quot;closed_trades&quot;: 7331,
-    &quot;net_profit&quot;: 2048148.84,
-    &quot;gross_pnl&quot;: 2487229.30,
-    &quot;trade_fee&quot;: 412026.81,
-    &quot;release_fee&quot;: 27053.69,
-    &quot;total_fee&quot;: 439080.50,
-    &quot;win_rate_pct&quot;: 50.8389,
-    &quot;avoided_close_today&quot;: 3879,
-    &quot;chip_reused&quot;: 3366,
-    &quot;direct_close&quot;: 86,
-    &quot;old_chip_close_yesterday&quot;: 3366,
-}
-
-MODULE_SUMMARY = {
-    &quot;OPENING_RANGE_BREAKOUT&quot;: {
-        &quot;name&quot;: &quot;开盘区间突破&quot;,
-        &quot;trades&quot;: 2816,
-        &quot;net_pnl&quot;: 482916.30,
-        &quot;gross_pnl&quot;: 637118.57,
-        &quot;fee&quot;: 154202.31,
-        &quot;win_rate_pct&quot;: 50.9588,
-    },
-    &quot;TREND_PULLBACK&quot;: {
-        &quot;name&quot;: &quot;趋势回踩&quot;,
-        &quot;trades&quot;: 4515,
-        &quot;net_pnl&quot;: 1592286.23,
-        &quot;gross_pnl&quot;: 1850110.73,
-        &quot;fee&quot;: 257824.50,
-        &quot;win_rate_pct&quot;: 50.7641,
-    },
-}
-
-
-def describe() -&gt; dict:
-    return {
-        &quot;version&quot;: VERSION,
-        &quot;universe&quot;: UNIVERSE,
-        &quot;strategy_idea&quot;: STRATEGY_IDEA,
-        &quot;modules&quot;: MODULES,
-        &quot;parameters&quot;: PARAMETERS,
-        &quot;backtest_summary&quot;: BACKTEST_SUMMARY,
-        &quot;module_summary&quot;: MODULE_SUMMARY,
-    }
-
-
-if __name__ == &quot;__main__&quot;:
-    pprint(describe(), sort_dicts=False)
-</code></pre>
-      </details>
-    
+      <h2>5. 脚本代码</h2>
+      <p>下面三份脚本固定同一套策略语义。平台差异只体现在合约选择、行情读取和下单 API。点击链接可直接查看完整代码。</p>
+      <table>
+        <thead><tr><th>平台</th><th>脚本代码</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>同花顺 / SuperMind</td>
+            <td><a href="scripts/ths_v69_index_futures_fixed.py">ths_v69_index_futures_fixed.py</a></td>
+            <td>同花顺平台回测和试跑；按单周期回测时修改 <code>V69_STAGE</code>。</td>
+          </tr>
+          <tr>
+            <td>聚宽 / JoinQuant</td>
+            <td><a href="scripts/jq_v69_index_futures_fixed.py">jq_v69_index_futures_fixed.py</a></td>
+            <td>聚宽 Python3 回测；可使用当月合约或固定周期合约。</td>
+          </tr>
+          <tr>
+            <td>本地研究口径</td>
+            <td><a href="scripts/local_v69_index_futures_fixed_spec.py">local_v69_index_futures_fixed_spec.py</a></td>
+            <td>固定本地研究口径、核心参数和结果摘要。</td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>核心参数片段</h3>
+      <pre><code>V69_PRODUCTS = ["IF", "IH", "IC", "IM"]
+first_open_hhmm = 945
+last_open_hhmm = 1435
+force_lock_hhmm = 1455
+max_active_lots = 4
+max_same_direction_lots = 2
+atr_n = 14
+ema_n = 20
+adx_n = 14
+trend_adx_min = 18
+trend_tp_r = 1.20
+opening_tp_r = 1.00</code></pre>
     </section>
   </main>
 </body>
