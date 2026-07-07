@@ -2,10 +2,70 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url=v70_v69_stage_charts_ths_index.html">
-  <title>V69 图表入口</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>股指期货策略发布入口</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      color: #172033;
+      background: #f5f7fb;
+    }
+    main {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 36px 18px;
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    p { color: #5c667a; line-height: 1.65; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+    .card {
+      display: block;
+      padding: 18px;
+      border: 1px solid #dfe5ef;
+      border-radius: 8px;
+      background: #fff;
+      color: inherit;
+      text-decoration: none;
+      box-shadow: 0 1px 2px rgba(17, 24, 39, .04);
+    }
+    .card:hover { border-color: #1261a6; }
+    .title { font-weight: 700; font-size: 18px; margin-bottom: 7px; }
+    .tag {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #eaf2fb;
+      color: #174f82;
+      font-size: 12px;
+    }
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-  <a href="v70_v69_stage_charts_ths_index.html">打开 V69 图表入口</a>
+  <main>
+    <h1>股指期货策略发布入口</h1>
+    <p>这里发布的是 IF / IH / IC / IM 股指期货策略资料，不是 ETF 方案。优先查看最新固定版对比报告。</p>
+    <section class="grid">
+      <a class="card" href="index-futures-v69-fixed-20260707/">
+        <span class="tag">最新</span>
+        <div class="title">V69 固定版：同花顺 / 聚宽 / 本地对比</div>
+        <p>包含整体思路、交易策略、核心参数、三端完整脚本代码和 V71 反例对比。</p>
+      </a>
+      <a class="card" href="v70_v69_stage_charts_ths_index.html">
+        <span class="tag">历史图表</span>
+        <div class="title">V69 图表入口</div>
+        <p>保留 2212、2412、2606 等阶段图表和旧版回测入口。</p>
+      </a>
+    </section>
+  </main>
 </body>
 </html>

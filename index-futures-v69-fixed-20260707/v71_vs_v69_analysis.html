@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>V71 十段 vs V69 基准回测分析</title>
+<style>
+body{font-family:Segoe UI,Microsoft YaHei,sans-serif;margin:24px;color:#172033}
+table{border-collapse:collapse;width:100%;margin:12px 0 24px}
+th,td{border:1px solid #d7dde8;padding:7px 9px;text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{background:#172033;color:white}
+.card{background:#f7f9fc;border:1px solid #dce3ef;border-radius:8px;padding:14px;margin:12px 0}
+li{margin:6px 0}
+</style>
+<h1>V71 聚宽可跑版十段 vs V69 基准</h1>
+<div class="card"><b>核心观察：</b>V71 放宽了趋势回踩和开盘突破的入场，候选与成交显著增加。若净收益下降且手续费大增，说明优化方向应回到信号质量和交易频率控制；若仅部分周期改善，则保留对应模块做条件化接入。</div>
+<h2>总览</h2>
+<table><thead><tr><th>version</th><th>candidate_signals</th><th>closed_trades</th><th>net_profit</th><th>gross_pnl</th><th>trade_fee</th><th>release_fee</th><th>total_fee</th><th>win_rate_pct</th><th>avoided_close_today</th><th>chip_reused</th><th>direct_close</th><th>old_chip_close_yesterday</th></tr></thead><tbody><tr><td>V71 聚宽可跑版十段</td><td>437,072</td><td>13,982</td><td>597,150</td><td>1,608,601</td><td>988,301</td><td>23,150</td><td>1,011,451</td><td>49.34</td><td>6,698</td><td>6,251</td><td>1,033</td><td>6,251</td></tr></tbody></table>
+<h2>分周期对比</h2>
+<table><thead><tr><th>stage</th><th>trades_v71</th><th>trades_v69</th><th>trades_delta</th><th>net_after_release_v71</th><th>net_after_release_v69</th><th>net_delta</th><th>gross_delta</th><th>fee_delta</th><th>win_delta</th></tr></thead><tbody><tr><td>2106</td><td>1,271</td><td>663</td><td>608</td><td>-101,955</td><td>141,935</td><td>-243,891</td><td>-177,183</td><td>66,708</td><td>-2.39</td></tr><tr><td>2206</td><td>1,658</td><td>896</td><td>762</td><td>72,796</td><td>148,723</td><td>-75,927</td><td>-8,283</td><td>67,644</td><td>-1.37</td></tr><tr><td>2212</td><td>1,086</td><td>644</td><td>442</td><td>-281,251</td><td>33,099</td><td>-314,350</td><td>-280,466</td><td>33,884</td><td>-3.84</td></tr><tr><td>2306</td><td>1,181</td><td>598</td><td>583</td><td>94,946</td><td>86,920</td><td>8,025</td><td>48,868</td><td>40,843</td><td>0.46</td></tr><tr><td>2312</td><td>1,215</td><td>644</td><td>571</td><td>-46,615</td><td>125,792</td><td>-172,407</td><td>-137,185</td><td>35,222</td><td>-2.78</td></tr><tr><td>2406</td><td>1,548</td><td>770</td><td>778</td><td>7,388</td><td>473,964</td><td>-466,576</td><td>-411,085</td><td>55,491</td><td>-2.53</td></tr><tr><td>2412</td><td>1,870</td><td>859</td><td>1,011</td><td>390,327</td><td>476,605</td><td>-86,278</td><td>23,392</td><td>109,670</td><td>-1.88</td></tr><tr><td>2506</td><td>1,359</td><td>655</td><td>704</td><td>123,563</td><td>96,602</td><td>26,961</td><td>74,301</td><td>47,340</td><td>0.43</td></tr><tr><td>2512</td><td>1,397</td><td>756</td><td>641</td><td>126,400</td><td>269,245</td><td>-142,846</td><td>-85,296</td><td>57,550</td><td>-1.25</td></tr><tr><td>2606</td><td>1,397</td><td>846</td><td>551</td><td>211,552</td><td>195,263</td><td>16,289</td><td>74,309</td><td>58,020</td><td>-0.27</td></tr><tr><td>合计</td><td>13,982</td><td>7,331</td><td>6,651</td><td>597,150</td><td>2,048,149</td><td>-1,450,998</td><td>-878,628</td><td>572,370</td><td></td></tr></tbody></table>
+<h2>模块对比</h2>
+<table><thead><tr><th>module</th><th>trades_v71</th><th>trades_v69</th><th>net_pnl_v71</th><th>net_pnl_v69</th><th>net_delta</th><th>gross_pnl_v71</th><th>gross_pnl_v69</th><th>fee_v71</th><th>fee_v69</th><th>win_rate</th></tr></thead><tbody><tr><td>OPENING_RANGE_BREAKOUT</td><td>5,881</td><td>2,816</td><td>798,391</td><td>482,916</td><td>315,475</td><td>1,269,268</td><td>637,119</td><td>470,877</td><td>154,202</td><td>49.92</td></tr><tr><td>TREND_PULLBACK</td><td>8,101</td><td>4,515</td><td>-178,091</td><td>1,592,286</td><td>-1,770,377</td><td>339,333</td><td>1,850,111</td><td>517,424</td><td>257,824</td><td>48.92</td></tr></tbody></table>
+<h2>主要过滤原因</h2>
+<table><thead><tr><th>reason</th><th>count</th></tr></thead><tbody><tr><td>同品种已有敞口</td><td>335,058</td></tr><tr><td>组合已有2手同向敞口</td><td>80,163</td></tr><tr><td>可用资金低于5%阈值</td><td>7,869</td></tr></tbody></table>
+<h2>优化路径</h2>
+<ol>
+<li><b>P0：</b>趋势回踩先回退到 V69 质量门槛，保留聚宽脚本层的保证金/真实持仓保护。</li>
+<li><b>P1：</b>只把 V71 中表现改善的开盘突破放宽规则接到 V69，单独做 A/B。</li>
+<li><b>P2：</b>加入手续费后期望R门槛、同模块冷却、同方向跨品种距离限制，压低无效成交。</li>
+<li><b>P3：</b>按周期/环境识别弱环境，弱环境禁用趋势回踩或提高机会分。</li>
+<li><b>P4：</b>如果开盘突破在十段仍贡献稳定，再做止盈延展和二次回踩入场。</li>
+</ol>

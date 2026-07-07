@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>股指期货 V69 固定版：同花顺 / 聚宽 / 本地对比</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #5c667a;
+      --line: #dfe5ef;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --accent: #1261a6;
+      --good: #16794c;
+      --warn: #a75d00;
+      --bad: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+    header {
+      background: #132033;
+      color: #fff;
+      padding: 34px 24px 26px;
+    }
+    main {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 22px 18px 46px;
+    }
+    h1 { margin: 0 0 10px; font-size: 30px; line-height: 1.25; }
+    h2 { margin: 30px 0 12px; font-size: 21px; }
+    h3 { margin: 20px 0 8px; font-size: 17px; }
+    p { margin: 8px 0; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .sub { color: #d7e3f2; max-width: 920px; }
+    .grid { display: grid; gap: 14px; }
+    .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card, .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(17, 24, 39, .04);
+    }
+    .metric {
+      font-size: 27px;
+      font-weight: 700;
+      margin-top: 5px;
+    }
+    .label { color: var(--muted); font-size: 13px; }
+    .good { color: var(--good); }
+    .warn { color: var(--warn); }
+    .bad { color: var(--bad); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      font-size: 14px;
+    }
+    th, td {
+      border-bottom: 1px solid #e7edf5;
+      padding: 9px 10px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: #eef3f9;
+      font-weight: 700;
+      color: #24324a;
+    }
+    code, pre {
+      font-family: Consolas, "SFMono-Regular", Menlo, monospace;
+    }
+    pre {
+      overflow: auto;
+      background: #101827;
+      color: #e7edf7;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #eaf2fb;
+      color: #174f82;
+      font-size: 12px;
+      margin-right: 6px;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      padding-left: 12px;
+      color: #334155;
+    }
+    @media (max-width: 860px) {
+      .cards { grid-template-columns: 1fr; }
+      h1 { font-size: 24px; }
+      table { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>股指期货 V69 固定版：同花顺 / 聚宽 / 本地方案对比</h1>
+    <p class="sub">固定对象是 IF / IH / IC / IM 股指期货 1 分钟策略，不是 ETF 轮动方案。结论基于旧线程十段回测与 V71 聚宽可跑版对照：当前应固定 V69，而不是整体替换为 V71。</p>
+  </header>
+  <main>
+    <section class="grid cards">
+      <div class="card">
+        <div class="label">固定版本</div>
+        <div class="metric good">V69</div>
+        <p>允许对锁 + 平昨复用加方向/今仓约束。</p>
+      </div>
+      <div class="card">
+        <div class="label">V69 十段净收益</div>
+        <div class="metric">2,048,149</div>
+        <p>Gross 2,487,229；手续费 439,081。</p>
+      </div>
+      <div class="card">
+        <div class="label">V71 对 V69 差异</div>
+        <div class="metric bad">-1,450,998</div>
+        <p>V71 成交数显著增加，手续费放大。</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>1. 总体结论</h2>
+      <p>当前表现最好的、且已经具备三端落地脚本的股指期货方案，是 <b>V69 新方案：允许对锁，平昨复用加方向/今仓约束</b>。V71 聚宽可跑版虽然改善了开盘区间突破模块，但趋势回踩模块大幅恶化，不能整体替代 V69。</p>
+      <p class="note">固定原则：同花顺、聚宽、本地三端都固定同一套 V69 策略语义；平台差异只允许发生在合约发现、下单 API、平今/平昨实现细节和日志输出，不允许改变核心交易逻辑。</p>
+    </section>
+
+    <section class="section">
+      <h2>2. 十段回测对比</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>指标</th>
+            <th>V69 基准</th>
+            <th>V71 聚宽可跑版</th>
+            <th>判断</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>净收益</td><td>2,048,149</td><td>597,150</td><td class="bad">V71 少 1,450,998</td></tr>
+          <tr><td>Gross PnL</td><td>2,487,229</td><td>1,608,601</td><td class="bad">V71 少 878,628</td></tr>
+          <tr><td>总手续费</td><td>439,081</td><td>1,011,451</td><td class="bad">V71 多 572,370</td></tr>
+          <tr><td>成交数</td><td>7,331</td><td>13,982</td><td class="warn">V71 多 6,651 笔</td></tr>
+          <tr><td>胜率</td><td>50.84%</td><td>49.34%</td><td class="warn">V71 低 1.50 pct</td></tr>
+        </tbody>
+      </table>
+
+      <h3>模块拆分</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>模块</th>
+            <th>V69 净收益</th>
+            <th>V71 净收益</th>
+            <th>变化</th>
+            <th>解释</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>开盘区间突破</td>
+            <td>482,916</td>
+            <td>798,391</td>
+            <td class="good">+315,475</td>
+            <td>V71 在开盘突破上更积极，单模块可保留为下一版候选。</td>
+          </tr>
+          <tr>
+            <td>趋势回踩</td>
+            <td>1,592,286</td>
+            <td>-178,091</td>
+            <td class="bad">-1,770,377</td>
+            <td>主要拖累来自趋势回踩，且交易频率和手续费同步放大。</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>因此，本页固定 V69 三端脚本；V71 只作为“开盘突破模块值得吸收、趋势回踩不能继承”的对照资料。</p>
+    </section>
+
+    <section class="section">
+      <h2>3. 整体思路</h2>
+      <p><span class="pill">标的</span> IF / IH / IC / IM 四类股指期货，1 分钟 K 线。</p>
+      <p><span class="pill">主策略</span> 只交易趋势回踩与开盘区间突破；箱体、VWAP 偏离作为环境观察，不直接开仓。</p>
+      <p><span class="pill">组合约束</span> 组合最多 4 手敞口；同向最多 2 手；同品种不同时持有多笔敞口。</p>
+      <p><span class="pill">执行核心</span> 当天新开仓退出时允许反向开仓形成有效对锁；昨日对锁旧仓可以平单边作为开仓筹码，但必须方向匹配；如果同方向今仓会挡住平昨，就不复用旧筹码，改为新开。</p>
+      <p><span class="pill">风控</span> 14 ATR、20 EMA、14 ADX；趋势回踩和开盘突破分别使用不同止盈 R；14:55 强制锁仓/收尾。</p>
+    </section>
+
+    <section class="section">
+      <h2>4. 核心参数</h2>
+      <table>
+        <thead>
+          <tr><th>参数</th><th>值</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>产品池</td><td>IF, IH, IC, IM</td><td>四类股指期货，不含 ETF。</td></tr>
+          <tr><td>信号频率</td><td>1m</td><td>每分钟检查行情和持仓。</td></tr>
+          <tr><td>最早开仓</td><td>09:45</td><td>开盘区间形成后才允许开仓。</td></tr>
+          <tr><td>最后开仓</td><td>14:35</td><td>避免尾盘新风险暴露。</td></tr>
+          <tr><td>强制锁仓</td><td>14:55</td><td>日内平今成本/限制下的收尾保护。</td></tr>
+          <tr><td>最多活动敞口</td><td>4 手</td><td>组合层上限。</td></tr>
+          <tr><td>同向最多</td><td>2 手</td><td>防止单边过度加仓。</td></tr>
+          <tr><td>跨品种冷却</td><td>6 分钟</td><td>降低相近信号重复开仓。</td></tr>
+          <tr><td>ATR / EMA / ADX</td><td>14 / 20 / 14</td><td>趋势、波动和入场质量判断。</td></tr>
+          <tr><td>趋势 ADX 下限</td><td>18</td><td>趋势回踩准入阈值。</td></tr>
+          <tr><td>开盘区间最小 ATR</td><td>0.80</td><td>过滤过窄的无效开盘区间。</td></tr>
+          <tr><td>趋势止盈</td><td>1.20R</td><td>趋势回踩模块。</td></tr>
+          <tr><td>开盘止盈</td><td>1.00R</td><td>开盘区间突破模块。</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>5. 三端固定脚本</h2>
+      <table>
+        <thead>
+          <tr><th>平台</th><th>固定脚本</th><th>用途</th><th>注意事项</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>同花顺 / SuperMind</td>
+            <td><a href="scripts/ths_v69_index_futures_fixed.py">ths_v69_index_futures_fixed.py</a></td>
+            <td>平台回测和后续试跑。</td>
+            <td>按单周期回测时改 `V69_STAGE`；不同环境的 `order_future`、保证金和平今支持要用日志核对。</td>
+          </tr>
+          <tr>
+            <td>聚宽 / JoinQuant</td>
+            <td><a href="scripts/jq_v69_index_futures_fixed.py">jq_v69_index_futures_fixed.py</a></td>
+            <td>聚宽 Python3 回测。</td>
+            <td>默认当月合约；如需固定周期，改 `V69_CONTRACT_MODE` 为 `fixed_stage` 并修改 `V69_STAGE`。</td>
+          </tr>
+          <tr>
+            <td>本地研究回测</td>
+            <td><a href="scripts/local_v69_index_futures_backtest.py">local_v69_index_futures_backtest.py</a></td>
+            <td>生成本地十段回测和指标对照。</td>
+            <td>用于研究复核，不等同平台撮合；费用、滑点、平今/平昨以平台日志为准。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>脚本关键片段</h3>
+      <pre><code>V69_PRODUCTS = ["IF", "IH", "IC", "IM"]
+context.first_open_hhmm = 945
+context.last_open_hhmm = 1435
+context.force_lock_hhmm = 1455
+context.max_active_lots = 4
+context.max_same_direction_lots = 2
+context.atr_n = 14
+context.ema_n = 20
+context.adx_n = 14
+context.trend_adx_min = 18
+context.trend_tp_r = 1.20
+context.opening_tp_r = 1.00</code></pre>
+    </section>
+
+    <section class="section">
+      <h2>6. 附件与复核入口</h2>
+      <ul>
+        <li><a href="v69_lock_allowed_priority_report.html">V69 本地平昨/对锁分析原报告</a></li>
+        <li><a href="v71_vs_v69_analysis.html">V71 聚宽可跑版 vs V69 十段分析</a></li>
+        <li><a href="../v70_v69_stage_charts_ths_index.html">旧版 V69 图表入口</a></li>
+      </ul>
+      <p class="note">下一步建议不是整体上 V71，而是做“V69 趋势回踩 + V71 开盘突破”的 A/B 十段验证，并增加手续费后机会门槛和弱环境过滤。</p>
+    </section>
+  </main>
+</body>
+</html>

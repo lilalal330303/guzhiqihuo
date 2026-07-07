@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>V69 允许对锁 + 平昨约束回测</title><style>
+    body{font-family:Arial,'Microsoft YaHei',sans-serif;background:#f6f8fb;color:#152033;margin:24px}
+    h1{font-size:24px;margin:0 0 10px}
+    h2{font-size:18px;margin:26px 0 10px}
+    .card{background:white;border:1px solid #dfe6f2;border-radius:8px;padding:16px;margin:14px 0}
+    .good{border-left:4px solid #15803d}.warn{border-left:4px solid #ca8a04}
+    table{border-collapse:collapse;width:100%;font-size:13px;background:white}
+    th{background:#1f2d44;color:#fff;text-align:left;padding:8px}
+    td{border-bottom:1px solid #e6edf7;padding:7px}
+    li{margin:6px 0}
+    </style></head>
+<body>
+<h1>V69 允许对锁 + 平昨约束回测</h1>
+<div class="card good">
+  <b>执行假设：</b>同品种有今仓时，允许反向开仓制造有效对锁；但单边平昨复用旧筹码时，必须检查锁仓方向，
+  如果同品种同方向今仓会被优先平掉，则不复用旧筹码，改为新开。
+</div>
+<h2>三版总览</h2>
+<table><thead><tr><th>方案</th><th>closed_trades</th><th>net_profit</th><th>gross_pnl</th><th>trade_fee</th><th>release_fee</th><th>总手续费</th><th>win_rate_pct</th><th>avoided_close_today</th><th>chip_reused</th><th>direct_close</th><th>old_chip_close_yesterday</th></tr></thead><tbody><tr><td>V65 旧逻辑：允许对锁，锁仓不分方向</td><td>7331</td><td>2,089,934.45</td><td>2,487,229.30</td><td>392,835.98</td><td>4,458.91</td><td>397,294.89</td><td>50.84%</td><td>3699</td><td>3616</td><td>16</td><td>3616</td></tr><tr><td>V68 严格平今：禁止同日虚拟对锁</td><td>7059</td><td>347,081.55</td><td>2,402,438.80</td><td>2,055,357.29</td><td>0.00</td><td>2,055,357.29</td><td>48.97%</td><td>0</td><td>0</td><td>7059</td><td>0</td></tr><tr><td>V69 新方案：允许对锁，平昨复用加方向/今仓约束</td><td>7331</td><td>2,048,148.84</td><td>2,487,229.30</td><td>412,026.81</td><td>27,053.69</td><td>439,080.50</td><td>50.84%</td><td>3879</td><td>3366</td><td>86</td><td>3366</td></tr></tbody></table>
+<h2>2606 对照</h2>
+<table><thead><tr><th>方案</th><th>trades</th><th>net_after_release</th><th>gross_pnl</th><th>fee</th><th>release_fee</th><th>win_rate</th><th>avoided_close_today</th><th>chip_reused</th><th>direct_close</th></tr></thead><tbody><tr><td>V65 旧逻辑：允许对锁，锁仓不分方向</td><td>846</td><td>203,810.30</td><td>261,031.50</td><td>56,625.28</td><td>595.92</td><td>50.24%</td><td>422</td><td>417</td><td>7</td></tr><tr><td>V68 严格平今：禁止同日虚拟对锁</td><td>827</td><td>-37,849.45</td><td>255,947.30</td><td>293,796.76</td><td>0.00</td><td>48.97%</td><td>0</td><td>0</td><td>827</td></tr><tr><td>V69 新方案：允许对锁，平昨复用加方向/今仓约束</td><td>846</td><td>195,263.21</td><td>261,031.50</td><td>62,099.54</td><td>3,668.75</td><td>50.24%</td><td>437</td><td>387</td><td>22</td></tr></tbody></table>
+<h2>V69 十段表现</h2>
+<table><thead><tr><th>stage</th><th>trades</th><th>net_after_release</th><th>gross_pnl</th><th>fee</th><th>release_fee</th><th>win_rate</th><th>avoided_close_today</th><th>chip_reused</th><th>direct_close</th><th>old_chip_close_yesterday</th></tr></thead><tbody><tr><td>2106.0</td><td>663.0</td><td>141,935.42</td><td>186,343.90</td><td>42,510.51</td><td>1,897.95</td><td>50.23%</td><td>346.0</td><td>310.0</td><td>7.0</td><td>310.0</td></tr><tr><td>2206.0</td><td>896.0</td><td>148,723.22</td><td>200,867.90</td><td>49,951.68</td><td>2,193.02</td><td>51.67%</td><td>466.0</td><td>425.0</td><td>5.0</td><td>425.0</td></tr><tr><td>2212.0</td><td>644.0</td><td>33,099.03</td><td>70,111.10</td><td>34,346.60</td><td>2,665.47</td><td>50.16%</td><td>346.0</td><td>294.0</td><td>4.0</td><td>294.0</td></tr><tr><td>2306.0</td><td>598.0</td><td>86,920.18</td><td>121,472.20</td><td>31,549.45</td><td>3,002.57</td><td>49.50%</td><td>326.0</td><td>271.0</td><td>1.0</td><td>271.0</td></tr><tr><td>2312.0</td><td>644.0</td><td>125,791.76</td><td>159,778.00</td><td>31,458.10</td><td>2,528.14</td><td>50.93%</td><td>348.0</td><td>296.0</td><td>0.0</td><td>296.0</td></tr><tr><td>2406.0</td><td>770.0</td><td>473,963.68</td><td>512,295.00</td><td>35,849.32</td><td>2,482.01</td><td>52.60%</td><td>411.0</td><td>349.0</td><td>10.0</td><td>349.0</td></tr><tr><td>2412.0</td><td>859.0</td><td>476,604.67</td><td>523,237.30</td><td>43,885.73</td><td>2,746.90</td><td>52.04%</td><td>449.0</td><td>393.0</td><td>17.0</td><td>393.0</td></tr><tr><td>2506.0</td><td>655.0</td><td>96,602.18</td><td>134,040.60</td><td>34,558.81</td><td>2,879.62</td><td>49.16%</td><td>351.0</td><td>293.0</td><td>11.0</td><td>293.0</td></tr><tr><td>2512.0</td><td>756.0</td><td>269,245.49</td><td>318,051.80</td><td>45,817.07</td><td>2,989.26</td><td>50.93%</td><td>399.0</td><td>348.0</td><td>9.0</td><td>348.0</td></tr><tr><td>2606.0</td><td>846.0</td><td>195,263.21</td><td>261,031.50</td><td>62,099.54</td><td>3,668.75</td><td>50.24%</td><td>437.0</td><td>387.0</td><td>22.0</td><td>387.0</td></tr></tbody></table>
+<div class="card warn">
+  <b>结论：</b>
+  <ul>
+    <li>V69 全十段净收益 2,048,148.84，低于 V65 的 2,089,934.45，主要差额来自更严格的旧筹码方向约束和剩余锁仓释放费。</li>
+    <li>V69 2606 净收益 195,263.21，较 V65 少约 8,547.09，但远好于 V68 的 -37,849.45。</li>
+    <li>如果实盘确实支持同品种今仓存在时反向开仓形成有效对锁，V69 比 V68 更接近可执行版本；后续优化应围绕减少最终锁仓释放、提高旧筹码方向匹配率展开。</li>
+  </ul>
+</div>
+</body></html>
