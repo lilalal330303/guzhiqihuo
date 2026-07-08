@@ -225,6 +225,113 @@ def test_fusion_falls_back_to_defensive_etf_when_no_candidate_passes():
     assert json.loads(first_ready["candidates_json"]) == []
 
 
+def test_dual_slot_fusion_emits_wufu_and_qixing_targets_with_weights():
+    dates = pd.date_range("2024-01-01", periods=35, freq="D")
+    prices = pd.concat(
+        [
+            _bars("WUFU", dates, [10.0 * (1.010**i) for i in range(35)], 1000.0),
+            _bars("QIX", dates, [10.0 * (1.009**i) for i in range(35)], 1000.0),
+            _bars("DEF", dates, [10.0] * 35, 1000.0),
+        ],
+        ignore_index=True,
+    )
+    config = FusionEtfRotationConfig(
+        wufu=WufuEtfRotationConfig(
+            etf_pool=["WUFU"],
+            defensive_etf="DEF",
+            lookback_days=25,
+            max_score_threshold=20.0,
+            enable_volume_check=False,
+            enable_loss_filter=False,
+        ),
+        qixing=QixingEnhancementConfig(
+            enabled=True,
+            pool=["QIX"],
+            independent_slot_enabled=True,
+            wufu_slot_weight=0.5,
+            qixing_slot_weight=0.5,
+        ),
+    )
+
+    targets = generate_fusion_etf_targets(prices, config=config)
+
+    first_ready = targets[targets["wufu_target_symbol"] == "WUFU"].iloc[0]
+    assert first_ready["target_symbol"] == "WUFU"
+    assert first_ready["wufu_target_symbol"] == "WUFU"
+    assert first_ready["qixing_target_symbol"] == "QIX"
+    assert json.loads(first_ready["target_symbols_json"]) == ["WUFU", "QIX"]
+    assert json.loads(first_ready["target_weights_json"]) == {"WUFU": 0.5, "QIX": 0.5}
+
+
+def test_dual_slot_fusion_merges_duplicate_targets_into_one_full_weight():
+    dates = pd.date_range("2024-01-01", periods=35, freq="D")
+    prices = pd.concat(
+        [
+            _bars("BOTH", dates, [10.0 * (1.010**i) for i in range(35)], 1000.0),
+            _bars("DEF", dates, [10.0] * 35, 1000.0),
+        ],
+        ignore_index=True,
+    )
+    config = FusionEtfRotationConfig(
+        wufu=WufuEtfRotationConfig(
+            etf_pool=["BOTH"],
+            defensive_etf="DEF",
+            lookback_days=25,
+            max_score_threshold=20.0,
+            enable_volume_check=False,
+            enable_loss_filter=False,
+        ),
+        qixing=QixingEnhancementConfig(
+            enabled=True,
+            pool=["BOTH"],
+            independent_slot_enabled=True,
+            wufu_slot_weight=0.5,
+            qixing_slot_weight=0.5,
+        ),
+    )
+
+    targets = generate_fusion_etf_targets(prices, config=config)
+
+    first_ready = targets[targets["wufu_target_symbol"] == "BOTH"].iloc[0]
+    assert first_ready["wufu_target_symbol"] == "BOTH"
+    assert first_ready["qixing_target_symbol"] == "BOTH"
+    assert json.loads(first_ready["target_symbols_json"]) == ["BOTH"]
+    assert json.loads(first_ready["target_weights_json"]) == {"BOTH": 1.0}
+
+
+def test_joinquant_dual_slot_export_is_single_owner_clean():
+    export_path = Path("reports/jq_fusion_etf_rotation_v2_dual_slot.py")
+    assert export_path.exists()
+
+    content = export_path.read_text(encoding="utf-8")
+    forbidden_tokens = [
+        "portfolio_value_proportion",
+        "sub_account",
+        "stock_strategy",
+        "strategy_holdings",
+        "qixing_etf_sell_trade",
+        "qixing_etf_buy_trade",
+        "run_weekly(strategy_1",
+        "sell_qixing",
+        "buy_qixing",
+        "small-cap",
+        "small_cap",
+        "blue-chip",
+        "blue_chip",
+    ]
+    for token in forbidden_tokens:
+        assert token not in content
+    for token in [
+        "DUAL_SLOT_ENABLED",
+        "WUFU_SLOT_WEIGHT",
+        "QIXING_SLOT_WEIGHT",
+        "select_dual_slot_targets",
+        "g.target_weights",
+        "WUFU_QIXING_FUSION_V2_DUAL_SLOT",
+    ]:
+        assert token in content
+
+
 def _bars(symbol: str, dates: pd.DatetimeIndex, closes: list[float], volume: float) -> pd.DataFrame:
     return pd.DataFrame(
         {

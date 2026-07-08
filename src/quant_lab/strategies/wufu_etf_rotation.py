@@ -207,6 +207,9 @@ class QixingEnhancementConfig:
     enabled: bool = False
     pool: list[str] = field(default_factory=lambda: DEFAULT_QIXING_ETF_POOL.copy())
     preferred_pool_bonus: float = 0.0
+    independent_slot_enabled: bool = False
+    wufu_slot_weight: float = 0.5
+    qixing_slot_weight: float = 0.5
     short_lookback_days: int = 10
     short_momentum_min: float | None = None
     liquidity_lookback_days: int = 20
@@ -993,6 +996,16 @@ def generate_fusion_etf_targets(
             liquidity_lookback=liquidity_lookback,
         )
 
+    if config.qixing.independent_slot_enabled:
+        return _generate_dual_slot_fusion_targets(
+            prices=prices,
+            config=config,
+            weak_states=weak_states,
+            dynamic_snapshots=dynamic_snapshots,
+            liquidity_thresholds=liquidity_thresholds,
+            liquidity_lookback=liquidity_lookback,
+        )
+
     fused_wufu = replace(config.wufu, etf_pool=list(dict.fromkeys(config.wufu.etf_pool + config.qixing.pool)))
     return _generate_fusion_targets_with_bonus(
         prices,
@@ -1002,6 +1015,150 @@ def generate_fusion_etf_targets(
         liquidity_thresholds=liquidity_thresholds,
         liquidity_lookback=liquidity_lookback,
     )
+
+
+def _generate_dual_slot_fusion_targets(
+    prices: pd.DataFrame,
+    config: FusionEtfRotationConfig,
+    weak_states: pd.DataFrame | None,
+    dynamic_snapshots: pd.DataFrame | None,
+    liquidity_thresholds: pd.DataFrame | dict[pd.Timestamp | str, float] | float | None,
+    liquidity_lookback: int,
+) -> pd.DataFrame:
+    wufu_config = config.wufu
+    qixing_config = config.qixing
+    required = {"symbol", "trade_date", "close", "volume"}
+    missing = required.difference(prices.columns)
+    if missing:
+        raise ValueError(f"prices missing required columns: {sorted(missing)}")
+    if wufu_config.holdings_num != 1:
+        raise ValueError("dual-slot fusion local version supports holdings_num=1")
+    if qixing_config.wufu_slot_weight < 0 or qixing_config.qixing_slot_weight < 0:
+        raise ValueError("slot weights must be non-negative")
+    slot_weight_sum = qixing_config.wufu_slot_weight + qixing_config.qixing_slot_weight
+    if slot_weight_sum <= 0:
+        raise ValueError("at least one slot weight must be positive")
+
+    data = prices.copy()
+    data["trade_date"] = pd.to_datetime(data["trade_date"])
+    data = data.sort_values(["symbol", "trade_date"])
+    dynamic_by_date = _dynamic_pool_by_date(dynamic_snapshots)
+    dynamic_symbols = [symbol for symbols in dynamic_by_date.values() for symbol in symbols]
+    allowed = set(
+        wufu_config.etf_pool
+        + wufu_config.global_etf_pool
+        + wufu_config.dynamic_etf_pool
+        + dynamic_symbols
+        + qixing_config.pool
+    )
+    if wufu_config.defensive_etf:
+        allowed.add(wufu_config.defensive_etf)
+    data = data[data["symbol"].isin(allowed)]
+    if data.empty:
+        raise ValueError("no prices available for configured ETF pool")
+
+    weak_by_date = _weak_state_by_date(weak_states)
+    symbol_bars = _symbol_bar_cache(data)
+    threshold_by_date = _liquidity_threshold_by_date(liquidity_thresholds) if liquidity_thresholds is not None else None
+
+    rows: list[dict[str, object]] = []
+    trade_dates = sorted(data["trade_date"].drop_duplicates())
+    for trade_date in trade_dates:
+        is_weak = weak_by_date.get(trade_date, False)
+        daily_dynamic_pool = dynamic_by_date.get(trade_date, [])
+        wufu_pool = (
+            wufu_config.global_etf_pool
+            if is_weak
+            else list(dict.fromkeys(wufu_config.etf_pool + wufu_config.dynamic_etf_pool + daily_dynamic_pool))
+        )
+        qixing_pool = list(dict.fromkeys(qixing_config.pool))
+        if threshold_by_date is not None:
+            filtered_wufu_pool = _filter_pool_by_liquidity_for_date(
+                symbol_bars,
+                trade_date,
+                wufu_pool,
+                threshold_by_date,
+                liquidity_lookback,
+            )
+            if filtered_wufu_pool:
+                wufu_pool = filtered_wufu_pool
+            filtered_qixing_pool = _filter_pool_by_liquidity_for_date(
+                symbol_bars,
+                trade_date,
+                qixing_pool,
+                threshold_by_date,
+                liquidity_lookback,
+            )
+            if filtered_qixing_pool:
+                qixing_pool = filtered_qixing_pool
+
+        wufu_metrics = _rank_etfs_for_date_cached(symbol_bars, trade_date, wufu_config, etf_pool=wufu_pool, is_weak=is_weak)
+        qixing_metrics = _rank_etfs_for_date_cached(
+            symbol_bars,
+            trade_date,
+            replace(wufu_config, etf_pool=qixing_pool),
+            etf_pool=qixing_pool,
+            is_weak=False,
+        )
+        qixing_metrics = [_with_fusion_score(row, set(qixing_pool), qixing_config) for row in qixing_metrics]
+        qixing_metrics.sort(key=lambda row: float(row["fusion_score"]), reverse=True)
+        for index, row in enumerate(qixing_metrics, start=1):
+            row["rank"] = index
+
+        wufu_target = wufu_metrics[0] if wufu_metrics else None
+        qixing_target = qixing_metrics[0] if qixing_metrics else None
+        if wufu_target is None and wufu_config.defensive_etf in symbol_bars:
+            wufu_target = _defensive_target_cached(symbol_bars, trade_date, wufu_config.defensive_etf)
+        if qixing_target is None and wufu_target is not None:
+            qixing_target = wufu_target
+
+        target_weights = _combine_slot_weights(
+            [
+                (wufu_target, qixing_config.wufu_slot_weight),
+                (qixing_target, qixing_config.qixing_slot_weight),
+            ]
+        )
+        target_symbols = list(target_weights)
+        primary_target = wufu_target or qixing_target
+        rows.append(
+            {
+                "trade_date": trade_date,
+                "target_symbol": primary_target["symbol"] if primary_target else None,
+                "wufu_target_symbol": wufu_target["symbol"] if wufu_target else None,
+                "qixing_target_symbol": qixing_target["symbol"] if qixing_target else None,
+                "target_symbols_json": json.dumps(target_symbols, ensure_ascii=False),
+                "target_weights_json": json.dumps(target_weights, ensure_ascii=False, sort_keys=True),
+                "rank": primary_target["rank"] if primary_target else None,
+                "momentum_score": primary_target["momentum_score"] if primary_target else None,
+                "fusion_score": primary_target.get("fusion_score") if primary_target else None,
+                "qixing_bonus": primary_target.get("qixing_bonus") if primary_target else None,
+                "annualized_return": primary_target["annualized_return"] if primary_target else None,
+                "r_squared": primary_target["r_squared"] if primary_target else None,
+                "close": primary_target["close"] if primary_target else None,
+                "is_weak": is_weak,
+                "candidates_json": json.dumps(
+                    {
+                        "wufu": _serializable_candidates(wufu_metrics[:10]),
+                        "qixing": _serializable_fusion_candidates(qixing_metrics[:10]),
+                    },
+                    ensure_ascii=False,
+                ),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _combine_slot_weights(slots: list[tuple[dict[str, object] | None, float]]) -> dict[str, float]:
+    weights: dict[str, float] = {}
+    for target, weight in slots:
+        if target is None or weight <= 0:
+            continue
+        symbol = str(target["symbol"])
+        weights[symbol] = weights.get(symbol, 0.0) + float(weight)
+    total = sum(weights.values())
+    if total <= 0:
+        return {}
+    return {symbol: round(weight / total, 10) for symbol, weight in weights.items()}
 
 
 def _generate_fusion_targets_with_bonus(
