@@ -5,34 +5,95 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>五福 ETF 策略研究页</title>
   <style>
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; color: #1f2933; background: #f7f8fa; }
-    main { max-width: 980px; margin: 0 auto; padding: 42px 22px; }
-    h1 { font-size: 32px; margin: 0 0 12px; }
-    p { line-height: 1.75; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 24px; }
-    a.card { display: block; color: inherit; text-decoration: none; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 18px; }
-    a.card:hover { border-color: #2563eb; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); }
-    .tag { display: inline-block; font-size: 12px; color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 999px; }
-    h2 { font-size: 20px; margin: 10px 0 8px; }
-    .muted { color: #64748b; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      color: #182235;
+      background: #f6f8fb;
+      line-height: 1.7;
+    }
+    header {
+      background: #101f3d;
+      color: #fff;
+      padding: 42px 22px;
+    }
+    main, .inner {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 34px;
+      margin: 0 0 10px;
+      letter-spacing: 0;
+    }
+    p {
+      margin: 8px 0;
+    }
+    main {
+      padding: 28px 22px 44px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    a.card {
+      display: block;
+      min-height: 150px;
+      color: inherit;
+      text-decoration: none;
+      background: #fff;
+      border: 1px solid #dbe3ef;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    a.card:hover {
+      border-color: #2563eb;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .tag {
+      display: inline-block;
+      font-size: 12px;
+      color: #1d4ed8;
+      background: #eff6ff;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    h2 {
+      font-size: 20px;
+      margin: 12px 0 8px;
+    }
+    .muted {
+      color: #64748b;
+    }
   </style>
 </head>
 <body>
+<header>
+  <div class="inner">
+    <h1>五福 ETF 策略研究页</h1>
+    <p>当前固定版本：V12-D。核心方向是 ETF 强势轮动、弱市防守、日内趋势择时和分钟容量分批成交。</p>
+  </div>
+</header>
 <main>
-  <h1>五福 ETF 策略研究页</h1>
-  <p class="muted">当前固定版本：V9。此页面已按 GitHub Pages 静态站点结构整理，接入仓库并启用 Pages 后即可发布。</p>
   <div class="grid">
-    <a class="card" href="reports/ths_jq_fast_v9_acceptance_report.html">
-      <span class="tag">双平台验收</span>
-      <h2>V9 分钟级对比报告</h2>
-      <p>同花顺与聚宽分钟级日志精细对比，包含弱市、目标、评分、池子、订单和持仓同步情况。</p>
+    <a class="card" href="reports/wufu_v12d_fixed_strategy.html">
+      <span class="tag">固定版</span>
+      <h2>V12-D 策略整体介绍</h2>
+      <p>当前固定版的核心思想、策略结构、核心参数、双平台表现、关键数据和未来进化方向。</p>
+    </a>
+    <a class="card" href="reports/wufu_v12d_fixed_analysis.html">
+      <span class="tag">本地分析</span>
+      <h2>V12-D 双平台日志分析</h2>
+      <p>基于同花顺和聚宽回测日志生成的对照分析报告，包含同步质量、分批成交和止损表现。</p>
     </a>
     <a class="card" href="reports/wufu_strategy_fixed_v9_analysis.html">
-      <span class="tag">固定版说明</span>
-      <h2>V9 策略整体分析报告</h2>
-      <p>封装当前版本的数据、参数、策略逻辑、特点、风险限制和核心优化方向。</p>
+      <span class="tag">历史归档</span>
+      <h2>V9 策略整体分析</h2>
+      <p>早期固定版归档页面，用于回溯策略演进过程。</p>
     </a>
   </div>
+  <p class="muted">提示：GitHub Pages 发布后，固定版页面路径为 <code>/reports/wufu_v12d_fixed_strategy.html</code>。</p>
 </main>
 </body>
 </html>
