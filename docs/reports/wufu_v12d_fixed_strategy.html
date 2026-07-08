@@ -6,161 +6,212 @@
   <title>五福 ETF 轮动策略 V12-D 固定版</title>
   <style>
     :root {
-      --bg:#f7f8fb; --ink:#162033; --muted:#64748b; --line:#dbe3ee;
-      --blue:#2563eb; --green:#16a34a; --red:#dc2626; --card:#fff;
+      --bg:#f5f7fb; --ink:#132033; --muted:#66758a; --line:#dce5f2;
+      --navy:#101f3d; --blue:#2563eb; --cyan:#0891b2; --green:#16a34a; --amber:#d97706; --card:#fff;
     }
-    body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif; line-height:1.68; }
-    header { background:#0f1f3d; color:white; padding:44px 28px; }
-    .wrap { max-width:1180px; margin:0 auto; }
-    .badge { display:inline-block; padding:4px 10px; border:1px solid rgba(255,255,255,.35); border-radius:999px; color:#dbeafe; font-size:14px; }
-    h1 { margin:14px 0 10px; font-size:36px; letter-spacing:0; }
-    h2 { margin:0 0 14px; font-size:22px; }
-    h3 { margin:22px 0 8px; font-size:18px; }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;
+      line-height:1.7;
+    }
+    a { color:inherit; }
+    .wrap { max-width:1180px; margin:0 auto; padding:0 24px; }
+    .hero {
+      color:#fff;
+      background:
+        linear-gradient(135deg, rgba(16,31,61,.98), rgba(28,52,96,.95)),
+        linear-gradient(90deg, rgba(37,99,235,.28), transparent);
+      padding:22px 0 96px;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::before {
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px) 0 0/72px 100%,
+        linear-gradient(180deg, rgba(255,255,255,.06) 1px, transparent 1px) 0 0/100% 72px;
+      mask-image:linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+    }
+    nav, .hero-grid { position:relative; z-index:1; }
+    nav { display:flex; align-items:center; justify-content:space-between; padding:6px 0 44px; }
+    .back { text-decoration:none; color:#dbeafe; font-weight:700; }
+    .pill { display:inline-flex; border:1px solid rgba(255,255,255,.24); border-radius:999px; padding:4px 10px; color:#dbeafe; font-size:13px; }
+    .hero-grid { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr); gap:40px; align-items:center; }
+    h1 { margin:16px 0 12px; font-size:clamp(34px,5vw,58px); line-height:1.08; letter-spacing:0; }
+    .lead { max-width:720px; color:rgba(255,255,255,.78); font-size:18px; }
+    .hero-actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:26px; }
+    .btn { display:inline-flex; align-items:center; gap:8px; border-radius:8px; padding:11px 15px; text-decoration:none; font-weight:800; border:1px solid rgba(255,255,255,.24); }
+    .btn.primary { background:#fff; color:var(--navy); border-color:#fff; }
+    .panel {
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:8px;
+      padding:18px;
+      box-shadow:0 24px 80px rgba(0,0,0,.25);
+      backdrop-filter:blur(12px);
+    }
+    .flow-visual {
+      background:#071225;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:8px;
+      padding:18px;
+      min-height:320px;
+    }
+    .flow-row { display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:center; margin:12px 0; }
+    .node {
+      background:#0d1c35;
+      border:1px solid rgba(96,165,250,.35);
+      border-radius:8px;
+      padding:12px;
+    }
+    .node b { display:block; color:#fff; }
+    .node span { color:#9fb4d8; font-size:13px; }
+    .arrow { color:#60a5fa; animation:slide 1.8s ease-in-out infinite; }
+    .mini-chart {
+      margin-top:18px;
+      height:84px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.08) 1px, transparent 1px) 0 0/100% 28px;
+      position:relative;
+      overflow:hidden;
+    }
+    .mini-chart svg { position:absolute; inset:0; width:100%; height:100%; }
+    .mini-chart path { stroke-dasharray:600; stroke-dashoffset:600; animation:draw 4s ease forwards infinite; }
+    @keyframes draw { 0% { stroke-dashoffset:600 } 60%,100% { stroke-dashoffset:0 } }
+    @keyframes slide { 0%,100% { transform:translateX(-2px); opacity:.65 } 50% { transform:translateX(3px); opacity:1 } }
+    main { margin-top:-56px; position:relative; z-index:2; padding-bottom:60px; }
+    section, .metric, .card {
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:8px;
+      box-shadow:0 10px 24px rgba(15,23,42,.04);
+    }
+    section { padding:24px; margin-bottom:18px; }
+    h2 { margin:0 0 14px; font-size:24px; letter-spacing:0; }
+    h3 { margin:18px 0 8px; font-size:18px; }
     p { margin:8px 0; }
-    main { padding:28px; }
-    section { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:22px; margin:0 auto 18px; max-width:1180px; }
-    .grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
-    .metric { border:1px solid var(--line); border-radius:8px; padding:14px; background:#fbfdff; }
-    .metric b { display:block; font-size:24px; margin-top:4px; }
-    .metric span { color:var(--muted); font-size:13px; }
-    table { width:100%; border-collapse:collapse; margin-top:10px; }
-    th,td { border-bottom:1px solid var(--line); padding:9px 8px; text-align:left; vertical-align:top; }
-    th { color:#334155; background:#f8fafc; }
-    .ok { color:var(--green); font-weight:700; }
-    .warn { color:#b45309; font-weight:700; }
     .muted { color:var(--muted); }
-    code { background:#eef2ff; color:#3730a3; padding:2px 5px; border-radius:4px; }
-    ul { padding-left:20px; }
+    .metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:18px; }
+    .metric { padding:16px; }
+    .metric span { display:block; color:var(--muted); font-size:13px; }
+    .metric b { display:block; font-size:25px; margin-top:4px; }
     .two { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    @media (max-width:900px) { .grid,.two { grid-template-columns:1fr; } h1{font-size:28px} }
+    .cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+    .card { padding:16px; }
+    .card .num { font-size:24px; font-weight:850; color:var(--blue); }
+    table { width:100%; border-collapse:collapse; margin-top:10px; }
+    th,td { border-bottom:1px solid var(--line); padding:10px 8px; text-align:left; vertical-align:top; }
+    th { background:#f8fafc; color:#334155; }
+    .process { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+    .step { background:#f8fbff; border-left:3px solid var(--blue); border-radius:8px; padding:14px; }
+    .roadmap { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+    .road { padding:14px; border:1px solid var(--line); border-radius:8px; background:#fbfdff; }
+    @media (max-width:960px) { .hero-grid,.metrics,.two,.cards,.process,.roadmap { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
-<header>
+<header class="hero">
   <div class="wrap">
-    <span class="badge">固定版</span>
-    <h1>五福 ETF 轮动策略 V12-D 固定版</h1>
-    <p>一个以 ETF 强势轮动为核心、叠加弱市防守、日内趋势择时与容量分批成交的跨平台回测版本。本文只介绍当前固定版本，不做历史版本比较。</p>
+    <nav>
+      <a class="back" href="../index.html">← 研究首页</a>
+      <span class="pill">V12-D Fixed · 2020-2026 · Minute Backtest</span>
+    </nav>
+    <div class="hero-grid">
+      <div>
+        <span class="pill">ETF 强势轮动 / 弱市防守 / 日内择时 / 容量分批</span>
+        <h1>五福 ETF 轮动策略 V12-D 固定版</h1>
+        <p class="lead">当前固定版把“选最强 ETF”与“弱市切换防守池”结合起来，并通过分钟趋势确认和容量分批成交，把回测逻辑进一步贴近真实执行。</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="wufu_v12d_fixed_analysis.html">查看双平台分析</a>
+          <a class="btn" href="wufu_v12d_fixed_summary.json">查看汇总 JSON</a>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="flow-visual">
+          <div class="flow-row"><div class="node"><b>弱市状态</b><span>日历注入 + A300 旁路校验</span></div><div class="arrow">→</div><div class="node"><b>ETF 池切换</b><span>进攻池 / 全球防守池</span></div></div>
+          <div class="flow-row"><div class="node"><b>动量评分</b><span>25 日加权对数动量</span></div><div class="arrow">→</div><div class="node"><b>Top1 目标</b><span>年化收益 × R2</span></div></div>
+          <div class="flow-row"><div class="node"><b>日内确认</b><span>13:11 / 13:40 / 14:10 / 14:30</span></div><div class="arrow">→</div><div class="node"><b>分批执行</b><span>25% 分钟成交量容量</span></div></div>
+          <div class="mini-chart">
+            <svg viewBox="0 0 420 84" preserveAspectRatio="none">
+              <path d="M0 76 C42 72,65 72,98 68 S150 60,186 58 S245 48,284 38 S345 22,420 12" fill="none" stroke="#60a5fa" stroke-width="4"/>
+              <path d="M0 78 C90 77,180 77,260 75 S360 73,420 72" fill="none" stroke="#34d399" stroke-width="2" opacity=".8"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </header>
+
 <main>
-  <section>
-    <h2>核心结论</h2>
-    <div class="grid">
+  <div class="wrap">
+    <div class="metrics">
       <div class="metric"><span>同花顺策略收益</span><b>6240.14%</b></div>
       <div class="metric"><span>聚宽策略收益</span><b>8802.63%</b></div>
       <div class="metric"><span>弱市匹配率</span><b>100.00%</b></div>
       <div class="metric"><span>目标匹配率</span><b>98.48%</b></div>
     </div>
-    <p class="muted">回测区间：同花顺 2020-01-02 至 2026-07-06；聚宽 2020-01-02 至 2026-07-07。初始资金均为 1,000,000，分钟级回测。</p>
-  </section>
 
-  <section>
-    <h2>策略核心思想</h2>
-    <p>五福 ETF 轮动策略的核心是“在可交易 ETF 池里只持有当前最强的一只 ETF”。它通过短周期动量评分寻找强势品种，并用弱市状态机切换到海外、商品、货币等防守池，减少 A 股系统性下跌阶段的暴露。</p>
-    <p>V12-D 固定版进一步加入日内择时和容量控制：信号在 13:10 生成，买入不再无条件立刻执行，而是先观察日内趋势；若触发买入且订单超过分钟容量阈值，则拆成 5 分钟分批完成。</p>
-  </section>
-
-  <section>
-    <h2>核心策略</h2>
-    <div class="two">
-      <div>
-        <h3>1. ETF 评分与选择</h3>
-        <ul>
-          <li>使用 25 日价格序列计算加权对数动量。</li>
-          <li>评分为年化收益与拟合稳定度 R2 的组合。</li>
-          <li>正常市场要求 R2 过滤，弱市使用均线规则过滤。</li>
-          <li>最终 Top1 满仓轮动，目标持仓数为 1。</li>
-        </ul>
+    <section>
+      <h2>策略核心思想</h2>
+      <div class="two">
+        <p>五福 ETF 轮动策略的核心是：在可交易 ETF 池中寻找当前最强的一只标的，集中持有并持续轮动。策略不试图预测长期宏观方向，而是把资金交给短周期强势资产。</p>
+        <p>为了降低单纯追强的脆弱性，策略加入弱市状态机。当 A 股进入弱市，策略切换到全球、商品、货币等防守型 ETF 池；当市场恢复，再回到 A 股行业与宽基 ETF 的进攻池。</p>
       </div>
-      <div>
-        <h3>2. 弱市防守</h3>
-        <ul>
-          <li>弱市状态由聚宽弱市日历注入，同花顺用同一日历同步。</li>
-          <li>A300 指数组合作为旁路校验。</li>
-          <li>弱市时切换到全球/防守 ETF 池。</li>
-          <li>弱市匹配率本轮达到 100.00%。</li>
-        </ul>
+    </section>
+
+    <section>
+      <h2>策略执行流程</h2>
+      <div class="process">
+        <div class="step"><b>09:40 弱市判定</b><p class="muted">判断市场状态，决定使用进攻池还是防守池。</p></div>
+        <div class="step"><b>13:10 生成目标</b><p class="muted">计算 ETF 动量评分，选出 Top1 目标。</p></div>
+        <div class="step"><b>13:11-14:40 日内择时</b><p class="muted">通过分钟趋势确认买入，不满足则等待下一检查点。</p></div>
+        <div class="step"><b>容量分批成交</b><p class="muted">超过分钟成交量 25% 时拆成 5 分钟执行。</p></div>
       </div>
-      <div>
-        <h3>3. 日内择时</h3>
-        <ul>
-          <li>13:10 生成目标。</li>
-          <li>13:11 首次尝试趋势确认。</li>
-          <li>13:40、14:10、14:30 继续检查。</li>
-          <li>14:40 强制买入仍未成交的目标。</li>
-        </ul>
+    </section>
+
+    <section>
+      <h2>核心参数</h2>
+      <table>
+        <tr><th>参数</th><th>当前值</th><th>作用</th></tr>
+        <tr><td>初始资金</td><td>1,000,000</td><td>双平台统一回测资金</td></tr>
+        <tr><td>持仓数量</td><td>1</td><td>集中持有最强 ETF</td></tr>
+        <tr><td>评分窗口</td><td>25 日</td><td>短周期强弱判断</td></tr>
+        <tr><td>R2 阈值</td><td>0.4</td><td>过滤趋势不稳定标的</td></tr>
+        <tr><td>流动性阈值</td><td>近 3 日成交额 / 20000</td><td>剔除成交额不足 ETF</td></tr>
+        <tr><td>止损阈值</td><td>0.97</td><td>价格低于成本 3% 触发止损</td></tr>
+        <tr><td>止损窗口</td><td>13:01-14:56</td><td>下午分钟级风控</td></tr>
+        <tr><td>容量限制</td><td>当分钟成交量 25%</td><td>超过容量则分批执行</td></tr>
+        <tr><td>分批缓冲</td><td>0.98</td><td>降低贴边资金不足风险</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>双平台表现</h2>
+      <div class="cards">
+        <div class="card"><span class="muted">同花顺覆盖</span><div class="num">1575 天</div><p>2020-01-02 至 2026-07-06</p></div>
+        <div class="card"><span class="muted">聚宽覆盖</span><div class="num">1576 天</div><p>2020-01-02 至 2026-07-07</p></div>
+        <div class="card"><span class="muted">同花顺最大回撤</span><div class="num">18.98%</div><p>截图与日志口径一致</p></div>
+        <div class="card"><span class="muted">聚宽最大回撤</span><div class="num">19.88%</div><p>长周期高收益伴随中等回撤</p></div>
       </div>
-      <div>
-        <h3>4. 执行与容量</h3>
-        <ul>
-          <li>保留 0.2% 现金缓冲。</li>
-          <li>ETF 按 100 份向下取整。</li>
-          <li>先卖后买，失败订单只记录不追单。</li>
-          <li>订单超过当分钟 25% 成交量时，拆成 5 分钟执行。</li>
-        </ul>
+    </section>
+
+    <section>
+      <h2>未来进化方向</h2>
+      <div class="roadmap">
+        <div class="road"><b>分批动态化</b><p class="muted">按实时成交量和剩余目标自动调整切片。</p></div>
+        <div class="road"><b>止损差异审计</b><p class="muted">拆分价格源、成本、可卖数量和撮合原因。</p></div>
+        <div class="road"><b>分钟数据本地库</b><p class="muted">用复权分钟线复核平台结果。</p></div>
+        <div class="road"><b>参数网格</b><p class="muted">优化检测时间、强制买入时间和止损窗口。</p></div>
+        <div class="road"><b>容量评估</b><p class="muted">建立资金规模和冲击成本敏感性分析。</p></div>
       </div>
-    </div>
-  </section>
-
-  <section>
-    <h2>核心参数</h2>
-    <table>
-      <tr><th>参数</th><th>当前值</th><th>含义</th></tr>
-      <tr><td>初始资金</td><td>1,000,000</td><td>双平台统一初始资金</td></tr>
-      <tr><td>持仓数量</td><td>1</td><td>Top1 ETF 轮动</td></tr>
-      <tr><td>评分窗口</td><td>25 日</td><td>短周期动量强弱判断</td></tr>
-      <tr><td>R2 阈值</td><td>0.4</td><td>正常市场趋势稳定度过滤</td></tr>
-      <tr><td>均线窗口</td><td>10 日</td><td>弱市状态与弱市过滤参考</td></tr>
-      <tr><td>成交额阈值</td><td>全市场近 3 日成交额 / 20000</td><td>流动性过滤</td></tr>
-      <tr><td>止损阈值</td><td>0.97</td><td>价格低于成本 3% 触发止损</td></tr>
-      <tr><td>止损窗口</td><td>13:01-14:56</td><td>只在下午分钟级执行止损</td></tr>
-      <tr><td>佣金与滑点</td><td>佣金 0.01%，滑点 0.01%，最低佣金 5</td><td>ETF 交易成本假设</td></tr>
-      <tr><td>容量限制</td><td>分钟成交量 25%</td><td>超过容量则分 5 分钟买入</td></tr>
-      <tr><td>分批缓冲</td><td>0.98</td><td>每步目标留 2% 缓冲，降低贴边失败</td></tr>
-    </table>
-  </section>
-
-  <section>
-    <h2>双平台表现</h2>
-    <table>
-      <tr><th>指标</th><th>同花顺</th><th>聚宽</th></tr>
-      <tr><td>覆盖天数</td><td>1575</td><td>1576</td></tr>
-      <tr><td>期末资产</td><td>63,254,890.64</td><td>88,849,050.74</td></tr>
-      <tr><td>总收益</td><td>6240.14%</td><td>8802.63%</td></tr>
-      <tr><td>日志最大回撤</td><td>-18.98%</td><td>-19.88%</td></tr>
-      <tr><td>止损次数</td><td>84</td><td>65</td></tr>
-      <tr><td>分批完成次数</td><td>622</td><td>633</td></tr>
-      <tr><td>分批缺口 P95</td><td>33.27%</td><td>0.06%</td></tr>
-      <tr><td>分批缺口低于 2% 比例</td><td>90.51%</td><td>98.10%</td></tr>
-    </table>
-    <p class="muted">截图口径补充：聚宽页面显示策略收益 8784.91%、年化 103.76%、最大回撤 19.88%；同花顺页面显示策略收益 6225.49%、年化 93.15%、最大回撤 18.98%。日志口径和页面口径存在微小差异，本文以日志对账为主。</p>
-  </section>
-
-  <section>
-    <h2>同步质量</h2>
-    <table>
-      <tr><th>指标</th><th>结果</th></tr>
-      <tr><td>共同交易日</td><td>1575</td></tr>
-      <tr><td>弱市匹配率</td><td>100.00%</td></tr>
-      <tr><td>目标匹配率</td><td>98.48%</td></tr>
-      <tr><td>日终持仓标的匹配率</td><td>96.00%</td></tr>
-      <tr><td>共同周期止损差异</td><td>29.23%</td></tr>
-      <tr><td>分批完成事件匹配率</td><td>92.48%</td></tr>
-    </table>
-    <p>当前版本已解决同花顺日志截断问题，弱市状态完全一致，目标选择达到高匹配。剩余差异主要来自平台成交撮合、资金/取整边界、停牌与可成交量规则。</p>
-  </section>
-
-  <section>
-    <h2>未来进化方向</h2>
-    <ul>
-      <li>继续压缩等待买入日志，进一步降低平台日志上限风险。</li>
-      <li>把分批成交从固定 5 分钟升级为动态容量追踪，按剩余目标和实时成交量自动调整。</li>
-      <li>建立止损差异专项表，拆分价格源、成本价、可卖数量和撮合失败四类原因。</li>
-      <li>接入更稳定的 ETF 复权分钟线数据源，用本地分钟库复核平台结果。</li>
-      <li>在双平台同步稳定后，重新做日内择时参数网格，优化检测时间、强制买入时间和止损窗口。</li>
-    </ul>
-  </section>
+    </section>
+  </div>
 </main>
 </body>
 </html>

@@ -5,95 +5,298 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>五福 ETF 策略研究页</title>
   <style>
+    :root {
+      --bg: #f5f7fb;
+      --ink: #142033;
+      --muted: #66758a;
+      --line: #dce5f2;
+      --navy: #101f3d;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --amber: #d97706;
+      --card: #ffffff;
+    }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
+      background:
+        linear-gradient(180deg, rgba(16,31,61,.04), transparent 360px),
+        var(--bg);
+      color: var(--ink);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
-      color: #182235;
-      background: #f6f8fb;
       line-height: 1.7;
     }
+    a { color: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
     header {
-      background: #101f3d;
+      min-height: 520px;
       color: #fff;
-      padding: 42px 22px;
+      background:
+        linear-gradient(135deg, rgba(16,31,61,.98), rgba(24,47,91,.94)),
+        radial-gradient(circle at 75% 25%, rgba(37,99,235,.45), transparent 32%);
+      overflow: hidden;
+      position: relative;
     }
-    main, .inner {
-      max-width: 1040px;
-      margin: 0 auto;
+    header::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 150px;
+      background: linear-gradient(180deg, transparent, rgba(245,247,251,1));
+      pointer-events: none;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 0;
+      position: relative;
+      z-index: 2;
+    }
+    .brand { display: flex; gap: 12px; align-items: center; font-weight: 800; letter-spacing: .2px; }
+    .mark {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: grid; place-items: center;
+      background: rgba(255,255,255,.13);
+      border: 1px solid rgba(255,255,255,.22);
+    }
+    .mark svg { width: 24px; height: 24px; }
+    .nav-links { display: flex; gap: 18px; color: rgba(255,255,255,.76); font-size: 14px; }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 480px);
+      gap: 42px;
+      align-items: center;
+      padding: 52px 0 120px;
+      position: relative;
+      z-index: 1;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 10px;
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 999px;
+      color: #dbeafe;
+      font-size: 13px;
     }
     h1 {
-      font-size: 34px;
-      margin: 0 0 10px;
+      margin: 18px 0 14px;
+      max-width: 760px;
+      font-size: clamp(36px, 6vw, 64px);
+      line-height: 1.05;
       letter-spacing: 0;
     }
-    p {
-      margin: 8px 0;
-    }
-    main {
-      padding: 28px 22px 44px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-    }
-    a.card {
-      display: block;
-      min-height: 150px;
-      color: inherit;
-      text-decoration: none;
-      background: #fff;
-      border: 1px solid #dbe3ef;
+    .lead { max-width: 680px; color: rgba(255,255,255,.78); font-size: 18px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 16px;
       border-radius: 8px;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,.25);
+      color: #fff;
+      font-weight: 700;
+    }
+    .btn.primary { background: #fff; color: var(--navy); border-color: #fff; }
+    .visual {
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+      backdrop-filter: blur(12px);
+    }
+    .screen {
+      border-radius: 8px;
+      overflow: hidden;
+      background: #071225;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .tape {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 6px;
+      padding: 14px;
+      background: #0a1830;
+    }
+    .bar {
+      height: 54px;
+      border-radius: 4px 4px 0 0;
+      align-self: end;
+      background: linear-gradient(180deg, #60a5fa, #2563eb);
+      transform-origin: bottom;
+      animation: pulse 3.6s ease-in-out infinite;
+    }
+    .bar:nth-child(2n) { background: linear-gradient(180deg, #34d399, #16a34a); animation-delay: -.8s; }
+    .bar:nth-child(3n) { height: 82px; animation-delay: -1.4s; }
+    .bar:nth-child(4n) { height: 36px; animation-delay: -2.2s; }
+    .chart { padding: 20px 18px 14px; }
+    .curve {
+      height: 160px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px) 0 0/52px 100%,
+        linear-gradient(180deg, rgba(255,255,255,.08) 1px, transparent 1px) 0 0/100% 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .curve svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .curve path {
+      stroke-dasharray: 720;
+      stroke-dashoffset: 720;
+      animation: draw 4.4s ease forwards infinite;
+    }
+    @keyframes pulse { 0%,100% { transform: scaleY(.68); opacity:.7 } 50% { transform: scaleY(1); opacity:1 } }
+    @keyframes draw { 0% { stroke-dashoffset:720 } 55%,100% { stroke-dashoffset:0 } }
+    main { margin-top: -66px; position: relative; z-index: 2; padding-bottom: 56px; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .metric, .card, section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 10px 24px rgba(15,23,42,.04);
+    }
+    .metric { padding: 16px; }
+    .metric span { display:block; color: var(--muted); font-size: 13px; }
+    .metric b { display:block; margin-top: 4px; font-size: 24px; }
+    section { padding: 24px; margin-top: 18px; }
+    h2 { margin: 0 0 10px; font-size: 24px; letter-spacing: 0; }
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+    .card {
       padding: 20px;
+      text-decoration: none;
+      min-height: 190px;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
     }
-    a.card:hover {
-      border-color: #2563eb;
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-    }
+    .card:hover { transform: translateY(-4px); border-color: #93c5fd; box-shadow: 0 20px 42px rgba(37,99,235,.12); }
     .tag {
-      display: inline-block;
-      font-size: 12px;
-      color: #1d4ed8;
-      background: #eff6ff;
-      padding: 2px 8px;
+      display: inline-flex;
+      padding: 3px 9px;
       border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 700;
     }
-    h2 {
-      font-size: 20px;
-      margin: 12px 0 8px;
+    .card h3 { font-size: 20px; margin: 12px 0 8px; }
+    .card p, .muted { color: var(--muted); }
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 18px;
     }
-    .muted {
-      color: #64748b;
+    .step {
+      border-left: 3px solid var(--blue);
+      background: #f8fbff;
+      padding: 14px;
+      border-radius: 8px;
+    }
+    .step b { display:block; }
+    footer { padding: 28px 0 42px; color: var(--muted); text-align: center; }
+    @media (max-width: 920px) {
+      .hero, .metrics, .cards, .timeline { grid-template-columns: 1fr; }
+      .hero { padding-bottom: 100px; }
+      .nav-links { display: none; }
     }
   </style>
 </head>
 <body>
 <header>
-  <div class="inner">
-    <h1>五福 ETF 策略研究页</h1>
-    <p>当前固定版本：V12-D。核心方向是 ETF 强势轮动、弱市防守、日内趋势择时和分钟容量分批成交。</p>
+  <div class="wrap">
+    <nav>
+      <div class="brand">
+        <div class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 17V7M9 17V4M14 17v-7M19 17V6" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span>五福 ETF Research</span>
+      </div>
+      <div class="nav-links">
+        <a href="reports/wufu_v12d_fixed_strategy.html">固定版</a>
+        <a href="reports/wufu_v12d_fixed_analysis.html">分析报告</a>
+        <a href="reports/wufu_strategy_fixed_v9_analysis.html">历史归档</a>
+      </div>
+    </nav>
+    <div class="hero">
+      <div>
+        <span class="eyebrow">V12-D Fixed · ETF Rotation · Dual Platform</span>
+        <h1>五福 ETF 轮动策略研究页</h1>
+        <p class="lead">当前固定版以强势 ETF 轮动为主轴，叠加弱市防守、日内趋势择时和分钟容量分批成交，已经完成同花顺与聚宽双平台长周期验证。</p>
+        <div class="actions">
+          <a class="btn primary" href="reports/wufu_v12d_fixed_strategy.html">查看固定版介绍</a>
+          <a class="btn" href="reports/wufu_v12d_fixed_analysis.html">查看双平台分析</a>
+        </div>
+      </div>
+      <div class="visual" aria-label="策略收益视觉元素">
+        <div class="screen">
+          <div class="tape">
+            <i class="bar" style="height:46px"></i><i class="bar" style="height:72px"></i><i class="bar" style="height:58px"></i><i class="bar" style="height:94px"></i>
+            <i class="bar" style="height:52px"></i><i class="bar" style="height:104px"></i><i class="bar" style="height:68px"></i><i class="bar" style="height:116px"></i>
+            <i class="bar" style="height:78px"></i><i class="bar" style="height:132px"></i><i class="bar" style="height:92px"></i><i class="bar" style="height:142px"></i>
+          </div>
+          <div class="chart">
+            <div class="curve">
+              <svg viewBox="0 0 460 160" preserveAspectRatio="none">
+                <path d="M0 142 C45 138,70 136,100 128 S160 128,190 112 S245 98,278 86 S335 54,360 48 S410 34,460 18" fill="none" stroke="#60a5fa" stroke-width="4"/>
+                <path d="M0 145 C60 144,130 143,210 141 S350 137,460 135" fill="none" stroke="#34d399" stroke-width="2" opacity=".8"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 <main>
-  <div class="grid">
-    <a class="card" href="reports/wufu_v12d_fixed_strategy.html">
-      <span class="tag">固定版</span>
-      <h2>V12-D 策略整体介绍</h2>
-      <p>当前固定版的核心思想、策略结构、核心参数、双平台表现、关键数据和未来进化方向。</p>
-    </a>
-    <a class="card" href="reports/wufu_v12d_fixed_analysis.html">
-      <span class="tag">本地分析</span>
-      <h2>V12-D 双平台日志分析</h2>
-      <p>基于同花顺和聚宽回测日志生成的对照分析报告，包含同步质量、分批成交和止损表现。</p>
-    </a>
-    <a class="card" href="reports/wufu_strategy_fixed_v9_analysis.html">
-      <span class="tag">历史归档</span>
-      <h2>V9 策略整体分析</h2>
-      <p>早期固定版归档页面，用于回溯策略演进过程。</p>
-    </a>
+  <div class="wrap">
+    <div class="metrics">
+      <div class="metric"><span>同花顺策略收益</span><b>6240.14%</b></div>
+      <div class="metric"><span>聚宽策略收益</span><b>8802.63%</b></div>
+      <div class="metric"><span>弱市匹配率</span><b>100.00%</b></div>
+      <div class="metric"><span>目标匹配率</span><b>98.48%</b></div>
+    </div>
+    <section>
+      <h2>研究入口</h2>
+      <p class="muted">页面按“当前固定版优先、分析证据其次、历史归档保留”的顺序组织。</p>
+      <div class="cards">
+        <a class="card" href="reports/wufu_v12d_fixed_strategy.html">
+          <span class="tag">固定版</span>
+          <h3>V12-D 策略整体介绍</h3>
+          <p>策略核心思想、核心参数、双平台表现、核心数据和未来进化方向。</p>
+        </a>
+        <a class="card" href="reports/wufu_v12d_fixed_analysis.html">
+          <span class="tag">分析报告</span>
+          <h3>V12-D 双平台日志分析</h3>
+          <p>基于同花顺和聚宽日志的同步质量、分批成交、止损与收益表现分析。</p>
+        </a>
+        <a class="card" href="reports/wufu_strategy_fixed_v9_analysis.html">
+          <span class="tag">历史归档</span>
+          <h3>V9 策略整体分析</h3>
+          <p>早期固定版归档，用于追踪策略演进和跨平台同步过程。</p>
+        </a>
+      </div>
+    </section>
+    <section>
+      <h2>当前固定版流程</h2>
+      <div class="timeline">
+        <div class="step"><b>09:40 弱市判断</b><span class="muted">注入弱市日历，切换进攻或防守 ETF 池。</span></div>
+        <div class="step"><b>13:10 生成目标</b><span class="muted">按 25 日动量和 R2 稳定度选出 Top1。</span></div>
+        <div class="step"><b>13:11-14:40 择时</b><span class="muted">通过分钟趋势确认买入，必要时强制执行。</span></div>
+        <div class="step"><b>容量分批成交</b><span class="muted">超过分钟成交量 25% 时拆成 5 分钟完成。</span></div>
+      </div>
+    </section>
   </div>
-  <p class="muted">提示：GitHub Pages 发布后，固定版页面路径为 <code>/reports/wufu_v12d_fixed_strategy.html</code>。</p>
 </main>
+<footer>五福 ETF 轮动策略 V12-D · GitHub Pages</footer>
 </body>
 </html>
