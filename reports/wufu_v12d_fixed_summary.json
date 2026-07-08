@@ -1,0 +1,90 @@
+{
+  "ths": {
+    "platform": "ths",
+    "line_count": 7008,
+    "char_count": 1103448,
+    "warnings": 327,
+    "errors": 0,
+    "omitted": false,
+    "version_lines": [
+      "2020-01-02 00:00:00INFOWUFU_THS_FAST_V12D_COMPACT_CAPACITY init_cash=1000000 auto_weak=False fallback_external=True weak_calendar_version=joinquant_v4_ranges_20200102_20260706_v12b_compact_besttime external_source=joinquant_v4_log_ranges start=2020-01-02 end=2026-07-06 ranges=120 dynamic_pool=False full_market_threshold=False ultra_compact=True split_enabled=True split_minutes=5 participation=0.25 step_buffer=0.98",
+      "2020-01-02 00:00:00INFOWUFU_THS_FAST_V12D_COMPACT_CAPACITY diagnostics=24 execution_buffer=0.998 round_lot=100 score_detail_top_n=10 weak_min_valid=4 weak_indexes=000300.SH,399101.SZ,399006.SZ,000510.SH a300_probe_indexes=000300.SH,399101.SZ,399006.SZ,399300.SZ compact_logs=True"
+    ],
+    "daily_count": 1575,
+    "signals_count": 723,
+    "weak_count": 254,
+    "morning_count": 259,
+    "stop_count": 84,
+    "split_start_count": 622,
+    "split_done_count": 622,
+    "order_fail_count": 0,
+    "start_date": "2020-01-02",
+    "end_date": "2026-07-06",
+    "final_value": 63254890.64,
+    "total_return": 62.40141320796601,
+    "annualized_return_log": 0.9423873013364756,
+    "max_drawdown_log": -0.18980231590578533,
+    "target_changes": 718,
+    "weak_days": 766,
+    "avg_pool": 47.39111111111111,
+    "split_gap_avg": 0.03829565916398713,
+    "split_gap_p95": 0.33269499999999985,
+    "split_gap_max": 1.0,
+    "split_gap_lt_2pct_rate": 0.905144694533762,
+    "split_mode_counts": {
+      "trend": 515,
+      "force": 107
+    }
+  },
+  "jq": {
+    "platform": "jq",
+    "line_count": 6122,
+    "char_count": 1097796,
+    "warnings": 1,
+    "errors": 120,
+    "omitted": false,
+    "version_lines": [
+      "2020-01-01 00:00:00 - INFO  - WUFU_JQ_FIXED_POOL_V12D_COMPACT_CAPACITY expected_init_cash=1000000 schedule morning=09:40 signal=13:10 execute=13:11 trend=13:40,14:10,14:30 force_buy=14:40 reset=15:10 diagnostics=24 execution_buffer=0.998 round_lot=100 weak_calendar_version=joinquant_v4_ranges_20200102_20260706_v12b_compact_besttime ultra_compact=True split_enabled=True split_minutes=5 participation=0.25 step_buffer=0.98 weak_indexes=000300.XSHG,399101.XSHE,399006.XSHE,000510.XSHG"
+    ],
+    "daily_count": 1576,
+    "signals_count": 725,
+    "weak_count": 254,
+    "morning_count": 259,
+    "stop_count": 65,
+    "split_start_count": 633,
+    "split_done_count": 633,
+    "order_fail_count": 0,
+    "start_date": "2020-01-02",
+    "end_date": "2026-07-07",
+    "final_value": 88849050.74,
+    "total_return": 88.02628159060212,
+    "annualized_return_log": 1.0498637568872722,
+    "max_drawdown_log": -0.19878999830318778,
+    "target_changes": 717,
+    "weak_days": 767,
+    "avg_pool": 48.22208121827411,
+    "split_gap_avg": 0.007454502369668245,
+    "split_gap_p95": 0.0006399999999999977,
+    "split_gap_max": 1.0,
+    "split_gap_lt_2pct_rate": 0.981042654028436,
+    "split_mode_counts": {
+      "trend": 523,
+      "force": 110
+    }
+  },
+  "compare": {
+    "common_days": 1575,
+    "ths_only_days": 0,
+    "jq_only_days": 1,
+    "weak_match_rate": 1.0,
+    "target_match_rate": 0.9847619047619047,
+    "position_match_rate": 0.96,
+    "final_common_value_diff_pct": -0.29539053838869733,
+    "stop_ths_common": 84,
+    "stop_jq_common": 65,
+    "stop_common_diff_pct": 0.2923076923076923,
+    "split_done_match_rate": 0.9248466257668712,
+    "split_done_ths_only": 19,
+    "split_done_jq_only": 30
+  }
+}
