@@ -1,143 +1,143 @@
-# Fusion ETF Rotation Design
+# 五福 + 七星 ETF 轮动融合设计
 
-## Decision
+## 决策
 
-Build a single fused ETF rotation strategy with the latest JoinQuant Wufu script as the base:
+以最新的聚宽五福 ETF 脚本作为主基准，构建一个单一的融合 ETF 轮动策略：
 
-- Base script: `reports/jq_wufu_fixed_pool_v12c_ultra_split.py`
-- Local strategy layer: `src/quant_lab/strategies/wufu_etf_rotation.py`
-- Output JoinQuant script: `reports/jq_fusion_etf_rotation_v1.py`
+- 基准脚本：`reports/jq_wufu_fixed_pool_v12c_ultra_split.py`
+- 本地策略层：`src/quant_lab/strategies/wufu_etf_rotation.py`
+- 输出聚宽脚本：`reports/jq_fusion_etf_rotation_v1.py`
 
-The fused strategy keeps Wufu V12C as the primary engine. Qixing is not kept as an independent strategy. Its useful ideas are folded into Wufu as optional candidate-pool and scoring enhancements.
+融合策略保留五福 V12C 作为主引擎。七星不再作为独立策略存在，而是把有价值的部分融合进五福的候选池和评分增强逻辑中。
 
-## Goals
+## 目标
 
-- Remove unused small-cap, blue-chip, and multi-strategy account logic from the old three-in-one script.
-- Preserve Wufu V12C behavior as the baseline unless a Qixing enhancement is explicitly enabled.
-- Fuse Qixing and Wufu into one target-generation pipeline, one holding set, and one order path.
-- Avoid ownership conflicts by removing strategy IDs, virtual sub-accounts, and parallel schedulers.
-- Keep the local version testable and reusable by the quant research workbench.
-- Produce a clean JoinQuant script that can run as a standalone ETF strategy.
+- 删除旧三合一脚本中的小市值、白马股、多策略账户等无用逻辑。
+- 除非显式开启七星增强，否则保持五福 V12C 的基准行为。
+- 将七星和五福合并成一条目标生成链路、一个持仓集合、一条下单路径。
+- 删除策略 ID、虚拟子账户、并行调度器，避免归属冲突。
+- 本地版本保持可测试、可复用，适配量化研究工作台。
+- 输出一份可直接在聚宽运行的干净 ETF 策略脚本。
 
-## Non-Goals
+## 非目标
 
-- Do not preserve small-cap stock selection, white-horse stock selection, or the old ETF rebound strategy.
-- Do not implement live trading outside JoinQuant's normal order APIs.
-- Do not weaken the T-day signal and T+1 execution contract in local backtests.
-- Do not add Streamlit UI changes in this pass.
+- 不保留小市值选股、白马股选股、旧 ETF 反弹策略。
+- 不实现聚宽普通下单 API 之外的实盘交易功能。
+- 不削弱本地回测中的 T 日信号、T+1 执行约束。
+- 本轮不增加 Streamlit 界面改动。
 
-## Architecture
+## 架构
 
-### Local Strategy Module
+### 本地策略模块
 
-Extend the existing Wufu strategy module with a fusion configuration and target generator:
+在现有五福策略模块上增加融合配置和目标生成器：
 
 - `FusionEtfRotationConfig`
 - `QixingEnhancementConfig`
 - `generate_fusion_etf_targets()`
 
-The local fusion target generator will reuse the existing Wufu primitives where possible:
+本地融合目标生成器尽量复用已有五福组件：
 
-- Wufu fixed ETF pools.
-- Dynamic ETF pool snapshots.
-- JoinQuant-style liquidity thresholds.
-- Weak-state generation.
-- Wufu momentum scoring: weighted log-price regression annualized return multiplied by R-squared.
-- Defensive ETF fallback.
+- 五福固定 ETF 池。
+- 动态 ETF 池快照。
+- 聚宽风格流动性阈值。
+- 弱市状态生成。
+- 五福动量评分：加权对数价格回归年化收益乘以 R 平方。
+- 防御 ETF 兜底。
 
-Qixing enhancement inputs are folded into the same candidate records rather than producing a second target list.
+七星增强输入会被折入同一组候选记录，不再生成第二套目标列表。
 
-### JoinQuant Script
+### 聚宽脚本
 
-Create a new clean script derived from `jq_wufu_fixed_pool_v12c_ultra_split.py`.
+新增脚本从 `jq_wufu_fixed_pool_v12c_ultra_split.py` 派生。
 
-The script keeps Wufu V12C's core schedule:
+脚本保留五福 V12C 的核心调度：
 
-- Morning state and pool preparation around 09:40.
-- Signal calculation around 13:10.
-- Unified execution around 13:11.
-- Pending buy trend checks at 13:40, 14:10, and 14:30.
-- Force-buy fallback at the V12C configured force-buy time.
-- Capacity split processing on each bar when enabled.
-- Minute stop loss.
-- Daily reset.
+- 09:40 左右准备早盘状态和候选池。
+- 13:10 左右计算信号。
+- 13:11 左右统一执行。
+- 13:40、14:10、14:30 进行待买趋势检查。
+- 在 V12C 配置的强制买入时间执行兜底买入。
+- 启用容量拆单时，每根 bar 处理拆单。
+- 分钟级止损。
+- 每日重置。
 
-It removes:
+脚本删除：
 
-- Small-cap strategy code.
-- Blue-chip strategy code.
-- Qixing standalone scheduler.
-- Virtual sub-account logic.
-- `stock_strategy` ownership routing.
-- Repeated `make_record` / `print_summary` style registrations from the old combined script.
+- 小市值策略代码。
+- 白马股策略代码。
+- 七星独立调度器。
+- 虚拟子账户逻辑。
+- `stock_strategy` 持仓归属路由。
+- 旧合并脚本中重复的记录和汇总注册逻辑。
 
-## Fusion Logic
+## 融合逻辑
 
-The fused ETF universe is:
+融合 ETF 池由以下部分组成：
 
-1. Wufu V12C baseline fixed pool.
-2. Wufu dynamic pool when available.
-3. Qixing selected ETF pool, deduplicated into the same universe.
-4. Defensive ETF.
+1. 五福 V12C 基准固定池。
+2. 可用时加入五福动态池。
+3. 将七星 ETF 池去重后并入同一候选池。
+4. 防御 ETF。
 
-Weak-market handling remains Wufu-led. When Wufu V12C marks the market weak, the pool is narrowed using the Wufu weak-market logic first. Qixing symbols may only participate if they survive that same weak-market policy.
+弱市处理仍由五福主导。五福 V12C 判断市场弱时，先按照五福弱市逻辑缩小候选池；七星标的只有通过同一弱市约束后才可能参与排序。
 
-Each candidate has one unified score:
+每个候选只保留一个统一评分：
 
 ```text
 fusion_score = wufu_score + qixing_bonus - qixing_penalties
 ```
 
-Default behavior keeps `qixing_bonus = 0`, so the first implementation can prove baseline compatibility. Enhancements can then be enabled through config without changing the order path.
+默认 `qixing_bonus = 0`，这样第一版可以证明与五福基准兼容。后续可以通过配置逐步开启增强，不改变下单路径。
 
-Qixing-derived enhancements:
+七星增强项包括：
 
-- Preferred-pool bonus for symbols in the Qixing ETF pool.
-- Short-momentum confirmation.
-- Liquidity floor.
-- Volume spike veto.
-- Premium-rate veto where data is available.
-- Optional profit-protection style exit flag for current holdings.
+- 七星 ETF 池标的偏好加分。
+- 短周期动量确认。
+- 流动性底线。
+- 放量异常否决。
+- 在有数据时使用溢价率否决。
+- 可选的持仓利润保护退出标记。
 
-## Conflict Prevention
+## 冲突预防
 
-There is exactly one target list and one set of current holdings.
+系统只有一个目标列表、一个当前持仓集合。
 
-The implementation must not use:
+实现中不使用：
 
-- Strategy IDs.
-- Per-strategy virtual cash accounts.
-- Separate Qixing and Wufu order functions.
-- Separate sell/buy schedules for Qixing and Wufu.
-- Ownership maps such as `stock_strategy`.
+- 策略 ID。
+- 分策略虚拟现金账户。
+- 独立的七星和五福下单函数。
+- 独立的七星和五福卖出/买入调度。
+- `stock_strategy` 之类的归属映射。
 
-If an ETF appears in both Wufu and Qixing pools, it appears once in the fused pool with metadata showing both sources.
+如果某只 ETF 同时出现在五福和七星池中，它只会在融合池中出现一次，并通过元数据标记来源。
 
-## Parameters
+## 参数
 
-Keep Wufu V12C parameters that affect:
+保留五福 V12C 中影响以下行为的参数：
 
-- ETF pools.
-- Weak-state logic.
-- Momentum scoring.
-- Candidate filtering.
-- Signal timing.
-- Execution buffer.
-- Round-lot handling.
-- Capacity split.
-- Stop loss.
-- Defensive fallback.
+- ETF 池。
+- 弱市逻辑。
+- 动量评分。
+- 候选过滤。
+- 信号时间。
+- 执行缓冲。
+- 整手处理。
+- 容量拆单。
+- 止损。
+- 防御 ETF 兜底。
 
-Remove parameters that only serve:
+删除只服务于以下旧逻辑的参数：
 
-- Small-cap strategy.
-- Blue-chip strategy.
-- Old ETF rebound strategy.
-- Multi-strategy portfolio allocation.
-- Strategy ownership routing.
-- Duplicated summary schedules.
+- 小市值策略。
+- 白马股策略。
+- 旧 ETF 反弹策略。
+- 多策略组合资金分配。
+- 策略归属路由。
+- 重复汇总调度。
 
-Qixing parameters are reduced to an enhancement block:
+七星参数缩减为一个增强配置块：
 
 - `enabled`
 - `pool`
@@ -150,57 +150,57 @@ Qixing parameters are reduced to an enhancement block:
 - `volume_threshold`
 - `premium_threshold`
 
-## Data Flow
+## 数据流
 
-Local:
+本地版本：
 
-1. Load ETF prices and optional metadata from DuckDB.
-2. Generate weak states using Wufu-compatible logic or supplied states.
-3. Generate dynamic pool snapshots if metadata is available.
-4. Build the fused pool for each date.
-5. Score and filter candidates once.
-6. Emit one target row per trade date.
-7. Backtest uses T-day target and T+1 execution through existing backtest modules.
+1. 从 DuckDB 读取 ETF 价格和可选元数据。
+2. 使用五福兼容逻辑或外部输入生成弱市状态。
+3. 如果有元数据，生成动态池快照。
+4. 按日期构建融合 ETF 池。
+5. 对候选进行一次统一评分和过滤。
+6. 每个交易日输出一条目标记录。
+7. 回测沿用现有模块，以 T 日目标、T+1 执行。
 
-JoinQuant:
+聚宽版本：
 
-1. Morning routine prepares weak state and pool.
-2. Signal routine ranks fused candidates and writes one intended target.
-3. Execute routine sells non-target holdings and buys the target through the single order path.
-4. Capacity split and pending-buy checks operate on the same target.
-5. Stop-loss and reset routines update one strategy state.
+1. 早盘流程准备弱市状态和候选池。
+2. 信号流程对融合候选排序，写入一个目标。
+3. 执行流程卖出非目标持仓，并通过单一下单路径买入目标。
+4. 容量拆单和待买检查围绕同一个目标运行。
+5. 止损和重置流程只维护一个策略状态。
 
-## Testing
+## 测试
 
-Add tests before implementation for:
+新增测试覆盖：
 
-- Duplicate symbols from Wufu and Qixing appear once in the fused universe.
-- With Qixing disabled, fusion targets match Wufu baseline targets on a controlled dataset.
-- With Qixing bonus enabled, a Qixing symbol can outrank an otherwise close Wufu candidate.
-- Weak-market mode applies Wufu weak-pool constraints before Qixing enhancement.
-- No candidate falls back to the defensive ETF.
-- The exported JoinQuant script does not contain small-cap, blue-chip, virtual sub-account, `portfolio_value_proportion`, or `stock_strategy` logic.
+- 五福和七星重复标的在融合池中只出现一次。
+- 关闭七星增强时，融合目标与五福基准目标一致。
+- 开启七星加分时，七星候选可以超过分数接近的五福候选。
+- 弱市模式先应用五福弱市池约束，再进行七星增强。
+- 无候选通过时回落到防御 ETF。
+- 输出的聚宽脚本不包含小市值、白马、虚拟子账户、`portfolio_value_proportion`、`stock_strategy` 等冲突逻辑。
 
-## Verification
+## 验证
 
-Run focused tests:
+聚焦测试：
 
 ```powershell
 python -m pytest tests/test_wufu_etf_rotation.py tests/test_fusion_etf_rotation.py -q
 ```
 
-Run full tests if focused tests pass:
+全量测试：
 
 ```powershell
 python -m pytest -q
 ```
 
-Static-check the generated JoinQuant script:
+聚宽脚本静态检查：
 
 ```powershell
 python -m py_compile reports/jq_fusion_etf_rotation_v1.py
 ```
 
-## Open Risk
+## 主要风险
 
-The latest Wufu V12C script is a standalone JoinQuant script while the local workbench has a cleaner reusable module. The implementation should avoid copying the whole script into the strategy module. Instead, local code should express the shared decision logic and the exported JoinQuant script should remain the platform adapter.
+最新五福 V12C 是一份独立的聚宽脚本，而本地工作台需要更干净、可复用的模块。实现时应避免把整份聚宽脚本直接复制进策略模块。本地代码表达共享决策逻辑，聚宽脚本只作为平台适配层。
