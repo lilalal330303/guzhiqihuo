@@ -3,20 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>五福 ETF V12-D 双平台分析</title>
+  <title>五福 ETF V12-D 双平台年度分析</title>
   <style>
     :root {
       --bg:#f5f7fb; --ink:#132033; --muted:#66758a; --line:#dce5f2;
-      --navy:#101f3d; --blue:#2563eb; --green:#16a34a; --amber:#d97706; --red:#dc2626; --card:#fff;
+      --navy:#101f3d; --blue:#2563eb; --green:#16a34a; --amber:#d97706;
+      --red:#dc2626; --card:#fff; --soft:#f8fbff;
     }
     * { box-sizing:border-box; }
-    body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif; line-height:1.7; }
+    body {
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;
+      line-height:1.7;
+    }
     a { color:inherit; }
     .wrap { max-width:1180px; margin:0 auto; padding:0 24px; }
     header {
       color:#fff;
-      background:linear-gradient(135deg,#101f3d,#1c345f);
-      padding:24px 0 94px;
+      background:
+        radial-gradient(circle at 78% 22%, rgba(96,165,250,.34), transparent 28%),
+        linear-gradient(135deg,#101f3d,#1c345f);
+      padding:24px 0 96px;
       position:relative;
       overflow:hidden;
     }
@@ -27,77 +36,109 @@
       background:
         linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px) 0 0/76px 100%,
         linear-gradient(180deg, rgba(255,255,255,.06) 1px, transparent 1px) 0 0/100% 76px;
-      opacity:.8;
+      opacity:.72;
     }
     nav, .hero { position:relative; z-index:1; }
-    nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:44px; }
+    nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:46px; }
     .back { text-decoration:none; color:#dbeafe; font-weight:800; }
-    .pill { display:inline-flex; border:1px solid rgba(255,255,255,.24); border-radius:999px; padding:4px 10px; color:#dbeafe; font-size:13px; }
-    .hero { display:grid; grid-template-columns:1fr minmax(340px,460px); gap:36px; align-items:center; }
+    .pill {
+      display:inline-flex;
+      border:1px solid rgba(255,255,255,.24);
+      border-radius:999px;
+      padding:4px 10px;
+      color:#dbeafe;
+      font-size:13px;
+    }
+    .hero {
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(340px,440px);
+      gap:36px;
+      align-items:center;
+    }
     h1 { margin:16px 0 12px; font-size:clamp(34px,5vw,56px); line-height:1.08; letter-spacing:0; }
+    h2 { margin:0 0 14px; font-size:24px; }
+    h3 { margin:18px 0 8px; font-size:18px; }
+    p { margin:8px 0; }
     .lead { color:rgba(255,255,255,.78); max-width:720px; font-size:18px; }
-    .diagnostic {
-      background:rgba(255,255,255,.08);
+    .hero-panel {
       border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.08);
       border-radius:8px;
       padding:18px;
       box-shadow:0 24px 80px rgba(0,0,0,.24);
+      backdrop-filter:blur(12px);
     }
-    .matrix {
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:8px;
-      padding:12px;
-      background:#071225;
+    .hero-chart {
+      min-height:260px;
       border-radius:8px;
+      padding:18px;
+      background:#071225;
       border:1px solid rgba(255,255,255,.12);
     }
-    .cell {
-      height:58px;
-      border-radius:6px;
-      background:#0d1c35;
-      border:1px solid rgba(96,165,250,.22);
-      display:grid;
-      place-items:center;
-      color:#dbeafe;
-      font-weight:800;
-      animation:glow 3.2s ease-in-out infinite;
+    .hero-bars { display:flex; align-items:end; gap:8px; height:170px; }
+    .hero-bars i {
+      flex:1;
+      min-width:14px;
+      border-radius:5px 5px 0 0;
+      background:linear-gradient(180deg,#60a5fa,#2563eb);
+      transform-origin:bottom;
+      animation:lift 3.2s ease-in-out infinite;
     }
-    .cell.good { color:#bbf7d0; border-color:rgba(52,211,153,.35); }
-    .cell.warn { color:#fde68a; border-color:rgba(251,191,36,.35); animation-delay:-1.2s; }
-    @keyframes glow { 0%,100% { opacity:.72 } 50% { opacity:1; box-shadow:0 0 22px rgba(96,165,250,.18) } }
+    .hero-bars i:nth-child(even) { background:linear-gradient(180deg,#34d399,#16a34a); animation-delay:-.8s; }
+    .hero-bars i:nth-child(3n) { animation-delay:-1.5s; }
+    @keyframes lift { 0%,100% { transform:scaleY(.86); opacity:.78 } 50% { transform:scaleY(1); opacity:1 } }
     main { margin-top:-56px; position:relative; z-index:2; padding-bottom:60px; }
-    section, .metric, .card {
+    section, .metric, .panel {
       background:var(--card);
       border:1px solid var(--line);
       border-radius:8px;
       box-shadow:0 10px 24px rgba(15,23,42,.04);
     }
     section { padding:24px; margin-bottom:18px; }
-    h2 { margin:0 0 14px; font-size:24px; }
-    h3 { margin:18px 0 8px; font-size:18px; }
-    p { margin:8px 0; }
-    .muted { color:var(--muted); }
     .metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:18px; }
     .metric { padding:16px; }
     .metric span { display:block; color:var(--muted); font-size:13px; }
     .metric b { display:block; font-size:25px; margin-top:4px; }
-    .metric.good b { color:var(--green); }
-    .metric.warn b { color:var(--amber); }
-    table { width:100%; border-collapse:collapse; margin-top:10px; }
-    th,td { border-bottom:1px solid var(--line); padding:10px 8px; text-align:left; vertical-align:top; }
-    th { background:#f8fafc; color:#334155; }
+    .muted { color:var(--muted); }
+    .tabs { display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 18px; }
+    .tab {
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--ink);
+      border-radius:8px;
+      padding:10px 14px;
+      font:inherit;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .tab.active { background:var(--navy); color:#fff; border-color:var(--navy); }
+    .platform-grid { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr); gap:18px; }
+    .panel { padding:18px; box-shadow:none; }
+    .chart-title { display:flex; justify-content:space-between; gap:12px; align-items:baseline; margin-bottom:12px; }
+    .barrow { display:grid; grid-template-columns:54px minmax(0,1fr) 82px; gap:10px; align-items:center; margin:10px 0; }
+    .track { height:14px; border-radius:999px; background:#e8eef8; overflow:hidden; }
+    .fill {
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg,#60a5fa,#2563eb);
+      width:0;
+      animation:grow .9s ease-out forwards;
+    }
+    .fill.green { background:linear-gradient(90deg,#34d399,#16a34a); }
+    .fill.red { background:linear-gradient(90deg,#fca5a5,#dc2626); }
+    @keyframes grow { from { width:0 } }
+    table { width:100%; border-collapse:collapse; margin-top:8px; }
+    th,td { border-bottom:1px solid var(--line); padding:10px 8px; text-align:left; white-space:nowrap; }
+    th { background:#f8fafc; color:#334155; font-size:13px; }
+    td.strong { font-weight:850; color:var(--blue); }
+    td.drawdown { color:var(--red); font-weight:800; }
+    .note { background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:14px; color:#7c2d12; }
     .two { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    .card { padding:18px; }
-    .bars { display:grid; gap:10px; margin-top:14px; }
-    .barrow { display:grid; grid-template-columns:120px 1fr 76px; gap:10px; align-items:center; }
-    .track { height:12px; background:#e8eef7; border-radius:999px; overflow:hidden; }
-    .fill { height:100%; border-radius:999px; background:linear-gradient(90deg,#60a5fa,#2563eb); animation:grow 1.2s ease-out both; }
-    .fill.green { background:linear-gradient(90deg,#86efac,#16a34a); }
-    .fill.amber { background:linear-gradient(90deg,#fde68a,#d97706); }
-    @keyframes grow { from { transform:scaleX(.08); transform-origin:left } to { transform:scaleX(1); transform-origin:left } }
-    .notes { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-    @media (max-width:960px) { .hero,.metrics,.two,.notes { grid-template-columns:1fr; } .barrow { grid-template-columns:1fr; } }
+    @media (max-width:960px) {
+      .hero, .metrics, .platform-grid, .two { grid-template-columns:1fr; }
+      .barrow { grid-template-columns:48px minmax(0,1fr) 76px; }
+      table { display:block; overflow-x:auto; }
+    }
   </style>
 </head>
 <body>
@@ -105,25 +146,21 @@
   <div class="wrap">
     <nav>
       <a class="back" href="../index.html">← 研究首页</a>
-      <span class="pill">V12-D Analysis · 同花顺 / 聚宽</span>
+      <span class="pill">V12-D Fixed · 双平台年度表现</span>
     </nav>
     <div class="hero">
       <div>
-        <span class="pill">双平台日志验收报告</span>
-        <h1>V12-D 固定版双平台分析</h1>
-        <p class="lead">本页基于同花顺 `outlog.txt` 与聚宽 `log (5).zip` 的策略日志生成，重点展示覆盖完整性、同步质量、收益表现、分批成交与剩余风险。</p>
+        <span class="pill">同花顺 / 聚宽 · 2020-2026 · 分钟级回测</span>
+        <h1>五福 ETF V12-D 双平台年度分析</h1>
+        <p class="lead">本页聚焦每个平台自身的年度表现：年度收益、区间年化、年内最大回撤、年末资产和年度轮动频率，突出策略在同花顺与聚宽上的独立表现。</p>
       </div>
-      <div class="diagnostic">
-        <div class="matrix">
-          <div class="cell good">弱市 100%</div>
-          <div class="cell good">目标 98.48%</div>
-          <div class="cell good">覆盖完整</div>
-          <div class="cell">同花顺 1575</div>
-          <div class="cell">聚宽 1576</div>
-          <div class="cell warn">止损待细化</div>
-          <div class="cell good">无日志省略</div>
-          <div class="cell">分批 92.48%</div>
-          <div class="cell warn">容量差异</div>
+      <div class="hero-panel">
+        <div class="hero-chart" aria-label="年度收益动效图">
+          <div class="hero-bars">
+            <i style="height:56px"></i><i style="height:68px"></i><i style="height:72px"></i>
+            <i style="height:86px"></i><i style="height:138px"></i><i style="height:158px"></i><i style="height:120px"></i>
+          </div>
+          <p class="muted" style="color:#9fb4d8">2020-2026 年度收益呈现后段加速，但 2025-2026 也贡献了主要回撤压力。</p>
         </div>
       </div>
     </div>
@@ -133,75 +170,168 @@
 <main>
   <div class="wrap">
     <div class="metrics">
-      <div class="metric good"><span>弱市匹配率</span><b>100.00%</b></div>
-      <div class="metric good"><span>目标匹配率</span><b>98.48%</b></div>
-      <div class="metric"><span>持仓标的匹配率</span><b>96.00%</b></div>
-      <div class="metric warn"><span>共同周期止损差异</span><b>29.23%</b></div>
+      <div class="metric"><span>同花顺期末资产</span><b>6325.49 万</b></div>
+      <div class="metric"><span>同花顺区间年化</span><b>94.24%</b></div>
+      <div class="metric"><span>聚宽期末资产</span><b>8884.91 万</b></div>
+      <div class="metric"><span>聚宽区间年化</span><b>104.99%</b></div>
     </div>
 
     <section>
-      <h2>结论摘要</h2>
-      <div class="two">
-        <div class="card">
-          <h3>达成项</h3>
-          <p>同花顺日志完整跑到 2026-07-06，聚宽跑到 2026-07-07，V12-D 不再触发同花顺日志省略。弱市匹配率达到 100%，目标匹配率达到 98.48%，可作为当前固定版发布。</p>
+      <h2>平台年度表现看板</h2>
+      <p class="muted">点击平台按钮切换图表和年度表。2026 年为截至日志末日的年内数据，同花顺截至 2026-07-06，聚宽截至 2026-07-07。</p>
+      <div class="tabs">
+        <button class="tab active" type="button" data-platform="ths">同花顺</button>
+        <button class="tab" type="button" data-platform="jq">聚宽</button>
+      </div>
+      <div class="platform-grid">
+        <div class="panel">
+          <div class="chart-title">
+            <h3 id="platform-title">同花顺年度收益与回撤</h3>
+            <span class="muted" id="platform-range">2020-01-02 至 2026-07-06</span>
+          </div>
+          <div id="return-bars"></div>
+          <h3>年内最大回撤</h3>
+          <div id="drawdown-bars"></div>
         </div>
-        <div class="card">
-          <h3>保留问题</h3>
-          <p>同花顺和聚宽收益仍有差距，主要来自平台成交规则、容量撮合、资金取整边界、停牌与可成交量规则。止损差异和少数分批缺口仍是下一轮重点。</p>
+        <div class="panel">
+          <h3>平台核心摘要</h3>
+          <table>
+            <tbody id="summary-table"></tbody>
+          </table>
+          <div class="note" style="margin-top:14px">区间年化使用日资产曲线按 252 个交易日折算；年度年化同样按当年实际交易日数折算，因此 2026 的年化是截断样本口径。</div>
         </div>
       </div>
     </section>
 
     <section>
-      <h2>双平台核心数据</h2>
-      <table>
-        <tr><th>指标</th><th>同花顺</th><th>聚宽</th></tr>
-        <tr><td>覆盖天数</td><td>1575</td><td>1576</td></tr>
-        <tr><td>期末资产</td><td>63,254,890.64</td><td>88,849,050.74</td></tr>
-        <tr><td>策略收益</td><td>6240.14%</td><td>8802.63%</td></tr>
-        <tr><td>最大回撤</td><td>-18.98%</td><td>-19.88%</td></tr>
-        <tr><td>止损次数</td><td>84</td><td>65</td></tr>
-        <tr><td>分批完成次数</td><td>622</td><td>633</td></tr>
-        <tr><td>分批缺口 P95</td><td>33.27%</td><td>0.06%</td></tr>
-        <tr><td>分批缺口低于 2% 比例</td><td>90.51%</td><td>98.10%</td></tr>
-      </table>
+      <h2>逐年核心数据表</h2>
+      <div id="yearly-table"></div>
     </section>
 
     <section>
-      <h2>同步质量仪表</h2>
-      <div class="bars">
-        <div class="barrow"><b>弱市</b><div class="track"><div class="fill green" style="width:100%"></div></div><span>100.00%</span></div>
-        <div class="barrow"><b>目标</b><div class="track"><div class="fill green" style="width:98.48%"></div></div><span>98.48%</span></div>
-        <div class="barrow"><b>持仓</b><div class="track"><div class="fill" style="width:96%"></div></div><span>96.00%</span></div>
-        <div class="barrow"><b>分批事件</b><div class="track"><div class="fill" style="width:92.48%"></div></div><span>92.48%</span></div>
-        <div class="barrow"><b>止损一致</b><div class="track"><div class="fill amber" style="width:70.77%"></div></div><span>70.77%</span></div>
-      </div>
-    </section>
-
-    <section>
-      <h2>分批成交诊断</h2>
+      <h2>平台表现解读</h2>
       <div class="two">
         <div>
-          <h3>积极信号</h3>
-          <p>V12-D 使用 `WUFU_SPLIT_START` 与 `WUFU_SPLIT_DONE` 代替逐分钟日志，显著降低日志量，并保留了最终执行缺口 `gap_pct`。</p>
+          <h3>同花顺</h3>
+          <p>同花顺年度收益从 2020-2023 的 34%-58% 区间，提升到 2024 的 153.82% 和 2025 的 181.37%。最大回撤集中在 2025 年，年内最大回撤为 -18.98%。</p>
         </div>
         <div>
-          <h3>待优化信号</h3>
-          <p>同花顺分批缺口 P95 为 33.27%，说明少量日期存在明显成交不足或平台容量限制。后续应把固定 5 分钟分批升级为动态容量追踪。</p>
+          <h3>聚宽</h3>
+          <p>聚宽年度收益整体高于同花顺，2024 年和 2025 年分别达到 180.51% 与 193.04%。2026 截至 7 月初收益为 64.18%，同时年内最大回撤达到 -19.88%。</p>
         </div>
-      </div>
-    </section>
-
-    <section>
-      <h2>未来验证路径</h2>
-      <div class="notes">
-        <div class="card"><b>止损差异专项表</b><p class="muted">输出价格、成本、可卖数量、成交状态，逐日定位差异。</p></div>
-        <div class="card"><b>动态分批引擎</b><p class="muted">按每分钟剩余容量动态切片，直到目标缺口低于阈值。</p></div>
-        <div class="card"><b>本地分钟线复核</b><p class="muted">用复权 ETF 分钟库验证日内择时和容量假设。</p></div>
       </div>
     </section>
   </div>
 </main>
+
+<script>
+const DATA = {
+  ths: {
+    name: "同花顺",
+    range: "2020-01-02 至 2026-07-06",
+    summary: {
+      "期末资产": "6325.49 万",
+      "总收益": "6240.14%",
+      "区间年化": "94.24%",
+      "最大回撤": "-18.98%",
+      "交易日": "1575",
+      "目标切换": "718 次"
+    },
+    yearly: [
+      {year:2020, days:243, ret:54.72, ann:57.24, dd:-17.08, end:"154.36 万", weak:90, target:112, position:112},
+      {year:2021, days:243, ret:34.47, ann:35.95, dd:-15.36, end:"219.10 万", weak:108, target:110, position:108},
+      {year:2022, days:242, ret:40.46, ann:42.44, dd:-14.01, end:"312.09 万", weak:149, target:101, position:96},
+      {year:2023, days:242, ret:58.49, ann:61.54, dd:-14.71, end:"495.86 万", weak:145, target:82, position:82},
+      {year:2024, days:242, ret:153.82, ann:163.78, dd:-10.54, end:"1254.19 万", weak:142, target:105, position:104},
+      {year:2025, days:243, ret:181.37, ann:192.36, dd:-18.98, end:"3458.38 万", weak:83, target:136, position:133},
+      {year:2026, days:120, ret:80.06, ann:243.86, dd:-17.54, end:"6325.49 万", weak:49, target:74, position:73}
+    ]
+  },
+  jq: {
+    name: "聚宽",
+    range: "2020-01-02 至 2026-07-07",
+    summary: {
+      "期末资产": "8884.91 万",
+      "总收益": "8802.63%",
+      "区间年化": "104.99%",
+      "最大回撤": "-19.88%",
+      "交易日": "1576",
+      "目标切换": "717 次"
+    },
+    yearly: [
+      {year:2020, days:243, ret:67.98, ann:71.24, dd:-16.99, end:"167.65 万", weak:90, target:111, position:112},
+      {year:2021, days:243, ret:37.28, ann:38.90, dd:-15.93, end:"243.32 万", weak:108, target:110, position:112},
+      {year:2022, days:242, ret:57.44, ann:60.42, dd:-12.56, end:"388.07 万", weak:149, target:100, position:100},
+      {year:2023, days:242, ret:70.66, ann:74.47, dd:-16.90, end:"663.93 万", weak:145, target:82, position:78},
+      {year:2024, days:242, ret:180.51, ann:192.73, dd:-10.75, end:"1855.90 万", weak:142, target:105, position:105},
+      {year:2025, days:243, ret:193.04, ann:204.95, dd:-18.99, end:"5329.58 万", weak:83, target:137, position:134},
+      {year:2026, days:121, ret:64.18, ann:180.84, dd:-19.88, end:"8884.91 万", weak:50, target:74, position:73}
+    ]
+  }
+};
+
+function pct(n) {
+  return `${n.toFixed(2)}%`;
+}
+
+function render(platform) {
+  const cfg = DATA[platform];
+  document.querySelectorAll(".tab").forEach(btn => btn.classList.toggle("active", btn.dataset.platform === platform));
+  document.getElementById("platform-title").textContent = `${cfg.name}年度收益与回撤`;
+  document.getElementById("platform-range").textContent = cfg.range;
+
+  const maxRet = Math.max(...cfg.yearly.map(row => row.ret));
+  document.getElementById("return-bars").innerHTML = cfg.yearly.map(row => `
+    <div class="barrow">
+      <b>${row.year}</b>
+      <div class="track"><div class="fill green" style="width:${Math.max(5, row.ret / maxRet * 100).toFixed(1)}%"></div></div>
+      <span>${pct(row.ret)}</span>
+    </div>
+  `).join("");
+
+  const maxDd = Math.max(...cfg.yearly.map(row => Math.abs(row.dd)));
+  document.getElementById("drawdown-bars").innerHTML = cfg.yearly.map(row => `
+    <div class="barrow">
+      <b>${row.year}</b>
+      <div class="track"><div class="fill red" style="width:${Math.max(5, Math.abs(row.dd) / maxDd * 100).toFixed(1)}%"></div></div>
+      <span>${pct(row.dd)}</span>
+    </div>
+  `).join("");
+
+  document.getElementById("summary-table").innerHTML = Object.entries(cfg.summary).map(([key, value]) => `
+    <tr><th>${key}</th><td class="${key.includes("回撤") ? "drawdown" : "strong"}">${value}</td></tr>
+  `).join("");
+
+  document.getElementById("yearly-table").innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>平台</th><th>年份</th><th>交易日</th><th>年度收益</th><th>区间年化</th><th>年内最大回撤</th>
+          <th>年末资产</th><th>弱市日</th><th>目标切换</th><th>持仓切换</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${cfg.yearly.map(row => `
+          <tr>
+            <td>${cfg.name}</td>
+            <td>${row.year}</td>
+            <td>${row.days}</td>
+            <td class="strong">${pct(row.ret)}</td>
+            <td class="strong">${pct(row.ann)}</td>
+            <td class="drawdown">${pct(row.dd)}</td>
+            <td>${row.end}</td>
+            <td>${row.weak}</td>
+            <td>${row.target}</td>
+            <td>${row.position}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => render(btn.dataset.platform)));
+render("ths");
+</script>
 </body>
 </html>
