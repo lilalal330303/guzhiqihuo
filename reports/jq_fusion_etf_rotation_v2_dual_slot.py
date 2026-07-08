@@ -783,10 +783,15 @@ def combine_slot_weights(slots):
         if not code or weight <= 0:
             continue
         weights[code] = weights.get(code, 0.0) + float(weight)
-    total = sum(weights.values())
+    total = 0.0
+    for weight in weights.values():
+        total += float(weight)
     if total <= 0:
         return {}
-    return {code: weight / total for code, weight in weights.items()}
+    output = {}
+    for code, weight in weights.items():
+        output[code] = float(weight) / total
+    return output
 
 
 def select_target(context):

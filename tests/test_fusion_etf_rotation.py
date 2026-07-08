@@ -330,6 +330,7 @@ def test_joinquant_dual_slot_export_is_single_owner_clean():
         "WUFU_QIXING_FUSION_V2_DUAL_SLOT",
     ]:
         assert token in content
+    assert "sum(weights.values())" not in content
 
 
 def _bars(symbol: str, dates: pd.DatetimeIndex, closes: list[float], volume: float) -> pd.DataFrame:
