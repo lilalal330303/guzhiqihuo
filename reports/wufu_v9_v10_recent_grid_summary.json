@@ -1,0 +1,631 @@
+{
+  "sample_start_date": "2026-02-06",
+  "sample_end_date": "2026-07-06",
+  "requested_end_date": "2026-07-08",
+  "method": {
+    "v9_baseline": "daily close proxy, no intraday timing, no fixed stop loss",
+    "v10_default": "real minute intraday timing with daily proxy fallback",
+    "v10_grid": "same target generation, grid search on intraday execution parameters"
+  },
+  "data": {
+    "daily_price_rows": 10847,
+    "daily_symbols": 113,
+    "minute_rows": 1454320,
+    "minute_symbols": 65,
+    "minute_start": "2026-02-06",
+    "minute_end": "2026-07-06",
+    "target_rows": 96,
+    "weak_state_rows": 202,
+    "excluded_symbols": [
+      "159583",
+      "512480"
+    ]
+  },
+  "params": {
+    "wufu": {
+      "etf_pool": [
+        "518880",
+        "501018",
+        "161226",
+        "159985",
+        "159980",
+        "513310",
+        "159518",
+        "159509",
+        "513100",
+        "513520",
+        "513500",
+        "159502",
+        "513400",
+        "513030",
+        "513290",
+        "520830",
+        "159529",
+        "513090",
+        "513120",
+        "513180",
+        "513330",
+        "513750",
+        "159892",
+        "513190",
+        "159605",
+        "513630",
+        "159323",
+        "510900",
+        "513920",
+        "513970",
+        "511380",
+        "512050",
+        "510500",
+        "159915",
+        "510300",
+        "512100",
+        "159949",
+        "588080",
+        "159967",
+        "588220",
+        "563300",
+        "510760",
+        "588200",
+        "515880",
+        "159981",
+        "512880",
+        "513350",
+        "159326",
+        "159516",
+        "159206",
+        "512480",
+        "159363",
+        "159870",
+        "512400",
+        "159755",
+        "588170",
+        "159992",
+        "159995",
+        "512890",
+        "515220",
+        "159566",
+        "159819",
+        "512800",
+        "512690",
+        "515050",
+        "562500",
+        "512170",
+        "517520",
+        "159869",
+        "512070",
+        "159611",
+        "562800",
+        "515120",
+        "512010",
+        "510880",
+        "515790",
+        "515980",
+        "512660",
+        "159928",
+        "512710",
+        "560860",
+        "515030",
+        "159766",
+        "159218",
+        "159852",
+        "516160",
+        "516150",
+        "159227",
+        "159583",
+        "588790",
+        "159865",
+        "512980",
+        "159851",
+        "561360",
+        "561980",
+        "562590",
+        "512200",
+        "159732",
+        "159667",
+        "516510",
+        "159840",
+        "159998",
+        "159825",
+        "512670",
+        "159883",
+        "515210",
+        "515400",
+        "159256",
+        "561330",
+        "515170",
+        "159638",
+        "516520",
+        "513360",
+        "516190"
+      ],
+      "global_etf_pool": [
+        "518880",
+        "501018",
+        "161226",
+        "159985",
+        "159980",
+        "513310",
+        "159518",
+        "159509",
+        "513100",
+        "513520",
+        "513500",
+        "159502",
+        "513400",
+        "513030",
+        "513290",
+        "520830",
+        "159529"
+      ],
+      "dynamic_etf_pool": [],
+      "defensive_etf": "511880",
+      "holdings_num": 1,
+      "lookback_days": 25,
+      "min_score_threshold": 0.0,
+      "max_score_threshold": 5.0,
+      "score_threshold_ratio": 0.9,
+      "enable_r2_filter": true,
+      "r2_threshold": 0.4,
+      "enable_ma_filter": true,
+      "ma_lookback": 10,
+      "ma_threshold": 1.0,
+      "enable_volume_check": true,
+      "volume_lookback": 5,
+      "volume_threshold": 1.8,
+      "enable_loss_filter": true,
+      "loss": 0.97,
+      "weak_period_ma_lookback": 10,
+      "max_weak_days": 20
+    },
+    "v9_baseline": {
+      "initial_cash": 1000000.0,
+      "commission_rate": 0.0001,
+      "slippage_rate": 0.0001,
+      "min_commission": 5.0,
+      "cash_buffer": 0.998,
+      "round_lot": 100,
+      "trend_lookback_minutes": 30,
+      "trend_slope_threshold": -999.0,
+      "fixed_stop_loss_threshold": 0.0,
+      "intraday_entry_weight": 1.0,
+      "trend_check_minutes": [
+        1311,
+        1340,
+        1410,
+        1440
+      ],
+      "force_buy_minute": 1455
+    },
+    "v10_default": {
+      "initial_cash": 1000000.0,
+      "commission_rate": 0.0001,
+      "slippage_rate": 0.0001,
+      "min_commission": 5.0,
+      "cash_buffer": 0.998,
+      "round_lot": 100,
+      "trend_lookback_minutes": 30,
+      "trend_slope_threshold": 0.001,
+      "fixed_stop_loss_threshold": 0.95,
+      "intraday_entry_weight": 0.65,
+      "trend_check_minutes": [
+        1311,
+        1340,
+        1410,
+        1440
+      ],
+      "force_buy_minute": 1455
+    },
+    "v10_best_grid": {
+      "initial_cash": 1000000.0,
+      "commission_rate": 0.0001,
+      "slippage_rate": 0.0001,
+      "min_commission": 5.0,
+      "cash_buffer": 0.998,
+      "round_lot": 100,
+      "trend_lookback_minutes": 30,
+      "trend_slope_threshold": 0.002,
+      "fixed_stop_loss_threshold": 0.97,
+      "intraday_entry_weight": 0.65,
+      "trend_check_minutes": [
+        1311,
+        1340,
+        1410,
+        1440
+      ],
+      "force_buy_minute": 1440
+    }
+  },
+  "metrics": {
+    "v9_baseline": {
+      "total_return": 0.421648247452044,
+      "annualized_return": 1.3553144417143321,
+      "max_drawdown": -0.15910275829807197,
+      "trade_count": 111,
+      "buy_count": 56,
+      "sell_count": 55,
+      "stop_loss_count": 0,
+      "win_rate": 0.43636363636363634,
+      "final_equity": 1421648.247452044,
+      "daily_volatility": 0.029507233417824637
+    },
+    "v10_default": {
+      "total_return": 0.6454103854705955,
+      "annualized_return": 2.3622326420001363,
+      "max_drawdown": -0.5885248261710678,
+      "trade_count": 113,
+      "buy_count": 57,
+      "sell_count": 55,
+      "stop_loss_count": 1,
+      "win_rate": 0.42857142857142855,
+      "final_equity": 1645410.3854705954,
+      "daily_volatility": 0.17984349771848063
+    },
+    "v10_best_grid": {
+      "total_return": 0.7186987834694503,
+      "annualized_return": 2.7386209810479674,
+      "max_drawdown": -0.5842708109233641,
+      "trade_count": 115,
+      "buy_count": 58,
+      "sell_count": 48,
+      "stop_loss_count": 9,
+      "win_rate": 0.43859649122807015,
+      "final_equity": 1718698.7834694502,
+      "daily_volatility": 0.17967642696119687
+    },
+    "v10_default_minus_v9": {
+      "total_return": 0.2237621380185515,
+      "annualized_return": 1.0069182002858041,
+      "max_drawdown": -0.42942206787299586,
+      "final_equity": 223762.13801855152,
+      "trade_count": 2.0,
+      "stop_loss_count": 1.0
+    },
+    "v10_best_minus_v9": {
+      "total_return": 0.2970505360174063,
+      "annualized_return": 1.3833065393336352,
+      "max_drawdown": -0.4251680526252921,
+      "final_equity": 297050.53601740627,
+      "trade_count": 4.0,
+      "stop_loss_count": 9.0
+    }
+  },
+  "trade_breakdown": {
+    "v9": {
+      "actions": {
+        "buy": 56,
+        "sell": 55
+      },
+      "entry_modes": {
+        "trend": 56
+      }
+    },
+    "v10_default": {
+      "actions": {
+        "buy": 57,
+        "sell": 55,
+        "stop_loss_sell": 1
+      },
+      "entry_modes": {
+        "trend_real": 35,
+        "force_real": 12,
+        "trend_proxy": 5,
+        "force_proxy": 5
+      },
+      "execution_modes": {
+        "minute": 46,
+        "daily_close": 9,
+        "stop_real": 1
+      }
+    },
+    "v10_best_grid": {
+      "actions": {
+        "buy": 58,
+        "sell": 48,
+        "stop_loss_sell": 9
+      },
+      "entry_modes": {
+        "trend_real": 35,
+        "force_real": 13,
+        "trend_proxy": 5,
+        "force_proxy": 5
+      },
+      "execution_modes": {
+        "minute": 40,
+        "daily_close": 8,
+        "stop_real": 8,
+        "stop_proxy": 1
+      }
+    }
+  },
+  "grid": {
+    "rows": 36,
+    "rank_rule": "score_return_drawdown desc, then total_return desc, then max_drawdown desc",
+    "top10": [
+      {
+        "rank": 1,
+        "grid_id": 23,
+        "trend_lookback_minutes": 30,
+        "trend_slope_threshold": 0.002,
+        "fixed_stop_loss_threshold": 0.97,
+        "force_buy_minute": 1440,
+        "cash_buffer": 0.998,
+        "total_return": 0.7186987834694503,
+        "annualized_return": 2.7386209810479674,
+        "max_drawdown": -0.5842708109233641,
+        "final_equity": 1718698.7834694502,
+        "trade_count": 115,
+        "stop_loss_count": 9,
+        "win_rate": 0.43859649122807015,
+        "score_return_drawdown": 1.230078193250216,
+        "entry_mode_breakdown": {
+          "trend_real": 35,
+          "force_real": 13,
+          "trend_proxy": 5,
+          "force_proxy": 5
+        },
+        "execution_mode_breakdown": {
+          "minute": 40,
+          "daily_close": 8,
+          "stop_real": 8,
+          "stop_proxy": 1
+        }
+      },
+      {
+        "rank": 2,
+        "grid_id": 17,
+        "trend_lookback_minutes": 30,
+        "trend_slope_threshold": 0.001,
+        "fixed_stop_loss_threshold": 0.97,
+        "force_buy_minute": 1440,
+        "cash_buffer": 0.998,
+        "total_return": 0.7050097914041802,
+        "annualized_return": 2.666527497633309,
+        "max_drawdown": -0.5842709488152897,
+        "final_equity": 1705009.7914041802,
+        "trade_count": 115,
+        "stop_loss_count": 9,
+        "win_rate": 0.43859649122807015,
+        "score_return_drawdown": 1.206648718088259,
+        "entry_mode_breakdown": {
+          "trend_real": 35,
+          "force_real": 13,
+          "trend_proxy": 5,
+          "force_proxy": 5
+        },
+        "execution_mode_breakdown": {
+          "minute": 40,
+          "daily_close": 8,
+          "stop_real": 8,
+          "stop_proxy": 1
+        }
+      },
+      {
+        "rank": 3,
+        "grid_id": 29,
+        "trend_lookback_minutes": 45,
+        "trend_slope_threshold": 0.001,
+        "fixed_stop_loss_threshold": 0.97,
+        "force_buy_minute": 1440,
+        "cash_buffer": 0.998,
+        "total_return": 0.6864968339821405,
+        "annualized_return": 2.5703415669461167,
+        "max_drawdown": -0.5823820647216524,
+        "final_equity": 1686496.8339821405,
+        "trade_count": 115,
+        "stop_loss_count": 10,
+        "win_rate": 0.45614035087719296,
+        "score_return_drawdown": 1.1787739966035,
+        "entry_mode_breakdown": {
+          "trend_real": 35,
+          "force_real": 13,
+          "trend_proxy": 5,
+          "force_proxy": 5
+        },
+        "execution_mode_breakdown": {
+          "minute": 39,
+          "stop_real": 9,
+          "daily_close": 8,
+          "stop_proxy": 1
+        }
+      },
+      {
+        "rank": 4,
+        "grid_id": 35,
+        "trend_lookback_minutes": 45,
+        "trend_slope_threshold": 0.002,
+        "fixed_stop_loss_threshold": 0.97,
+        "force_buy_minute": 1440,
+        "cash_buffer": 0.998,
+        "total_return": 0.6837306335769069,
+        "annualized_return": 2.5560987607565,
+        "max_drawdown": -0.5823820647216524,
+        "final_equity": 1683730.633576907,
+        "trade_count": 115,
+        "stop_loss_count": 10,
+        "win_rate": 0.45614035087719296,
+        "score_return_drawdown": 1.1740241930418884,
+        "entry_mode_breakdown": {
+          "trend_real": 35,
+          "force_real": 13,
+          "trend_proxy": 5,
+          "force_proxy": 5
+        },
+        "execution_mode_breakdown": {
+          "minute": 39,
+          "stop_real": 9,
+          "daily_close": 8,
+          "stop_proxy": 1
+        }
+      },
+      {
+        "rank": 5,
+        "grid_id": 27,
+        "trend_lookback_minutes": 45,
+        "trend_slope_threshold": 0.001,
+        "fixed_stop_loss_threshold": 0.95,
+        "force_buy_minute": 1440,
+        "cash_buffer": 0.998,
+        "total_return": 0.6802610391985631,
+        "annualized_return": 2.538281683049041,
+        "max_drawdown": -0.5814393551914272,
+        "final_equity": 1680261.039198563,
+        "trade_count": 113,
+        "stop_loss_count": 1,
+        "win_rate": 0.4642857142857143,
+        "score_return_drawdown": 1.169960432029237,
+        "entry_mode_breakdown": {
+          "trend_real": 34,
+          "force_real": 13,
+          "trend_proxy": 5,
+          "force_proxy": 5
+        },
+        "execution_mode_breakdown": {
+          "minute": 46,
+          "daily_close": 9,
+          "stop_real": 1
+        }
+      },
+      {
+        "rank": 6,
+        "grid_id": 33,
+        "trend_lookback_minutes": 45,
+        "trend_slope_threshold": 0.002,
+        "fixed_stop_loss_threshold": 0.95,
+        "force_buy_minute": 1440,
+        "cash_buffer": 0.998,
+        "total_return": 0.677521542423311,
+        "annualized_return": 2.5242510525964637,
+        "max_drawdown": -0.5814393551914272,
+        "final_equity": 1677521.542423311,
+        "trade_count": 113,
+        "stop_loss_count": 1,
+        "win_rate": 0.4642857142857143,
+        "score_return_drawdown": 1.1652488541995074,
+        "entry_mode_breakdown": {
+          "trend_real": 34,
+          "force_real": 13,
+          "trend_proxy": 5,
+          "force_proxy": 5
+        },
+        "execution_mode_breakdown": {
+          "minute": 46,
+          "daily_close": 9,
+          "stop_real": 1
+        }
+      },
+      {
+        "rank": 7,
+        "grid_id": 28,
+        "trend_lookback_minutes": 45,
+        "trend_slope_threshold": 0.001,
+        "fixed_stop_loss_threshold": 0.95,
+        "force_buy_minute": 1455,
+        "cash_buffer": 0.998,
+        "total_return": 0.6634209201453791,
+        "annualized_return": 2.452552231416936,
+        "max_drawdown": -0.5810941866601101,
+        "final_equity": 1663420.9201453791,
+        "trade_count": 113,
+        "stop_loss_count": 1,
+        "win_rate": 0.44642857142857145,
+        "score_return_drawdown": 1.1416753692864303,
+        "entry_mode_breakdown": {
+          "trend_real": 34,
+          "force_real": 13,
+          "trend_proxy": 5,
+          "force_proxy": 5
+        },
+        "execution_mode_breakdown": {
+          "minute": 46,
+          "daily_close": 9,
+          "stop_real": 1
+        }
+      },
+      {
+        "rank": 8,
+        "grid_id": 25,
+        "trend_lookback_minutes": 45,
+        "trend_slope_threshold": 0.001,
+        "fixed_stop_loss_threshold": 0.0,
+        "force_buy_minute": 1440,
+        "cash_buffer": 0.998,
+        "total_return": 0.6623755335903707,
+        "annualized_return": 2.4472712077107395,
+        "max_drawdown": -0.5814393551914272,
+        "final_equity": 1662375.5335903708,
+        "trade_count": 111,
+        "stop_loss_count": 0,
+        "win_rate": 0.4727272727272727,
+        "score_return_drawdown": 1.1391996906922424,
+        "entry_mode_breakdown": {
+          "trend_real": 34,
+          "force_real": 12,
+          "trend_proxy": 5,
+          "force_proxy": 5
+        },
+        "execution_mode_breakdown": {
+          "minute": 46,
+          "daily_close": 9
+        }
+      },
+      {
+        "rank": 9,
+        "grid_id": 34,
+        "trend_lookback_minutes": 45,
+        "trend_slope_threshold": 0.002,
+        "fixed_stop_loss_threshold": 0.95,
+        "force_buy_minute": 1455,
+        "cash_buffer": 0.998,
+        "total_return": 0.6607018243838105,
+        "annualized_return": 2.438825977629187,
+        "max_drawdown": -0.5810941866601101,
+        "final_equity": 1660701.8243838106,
+        "trade_count": 113,
+        "stop_loss_count": 1,
+        "win_rate": 0.44642857142857145,
+        "score_return_drawdown": 1.1369961007203535,
+        "entry_mode_breakdown": {
+          "trend_real": 34,
+          "force_real": 13,
+          "trend_proxy": 5,
+          "force_proxy": 5
+        },
+        "execution_mode_breakdown": {
+          "minute": 46,
+          "daily_close": 9,
+          "stop_real": 1
+        }
+      },
+      {
+        "rank": 10,
+        "grid_id": 21,
+        "trend_lookback_minutes": 30,
+        "trend_slope_threshold": 0.002,
+        "fixed_stop_loss_threshold": 0.95,
+        "force_buy_minute": 1440,
+        "cash_buffer": 0.998,
+        "total_return": 0.6679728581831375,
+        "annualized_return": 2.4756030108572276,
+        "max_drawdown": -0.5885590504007607,
+        "final_equity": 1667972.8581831374,
+        "trade_count": 113,
+        "stop_loss_count": 1,
+        "win_rate": 0.44642857142857145,
+        "score_return_drawdown": 1.1349292101247996,
+        "entry_mode_breakdown": {
+          "trend_real": 35,
+          "force_real": 12,
+          "trend_proxy": 5,
+          "force_proxy": 5
+        },
+        "execution_mode_breakdown": {
+          "minute": 46,
+          "daily_close": 9,
+          "stop_real": 1
+        }
+      }
+    ]
+  },
+  "elapsed_seconds": 86.92707750000409
+}

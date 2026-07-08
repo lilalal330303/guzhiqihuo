@@ -1,0 +1,21 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>五福 ETF V10 日内择时本地真实分钟回测</title><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;line-height:1.7;max-width:1080px;margin:32px auto;padding:0 24px;color:#1f2933}pre{background:#f6f8fa;padding:8px;overflow:auto}</style></head><body><h1>五福 ETF V10 日内择时本地真实分钟回测</h1>
+<h2>结论</h2>
+<p>本轮已将 V10 本地回测从“日线 OHLC 代理”切到“真实分钟线优先、缺口日期代理兜底”：</p>
+<p>- 本地 `prices_minute` 命中 1483520 行，覆盖 67 个标的，区间 2026-02-06 至 2026-07-06。</p>
+<p>- 真实分钟逻辑复刻聚宽 V10：13:11、13:40、14:10、14:40 逐次检查 30 根 1 分钟收盘斜率，14:55 强制买入。</p>
+<p>- 固定止损改为真实分钟 low/close 触发；没有分钟数据的日期继续使用旧的日线代理，保证全周期可运行。</p>
+<h2>指标对比</h2>
+<pre>| 指标 | 基准：真实 13:11 买入 | V10：真实分钟择时 | 差异 |</pre>
+<pre>|---|---:|---:|---:|</pre>
+<pre>| 最终权益 | 6167869.37 | 31272498.49 | 25104629.13 |</pre>
+<pre>| 总收益 | 516.79% | 3027.25% | 2510.46% |</pre>
+<pre>| 年化收益 | 32.26% | 69.73% | 37.47% |</pre>
+<pre>| 最大回撤 | -58.81% | -58.86% | -0.04% |</pre>
+<pre>| 交易数 | 1509 | 1521 | 12 |</pre>
+<pre>| 止损次数 | 0 | 28 | 28 |</pre>
+<h2>交易分布</h2>
+<p>- V10 动作分布：{&#x27;buy&#x27;: 761, &#x27;sell&#x27;: 732, &#x27;stop_loss_sell&#x27;: 28}</p>
+<p>- V10 买入模式分布：{&#x27;force_proxy&#x27;: 374, &#x27;trend_proxy&#x27;: 342, &#x27;trend_real&#x27;: 34, &#x27;force_real&#x27;: 11}</p>
+<p>- V10 卖出/止损执行模式：{&#x27;daily_close&#x27;: 686, &#x27;minute&#x27;: 46, &#x27;stop_proxy&#x27;: 28}</p>
+<h2>解读</h2>
+<p>这版结果已经能验证真实分钟执行链路，但还不是完整分钟历史结论。当前真实分钟主要覆盖最近一段，2020-2026 大多数历史日期仍依赖代理兜底。下一步应继续用 Pandadata/JQData/Tushare Pro 等长周期分钟源补全全池历史，再重新评估择时有效性。</p></body></html>

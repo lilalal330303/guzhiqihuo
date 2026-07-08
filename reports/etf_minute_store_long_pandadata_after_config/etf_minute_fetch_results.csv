@@ -1,0 +1,4 @@
+symbol,status,source,start_date,end_date,rows,error
+511880.SH,source_unavailable,,2020-01-02,2026-07-06,0,pandadata: ServiceError: 登录失败: [错误码 200006 : 用户未注册]
+510300.SH,source_unavailable,,2020-01-02,2026-07-06,0,pandadata: ServiceError: 登录失败: [错误码 200006 : 用户未注册]
+159967.SZ,source_unavailable,,2020-01-02,2026-07-06,0,pandadata: ServiceError: 登录失败: [错误码 200006 : 用户未注册]

@@ -1,0 +1,6521 @@
+{
+  "requested": 1302,
+  "succeeded": [
+    {
+      "symbol": "159003",
+      "rows": 1685,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159005",
+      "rows": 1685,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159007",
+      "rows": 53,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159008",
+      "rows": 46,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159009",
+      "rows": 56,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159010",
+      "rows": 38,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159011",
+      "rows": 14,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159012",
+      "rows": 33,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159013",
+      "rows": 46,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159015",
+      "rows": 41,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159016",
+      "rows": 37,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159017",
+      "rows": 41,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159018",
+      "rows": 47,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159019",
+      "rows": 49,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159020",
+      "rows": 47,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159021",
+      "rows": 36,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159022",
+      "rows": 48,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159023",
+      "rows": 15,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159026",
+      "rows": 48,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159027",
+      "rows": 36,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159028",
+      "rows": 37,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159029",
+      "rows": 32,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159030",
+      "rows": 39,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159031",
+      "rows": 25,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159032",
+      "rows": 38,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159033",
+      "rows": 21,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159035",
+      "rows": 36,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159036",
+      "rows": 17,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159037",
+      "rows": 17,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159038",
+      "rows": 32,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159039",
+      "rows": 12,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159040",
+      "rows": 7,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159041",
+      "rows": 18,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159042",
+      "rows": 19,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159045",
+      "rows": 9,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159046",
+      "rows": 17,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159048",
+      "rows": 18,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159050",
+      "rows": 19,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159051",
+      "rows": 19,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159052",
+      "rows": 17,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159053",
+      "rows": 19,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159055",
+      "rows": 19,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159056",
+      "rows": 19,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159057",
+      "rows": 15,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159060",
+      "rows": 18,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159061",
+      "rows": 9,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159062",
+      "rows": 12,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159063",
+      "rows": 15,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159065",
+      "rows": 7,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159066",
+      "rows": 1,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159070",
+      "rows": 7,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159071",
+      "rows": 12,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159100",
+      "rows": 155,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159101",
+      "rows": 200,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159102",
+      "rows": 191,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159103",
+      "rows": 195,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159105",
+      "rows": 163,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159106",
+      "rows": 171,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159107",
+      "rows": 187,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159108",
+      "rows": 148,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159109",
+      "rows": 179,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159117",
+      "rows": 174,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159118",
+      "rows": 145,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159119",
+      "rows": 155,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159120",
+      "rows": 155,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159121",
+      "rows": 148,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159122",
+      "rows": 163,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159123",
+      "rows": 145,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159125",
+      "rows": 160,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159126",
+      "rows": 163,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159127",
+      "rows": 150,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159128",
+      "rows": 155,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159129",
+      "rows": 154,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159130",
+      "rows": 145,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159132",
+      "rows": 117,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159133",
+      "rows": 147,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159135",
+      "rows": 93,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159136",
+      "rows": 125,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159137",
+      "rows": 115,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159138",
+      "rows": 114,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159139",
+      "rows": 129,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159140",
+      "rows": 130,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159141",
+      "rows": 135,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159142",
+      "rows": 134,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159143",
+      "rows": 115,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159145",
+      "rows": 110,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159146",
+      "rows": 109,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159147",
+      "rows": 106,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159148",
+      "rows": 93,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159149",
+      "rows": 109,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159150",
+      "rows": 620,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159151",
+      "rows": 113,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159152",
+      "rows": 99,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159153",
+      "rows": 95,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159155",
+      "rows": 108,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159156",
+      "rows": 92,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159157",
+      "rows": 96,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159158",
+      "rows": 104,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159159",
+      "rows": 92,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159160",
+      "rows": 67,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159162",
+      "rows": 102,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159163",
+      "rows": 95,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159165",
+      "rows": 92,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159166",
+      "rows": 74,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159167",
+      "rows": 92,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159168",
+      "rows": 92,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159169",
+      "rows": 84,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159170",
+      "rows": 73,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159171",
+      "rows": 83,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159172",
+      "rows": 72,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159173",
+      "rows": 63,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159175",
+      "rows": 83,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159176",
+      "rows": 62,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159177",
+      "rows": 63,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159178",
+      "rows": 46,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159179",
+      "rows": 62,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159180",
+      "rows": 62,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159181",
+      "rows": 73,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159182",
+      "rows": 41,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159183",
+      "rows": 70,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159185",
+      "rows": 48,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159186",
+      "rows": 52,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159187",
+      "rows": 64,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159188",
+      "rows": 58,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159189",
+      "rows": 73,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159190",
+      "rows": 66,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159191",
+      "rows": 68,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159192",
+      "rows": 44,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159193",
+      "rows": 43,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159195",
+      "rows": 63,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159197",
+      "rows": 63,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159198",
+      "rows": 62,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159199",
+      "rows": 59,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159202",
+      "rows": 296,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159203",
+      "rows": 246,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159205",
+      "rows": 259,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159207",
+      "rows": 301,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159208",
+      "rows": 281,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159209",
+      "rows": 311,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159210",
+      "rows": 265,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159211",
+      "rows": 298,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159212",
+      "rows": 301,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159213",
+      "rows": 286,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159215",
+      "rows": 303,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159216",
+      "rows": 298,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159219",
+      "rows": 280,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159220",
+      "rows": 281,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159221",
+      "rows": 280,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159222",
+      "rows": 295,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159223",
+      "rows": 244,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159225",
+      "rows": 295,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159226",
+      "rows": 268,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159228",
+      "rows": 255,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159229",
+      "rows": 277,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159230",
+      "rows": 267,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159231",
+      "rows": 287,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159232",
+      "rows": 286,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159233",
+      "rows": 265,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159235",
+      "rows": 286,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159236",
+      "rows": 277,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159237",
+      "rows": 242,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159238",
+      "rows": 262,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159239",
+      "rows": 269,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159240",
+      "rows": 255,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159241",
+      "rows": 268,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159242",
+      "rows": 229,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159243",
+      "rows": 120,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159245",
+      "rows": 254,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159246",
+      "rows": 239,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159247",
+      "rows": 100,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159248",
+      "rows": 229,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159249",
+      "rows": 245,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159251",
+      "rows": 229,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159253",
+      "rows": 138,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159255",
+      "rows": 222,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159257",
+      "rows": 227,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159258",
+      "rows": 223,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159260",
+      "rows": 162,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159261",
+      "rows": 242,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159262",
+      "rows": 242,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159263",
+      "rows": 241,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159265",
+      "rows": 245,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159266",
+      "rows": 223,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159267",
+      "rows": 223,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159268",
+      "rows": 232,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159269",
+      "rows": 239,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159270",
+      "rows": 229,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159271",
+      "rows": 217,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159273",
+      "rows": 220,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159275",
+      "rows": 182,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159276",
+      "rows": 227,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159277",
+      "rows": 214,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159279",
+      "rows": 182,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159280",
+      "rows": 212,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159281",
+      "rows": 201,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159283",
+      "rows": 209,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159285",
+      "rows": 173,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159286",
+      "rows": 201,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159287",
+      "rows": 205,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159288",
+      "rows": 183,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159289",
+      "rows": 192,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159290",
+      "rows": 190,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159291",
+      "rows": 202,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159292",
+      "rows": 201,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159293",
+      "rows": 114,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159295",
+      "rows": 162,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159296",
+      "rows": 199,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159298",
+      "rows": 197,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159299",
+      "rows": 194,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159300",
+      "rows": 505,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159301",
+      "rows": 473,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159302",
+      "rows": 443,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159303",
+      "rows": 489,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159305",
+      "rows": 425,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159306",
+      "rows": 520,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159307",
+      "rows": 531,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159309",
+      "rows": 497,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159310",
+      "rows": 528,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159311",
+      "rows": 236,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159312",
+      "rows": 401,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159315",
+      "rows": 499,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159318",
+      "rows": 493,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159320",
+      "rows": 368,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159321",
+      "rows": 506,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159322",
+      "rows": 498,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159325",
+      "rows": 401,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159327",
+      "rows": 463,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159328",
+      "rows": 396,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159329",
+      "rows": 473,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159330",
+      "rows": 453,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159331",
+      "rows": 465,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159332",
+      "rows": 465,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159333",
+      "rows": 442,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159335",
+      "rows": 440,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159336",
+      "rows": 340,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159337",
+      "rows": 431,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159339",
+      "rows": 419,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159350",
+      "rows": 620,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159351",
+      "rows": 419,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159353",
+      "rows": 419,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159355",
+      "rows": 384,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159356",
+      "rows": 381,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159357",
+      "rows": 387,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159358",
+      "rows": 386,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159359",
+      "rows": 385,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159360",
+      "rows": 387,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159362",
+      "rows": 385,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159365",
+      "rows": 247,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159366",
+      "rows": 298,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159367",
+      "rows": 337,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159368",
+      "rows": 312,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159369",
+      "rows": 209,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159370",
+      "rows": 351,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159371",
+      "rows": 340,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159372",
+      "rows": 262,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159373",
+      "rows": 342,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159375",
+      "rows": 357,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159376",
+      "rows": 356,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159377",
+      "rows": 296,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159378",
+      "rows": 357,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159379",
+      "rows": 348,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159380",
+      "rows": 359,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159382",
+      "rows": 282,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159383",
+      "rows": 338,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159385",
+      "rows": 267,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159386",
+      "rows": 341,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159387",
+      "rows": 261,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159388",
+      "rows": 303,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159389",
+      "rows": 267,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159390",
+      "rows": 301,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159391",
+      "rows": 292,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159392",
+      "rows": 279,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159393",
+      "rows": 322,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159399",
+      "rows": 329,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159500",
+      "rows": 203,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159501",
+      "rows": 740,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159505",
+      "rows": 623,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159507",
+      "rows": 733,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159508",
+      "rows": 719,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159510",
+      "rows": 697,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159511",
+      "rows": 704,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159512",
+      "rows": 713,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159513",
+      "rows": 710,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159515",
+      "rows": 682,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159517",
+      "rows": 681,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159519",
+      "rows": 686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159520",
+      "rows": 649,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159521",
+      "rows": 680,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159523",
+      "rows": 673,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159525",
+      "rows": 517,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159526",
+      "rows": 532,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159527",
+      "rows": 581,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159528",
+      "rows": 516,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159531",
+      "rows": 674,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159532",
+      "rows": 671,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159533",
+      "rows": 501,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159535",
+      "rows": 670,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159536",
+      "rows": 671,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159537",
+      "rows": 663,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159538",
+      "rows": 669,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159539",
+      "rows": 664,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159540",
+      "rows": 666,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159541",
+      "rows": 649,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159542",
+      "rows": 502,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159543",
+      "rows": 635,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159545",
+      "rows": 539,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159546",
+      "rows": 656,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159547",
+      "rows": 577,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159549",
+      "rows": 620,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159550",
+      "rows": 248,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159551",
+      "rows": 637,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159552",
+      "rows": 488,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159553",
+      "rows": 537,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159555",
+      "rows": 618,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159556",
+      "rows": 598,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159557",
+      "rows": 515,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159559",
+      "rows": 619,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159560",
+      "rows": 635,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159561",
+      "rows": 523,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159562",
+      "rows": 591,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159563",
+      "rows": 571,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159565",
+      "rows": 572,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159568",
+      "rows": 571,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159569",
+      "rows": 450,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159571",
+      "rows": 604,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159572",
+      "rows": 610,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159573",
+      "rows": 610,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159575",
+      "rows": 603,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159576",
+      "rows": 604,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159577",
+      "rows": 573,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159578",
+      "rows": 502,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159581",
+      "rows": 558,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159582",
+      "rows": 538,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159586",
+      "rows": 556,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159587",
+      "rows": 449,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159588",
+      "rows": 508,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159589",
+      "rows": 550,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159590",
+      "rows": 403,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159591",
+      "rows": 557,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159592",
+      "rows": 557,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159593",
+      "rows": 561,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159595",
+      "rows": 557,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159596",
+      "rows": 557,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159597",
+      "rows": 512,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159599",
+      "rows": 525,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159601",
+      "rows": 1129,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159602",
+      "rows": 1129,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159603",
+      "rows": 989,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159606",
+      "rows": 1092,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159607",
+      "rows": 1111,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159608",
+      "rows": 1096,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159609",
+      "rows": 967,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159610",
+      "rows": 1085,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159612",
+      "rows": 999,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159613",
+      "rows": 1072,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159615",
+      "rows": 975,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159616",
+      "rows": 946,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159617",
+      "rows": 972,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159618",
+      "rows": 1018,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159619",
+      "rows": 1061,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159620",
+      "rows": 946,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159621",
+      "rows": 919,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159622",
+      "rows": 766,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159623",
+      "rows": 922,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159625",
+      "rows": 1013,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159627",
+      "rows": 868,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159628",
+      "rows": 961,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159629",
+      "rows": 949,
+      "repair_events": 2
+    },
+    {
+      "symbol": "159630",
+      "rows": 890,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159631",
+      "rows": 932,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159632",
+      "rows": 949,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159635",
+      "rows": 965,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159637",
+      "rows": 928,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159639",
+      "rows": 960,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159640",
+      "rows": 958,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159641",
+      "rows": 957,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159642",
+      "rows": 958,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159643",
+      "rows": 936,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159645",
+      "rows": 910,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159647",
+      "rows": 953,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159653",
+      "rows": 761,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159655",
+      "rows": 896,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159656",
+      "rows": 838,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159657",
+      "rows": 803,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159658",
+      "rows": 905,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159659",
+      "rows": 773,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159660",
+      "rows": 779,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159661",
+      "rows": 625,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159662",
+      "rows": 868,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159663",
+      "rows": 895,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159665",
+      "rows": 844,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159666",
+      "rows": 823,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159669",
+      "rows": 841,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159670",
+      "rows": 766,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159671",
+      "rows": 804,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159672",
+      "rows": 788,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159673",
+      "rows": 719,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159675",
+      "rows": 868,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159676",
+      "rows": 782,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159677",
+      "rows": 865,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159678",
+      "rows": 813,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159679",
+      "rows": 816,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159680",
+      "rows": 870,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159681",
+      "rows": 847,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159682",
+      "rows": 847,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159685",
+      "rows": 786,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159686",
+      "rows": 716,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159687",
+      "rows": 845,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159688",
+      "rows": 821,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159689",
+      "rows": 802,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159690",
+      "rows": 725,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159692",
+      "rows": 756,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159695",
+      "rows": 765,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159696",
+      "rows": 690,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159697",
+      "rows": 769,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159698",
+      "rows": 695,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159699",
+      "rows": 692,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159701",
+      "rows": 1095,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159703",
+      "rows": 1230,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159706",
+      "rows": 1099,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159707",
+      "rows": 1125,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159708",
+      "rows": 1213,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159709",
+      "rows": 1213,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159711",
+      "rows": 1092,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159712",
+      "rows": 1126,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159713",
+      "rows": 1182,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159715",
+      "rows": 1163,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159716",
+      "rows": 1212,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159717",
+      "rows": 1150,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159718",
+      "rows": 1093,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159719",
+      "rows": 1089,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159721",
+      "rows": 1214,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159723",
+      "rows": 1144,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159725",
+      "rows": 1213,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159726",
+      "rows": 1118,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159728",
+      "rows": 1081,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159729",
+      "rows": 1200,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159730",
+      "rows": 1094,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159731",
+      "rows": 1104,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159735",
+      "rows": 1232,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159736",
+      "rows": 1154,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159738",
+      "rows": 1071,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159739",
+      "rows": 1122,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159741",
+      "rows": 1233,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159742",
+      "rows": 1240,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159743",
+      "rows": 1084,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159747",
+      "rows": 1205,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159748",
+      "rows": 1110,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159750",
+      "rows": 1064,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159751",
+      "rows": 1093,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159752",
+      "rows": 1195,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159757",
+      "rows": 1187,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159758",
+      "rows": 1093,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159760",
+      "rows": 1099,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159763",
+      "rows": 1162,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159767",
+      "rows": 1177,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159770",
+      "rows": 1129,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159773",
+      "rows": 1150,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159775",
+      "rows": 1075,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159776",
+      "rows": 1036,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159777",
+      "rows": 1142,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159778",
+      "rows": 1062,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159779",
+      "rows": 1115,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159780",
+      "rows": 1212,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159782",
+      "rows": 1210,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159783",
+      "rows": 1212,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159787",
+      "rows": 1044,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159788",
+      "rows": 1053,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159791",
+      "rows": 1045,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159793",
+      "rows": 1116,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159795",
+      "rows": 1065,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159796",
+      "rows": 1045,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159797",
+      "rows": 1005,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159798",
+      "rows": 1008,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159800",
+      "rows": 479,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159801",
+      "rows": 1548,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159805",
+      "rows": 1506,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159807",
+      "rows": 1519,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159808",
+      "rows": 1411,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159810",
+      "rows": 1450,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159811",
+      "rows": 1503,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159812",
+      "rows": 1479,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159820",
+      "rows": 1420,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159821",
+      "rows": 1374,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159824",
+      "rows": 1327,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159827",
+      "rows": 1342,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159828",
+      "rows": 1326,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159830",
+      "rows": 1202,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159831",
+      "rows": 1029,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159834",
+      "rows": 1043,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159835",
+      "rows": 1277,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159836",
+      "rows": 1240,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159837",
+      "rows": 1315,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159838",
+      "rows": 1193,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159839",
+      "rows": 1302,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159841",
+      "rows": 1306,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159843",
+      "rows": 1308,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159847",
+      "rows": 1202,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159848",
+      "rows": 1288,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159849",
+      "rows": 1296,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159850",
+      "rows": 1303,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159855",
+      "rows": 1298,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159856",
+      "rows": 1312,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159857",
+      "rows": 1300,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159858",
+      "rows": 1279,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159861",
+      "rows": 1273,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159862",
+      "rows": 1127,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159863",
+      "rows": 1289,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159864",
+      "rows": 1186,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159866",
+      "rows": 1270,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159867",
+      "rows": 1293,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159871",
+      "rows": 1275,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159872",
+      "rows": 1214,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159873",
+      "rows": 1277,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159875",
+      "rows": 1181,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159876",
+      "rows": 1279,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159877",
+      "rows": 1131,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159880",
+      "rows": 1279,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159881",
+      "rows": 1214,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159887",
+      "rows": 1243,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159888",
+      "rows": 1242,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159889",
+      "rows": 1163,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159890",
+      "rows": 1273,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159891",
+      "rows": 1226,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159895",
+      "rows": 1136,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159896",
+      "rows": 1115,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159898",
+      "rows": 1232,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159899",
+      "rows": 1217,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159901",
+      "rows": 1685,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159902",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159903",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159905",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159906",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159907",
+      "rows": 1678,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159908",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159909",
+      "rows": 1686,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159910",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159912",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159913",
+      "rows": 1645,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159916",
+      "rows": 1681,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159918",
+      "rows": 1656,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159920",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159923",
+      "rows": 1685,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159925",
+      "rows": 1684,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159929",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159930",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159931",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159933",
+      "rows": 1651,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159935",
+      "rows": 1682,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159936",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159937",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159938",
+      "rows": 1686,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159940",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159943",
+      "rows": 1686,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159944",
+      "rows": 1684,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159945",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159948",
+      "rows": 1684,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159954",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159956",
+      "rows": 1685,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159957",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159958",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159959",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159960",
+      "rows": 1685,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159961",
+      "rows": 1670,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159964",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159965",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159968",
+      "rows": 1619,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159970",
+      "rows": 1564,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159971",
+      "rows": 1684,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159973",
+      "rows": 1660,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159974",
+      "rows": 1580,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159975",
+      "rows": 1575,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159976",
+      "rows": 1560,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159977",
+      "rows": 1638,
+      "repair_events": 1
+    },
+    {
+      "symbol": "159982",
+      "rows": 1546,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159993",
+      "rows": 1555,
+      "repair_events": 0
+    },
+    {
+      "symbol": "159994",
+      "rows": 1540,
+      "repair_events": 1
+    },
+    {
+      "symbol": "510010",
+      "rows": 1670,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510020",
+      "rows": 1684,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510030",
+      "rows": 1685,
+      "repair_events": 1
+    },
+    {
+      "symbol": "510040",
+      "rows": 361,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510060",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510090",
+      "rows": 1614,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510130",
+      "rows": 1640,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510140",
+      "rows": 2,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510150",
+      "rows": 1685,
+      "repair_events": 1
+    },
+    {
+      "symbol": "510160",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510180",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510190",
+      "rows": 1679,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510200",
+      "rows": 1494,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510230",
+      "rows": 1685,
+      "repair_events": 1
+    },
+    {
+      "symbol": "510270",
+      "rows": 1681,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510290",
+      "rows": 1685,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510320",
+      "rows": 289,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510350",
+      "rows": 1667,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510360",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510370",
+      "rows": 1380,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510380",
+      "rows": 1627,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510390",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510510",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510530",
+      "rows": 1574,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510550",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510560",
+      "rows": 1551,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510570",
+      "rows": 1410,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510580",
+      "rows": 1685,
+      "repair_events": 2
+    },
+    {
+      "symbol": "510590",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510600",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510630",
+      "rows": 1685,
+      "repair_events": 1
+    },
+    {
+      "symbol": "510650",
+      "rows": 1683,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510660",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510670",
+      "rows": 166,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510680",
+      "rows": 1668,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510710",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510720",
+      "rows": 520,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510770",
+      "rows": 1152,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510800",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510810",
+      "rows": 1680,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510850",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510910",
+      "rows": 23,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510950",
+      "rows": 523,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510980",
+      "rows": 626,
+      "repair_events": 0
+    },
+    {
+      "symbol": "510990",
+      "rows": 1214,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511600",
+      "rows": 1683,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511620",
+      "rows": 1271,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511650",
+      "rows": 1253,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511670",
+      "rows": 1118,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511690",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511700",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511770",
+      "rows": 1312,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511800",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511810",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511820",
+      "rows": 1534,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511830",
+      "rows": 1660,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511850",
+      "rows": 1271,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511860",
+      "rows": 1681,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511900",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511910",
+      "rows": 1145,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511920",
+      "rows": 1574,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511930",
+      "rows": 1259,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511950",
+      "rows": 1181,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511960",
+      "rows": 1331,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511970",
+      "rows": 1078,
+      "repair_events": 0
+    },
+    {
+      "symbol": "511980",
+      "rows": 1606,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512020",
+      "rows": 385,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512030",
+      "rows": 215,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512060",
+      "rows": 233,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512080",
+      "rows": 350,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512090",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512120",
+      "rows": 1685,
+      "repair_events": 1
+    },
+    {
+      "symbol": "512130",
+      "rows": 246,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512140",
+      "rows": 40,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512150",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512160",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512180",
+      "rows": 1677,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512190",
+      "rows": 1628,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512240",
+      "rows": 303,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512250",
+      "rows": 298,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512260",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512330",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512360",
+      "rows": 1602,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512370",
+      "rows": 212,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512380",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512390",
+      "rows": 1592,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512430",
+      "rows": 44,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512450",
+      "rows": 64,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512460",
+      "rows": 72,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512510",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512520",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512530",
+      "rows": 1642,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512550",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512560",
+      "rows": 1685,
+      "repair_events": 1
+    },
+    {
+      "symbol": "512570",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512600",
+      "rows": 1685,
+      "repair_events": 1
+    },
+    {
+      "symbol": "512620",
+      "rows": 149,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512630",
+      "rows": 171,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512640",
+      "rows": 1668,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512650",
+      "rows": 1622,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512680",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512700",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512730",
+      "rows": 1555,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512750",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512810",
+      "rows": 1686,
+      "repair_events": 1
+    },
+    {
+      "symbol": "512820",
+      "rows": 1685,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512870",
+      "rows": 1634,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512900",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512910",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512930",
+      "rows": 1662,
+      "repair_events": 1
+    },
+    {
+      "symbol": "512940",
+      "rows": 88,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512950",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512960",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512970",
+      "rows": 1611,
+      "repair_events": 0
+    },
+    {
+      "symbol": "512990",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513020",
+      "rows": 1069,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513070",
+      "rows": 1037,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513110",
+      "rows": 798,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513140",
+      "rows": 840,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513150",
+      "rows": 1066,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513160",
+      "rows": 1068,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513170",
+      "rows": 535,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513210",
+      "rows": 534,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513220",
+      "rows": 962,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513230",
+      "rows": 1075,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513240",
+      "rows": 41,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513280",
+      "rows": 961,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513300",
+      "rows": 1373,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513320",
+      "rows": 1040,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513380",
+      "rows": 1007,
+      "repair_events": 1
+    },
+    {
+      "symbol": "513390",
+      "rows": 767,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513530",
+      "rows": 1017,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513550",
+      "rows": 1325,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513560",
+      "rows": 823,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513580",
+      "rows": 1238,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513590",
+      "rows": 1179,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513600",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513620",
+      "rows": 35,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513650",
+      "rows": 787,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513660",
+      "rows": 1685,
+      "repair_events": 1
+    },
+    {
+      "symbol": "513690",
+      "rows": 1243,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513700",
+      "rows": 1188,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513720",
+      "rows": 116,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513800",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513810",
+      "rows": 685,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513820",
+      "rows": 519,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513830",
+      "rows": 323,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513850",
+      "rows": 636,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513860",
+      "rows": 1213,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513870",
+      "rows": 647,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513880",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513890",
+      "rows": 1076,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513900",
+      "rows": 1682,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513910",
+      "rows": 567,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513930",
+      "rows": 74,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513950",
+      "rows": 770,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513980",
+      "rows": 1213,
+      "repair_events": 0
+    },
+    {
+      "symbol": "513990",
+      "rows": 1424,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515010",
+      "rows": 1614,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515020",
+      "rows": 1596,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515060",
+      "rows": 1574,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515080",
+      "rows": 1578,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515090",
+      "rows": 1545,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515100",
+      "rows": 1456,
+      "repair_events": 1
+    },
+    {
+      "symbol": "515130",
+      "rows": 1493,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515150",
+      "rows": 1566,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515160",
+      "rows": 1539,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515190",
+      "rows": 1469,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515200",
+      "rows": 1608,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515230",
+      "rows": 1296,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515250",
+      "rows": 1328,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515260",
+      "rows": 1436,
+      "repair_events": 1
+    },
+    {
+      "symbol": "515290",
+      "rows": 1336,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515300",
+      "rows": 1644,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515310",
+      "rows": 1580,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515320",
+      "rows": 1328,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515330",
+      "rows": 1579,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515350",
+      "rows": 1555,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515360",
+      "rows": 1611,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515370",
+      "rows": 152,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515380",
+      "rows": 1524,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515390",
+      "rows": 1569,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515450",
+      "rows": 1542,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515460",
+      "rows": 76,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515480",
+      "rows": 1,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515530",
+      "rows": 1371,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515550",
+      "rows": 1565,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515560",
+      "rows": 1445,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515580",
+      "rows": 1621,
+      "repair_events": 1
+    },
+    {
+      "symbol": "515590",
+      "rows": 1560,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515600",
+      "rows": 1582,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515630",
+      "rows": 1515,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515640",
+      "rows": 48,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515650",
+      "rows": 1612,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515660",
+      "rows": 1581,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515680",
+      "rows": 1583,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515710",
+      "rows": 1329,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515720",
+      "rows": 180,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515730",
+      "rows": 147,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515750",
+      "rows": 1593,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515760",
+      "rows": 1391,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515770",
+      "rows": 1464,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515800",
+      "rows": 1587,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515810",
+      "rows": 1623,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515850",
+      "rows": 1545,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515860",
+      "rows": 1626,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515890",
+      "rows": 1505,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515900",
+      "rows": 1585,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515910",
+      "rows": 1298,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515920",
+      "rows": 1320,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515950",
+      "rows": 1517,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515960",
+      "rows": 1471,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515970",
+      "rows": 92,
+      "repair_events": 0
+    },
+    {
+      "symbol": "515990",
+      "rows": 1561,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516000",
+      "rows": 1297,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516010",
+      "rows": 1293,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516020",
+      "rows": 1292,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516050",
+      "rows": 1308,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516060",
+      "rows": 1297,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516070",
+      "rows": 1258,
+      "repair_events": 1
+    },
+    {
+      "symbol": "516090",
+      "rows": 1282,
+      "repair_events": 1
+    },
+    {
+      "symbol": "516110",
+      "rows": 1252,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516120",
+      "rows": 1291,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516130",
+      "rows": 1147,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516180",
+      "rows": 1295,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516200",
+      "rows": 1282,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516210",
+      "rows": 1155,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516220",
+      "rows": 1290,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516230",
+      "rows": 99,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516250",
+      "rows": 128,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516260",
+      "rows": 1192,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516270",
+      "rows": 1198,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516290",
+      "rows": 1177,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516300",
+      "rows": 1280,
+      "repair_events": 1
+    },
+    {
+      "symbol": "516310",
+      "rows": 1237,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516330",
+      "rows": 1268,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516350",
+      "rows": 1096,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516360",
+      "rows": 1248,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516370",
+      "rows": 62,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516380",
+      "rows": 1223,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516390",
+      "rows": 1223,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516460",
+      "rows": 288,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516500",
+      "rows": 1285,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516530",
+      "rows": 1080,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516550",
+      "rows": 1270,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516560",
+      "rows": 1159,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516570",
+      "rows": 1223,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516580",
+      "rows": 1197,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516600",
+      "rows": 1298,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516610",
+      "rows": 1248,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516620",
+      "rows": 1130,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516630",
+      "rows": 1168,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516640",
+      "rows": 1173,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516650",
+      "rows": 1222,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516700",
+      "rows": 1244,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516710",
+      "rows": 1181,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516720",
+      "rows": 1176,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516730",
+      "rows": 1125,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516750",
+      "rows": 1130,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516760",
+      "rows": 1288,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516770",
+      "rows": 1293,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516790",
+      "rows": 1177,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516810",
+      "rows": 1084,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516820",
+      "rows": 1214,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516830",
+      "rows": 1212,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516840",
+      "rows": 38,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516850",
+      "rows": 1283,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516860",
+      "rows": 1149,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516880",
+      "rows": 1322,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516890",
+      "rows": 1195,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516900",
+      "rows": 1255,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516910",
+      "rows": 1227,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516920",
+      "rows": 1182,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516930",
+      "rows": 1180,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516970",
+      "rows": 1212,
+      "repair_events": 0
+    },
+    {
+      "symbol": "516980",
+      "rows": 1216,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517000",
+      "rows": 1293,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517010",
+      "rows": 1183,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517030",
+      "rows": 1153,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517050",
+      "rows": 1307,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517080",
+      "rows": 1302,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517090",
+      "rows": 1093,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517100",
+      "rows": 1296,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517110",
+      "rows": 1151,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517120",
+      "rows": 1202,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517130",
+      "rows": 25,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517160",
+      "rows": 1085,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517170",
+      "rows": 1254,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517180",
+      "rows": 1093,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517200",
+      "rows": 1307,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517300",
+      "rows": 1300,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517330",
+      "rows": 1084,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517350",
+      "rows": 1233,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517360",
+      "rows": 1212,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517380",
+      "rows": 1187,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517390",
+      "rows": 1096,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517400",
+      "rows": 525,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517550",
+      "rows": 1069,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517660",
+      "rows": 1139,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517770",
+      "rows": 1110,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517800",
+      "rows": 1174,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517850",
+      "rows": 1005,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517880",
+      "rows": 1111,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517900",
+      "rows": 1036,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517950",
+      "rows": 130,
+      "repair_events": 0
+    },
+    {
+      "symbol": "517990",
+      "rows": 1002,
+      "repair_events": 0
+    },
+    {
+      "symbol": "518600",
+      "rows": 1433,
+      "repair_events": 0
+    },
+    {
+      "symbol": "518660",
+      "rows": 1479,
+      "repair_events": 0
+    },
+    {
+      "symbol": "518680",
+      "rows": 1439,
+      "repair_events": 0
+    },
+    {
+      "symbol": "518800",
+      "rows": 1686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "518850",
+      "rows": 1474,
+      "repair_events": 0
+    },
+    {
+      "symbol": "518860",
+      "rows": 1404,
+      "repair_events": 0
+    },
+    {
+      "symbol": "518890",
+      "rows": 1395,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520510",
+      "rows": 219,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520520",
+      "rows": 406,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520530",
+      "rows": 138,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520550",
+      "rows": 347,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520560",
+      "rows": 178,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520570",
+      "rows": 153,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520580",
+      "rows": 334,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520590",
+      "rows": 143,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520600",
+      "rows": 365,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520610",
+      "rows": 95,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520620",
+      "rows": 211,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520630",
+      "rows": 128,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520650",
+      "rows": 158,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520660",
+      "rows": 481,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520670",
+      "rows": 211,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520680",
+      "rows": 68,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520690",
+      "rows": 223,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520710",
+      "rows": 25,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520720",
+      "rows": 184,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520730",
+      "rows": 36,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520760",
+      "rows": 86,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520770",
+      "rows": 105,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520780",
+      "rows": 123,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520790",
+      "rows": 66,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520810",
+      "rows": 115,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520820",
+      "rows": 133,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520840",
+      "rows": 207,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520850",
+      "rows": 110,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520860",
+      "rows": 228,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520870",
+      "rows": 155,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520890",
+      "rows": 431,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520900",
+      "rows": 481,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520910",
+      "rows": 100,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520920",
+      "rows": 181,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520930",
+      "rows": 90,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520940",
+      "rows": 262,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520950",
+      "rows": 147,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520960",
+      "rows": 164,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520970",
+      "rows": 219,
+      "repair_events": 0
+    },
+    {
+      "symbol": "520990",
+      "rows": 481,
+      "repair_events": 0
+    },
+    {
+      "symbol": "526010",
+      "rows": 53,
+      "repair_events": 0
+    },
+    {
+      "symbol": "526030",
+      "rows": 7,
+      "repair_events": 0
+    },
+    {
+      "symbol": "526050",
+      "rows": 44,
+      "repair_events": 0
+    },
+    {
+      "symbol": "526070",
+      "rows": 26,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530000",
+      "rows": 434,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530050",
+      "rows": 383,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530060",
+      "rows": 94,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530080",
+      "rows": 348,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530100",
+      "rows": 171,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530180",
+      "rows": 367,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530280",
+      "rows": 347,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530300",
+      "rows": 357,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530380",
+      "rows": 181,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530530",
+      "rows": 203,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530580",
+      "rows": 359,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530680",
+      "rows": 359,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530800",
+      "rows": 346,
+      "repair_events": 0
+    },
+    {
+      "symbol": "530880",
+      "rows": 399,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560000",
+      "rows": 1108,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560020",
+      "rows": 660,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560030",
+      "rows": 723,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560050",
+      "rows": 1129,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560060",
+      "rows": 958,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560070",
+      "rows": 746,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560080",
+      "rows": 902,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560090",
+      "rows": 801,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560100",
+      "rows": 1063,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560110",
+      "rows": 946,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560120",
+      "rows": 221,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560130",
+      "rows": 114,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560150",
+      "rows": 544,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560160",
+      "rows": 104,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560170",
+      "rows": 726,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560180",
+      "rows": 775,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560190",
+      "rows": 361,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560210",
+      "rows": 72,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560220",
+      "rows": 674,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560230",
+      "rows": 96,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560250",
+      "rows": 31,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560260",
+      "rows": 675,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560270",
+      "rows": 82,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560280",
+      "rows": 650,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560290",
+      "rows": 96,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560300",
+      "rows": 615,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560310",
+      "rows": 86,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560320",
+      "rows": 38,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560330",
+      "rows": 756,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560350",
+      "rows": 561,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560360",
+      "rows": 493,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560370",
+      "rows": 88,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560380",
+      "rows": 366,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560390",
+      "rows": 84,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560400",
+      "rows": 73,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560410",
+      "rows": 53,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560420",
+      "rows": 34,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560450",
+      "rows": 44,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560460",
+      "rows": 36,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560470",
+      "rows": 44,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560480",
+      "rows": 29,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560490",
+      "rows": 29,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560500",
+      "rows": 1170,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560510",
+      "rows": 419,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560520",
+      "rows": 535,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560530",
+      "rows": 419,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560550",
+      "rows": 960,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560560",
+      "rows": 1162,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560570",
+      "rows": 189,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560580",
+      "rows": 763,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560590",
+      "rows": 668,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560610",
+      "rows": 419,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560620",
+      "rows": 423,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560630",
+      "rows": 306,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560650",
+      "rows": 971,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560660",
+      "rows": 1175,
+      "repair_events": 1
+    },
+    {
+      "symbol": "560670",
+      "rows": 20,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560680",
+      "rows": 892,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560690",
+      "rows": 534,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560700",
+      "rows": 746,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560710",
+      "rows": 96,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560720",
+      "rows": 21,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560750",
+      "rows": 343,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560770",
+      "rows": 202,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560790",
+      "rows": 30,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560800",
+      "rows": 1086,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560810",
+      "rows": 380,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560820",
+      "rows": 292,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560830",
+      "rows": 29,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560850",
+      "rows": 539,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560870",
+      "rows": 30,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560880",
+      "rows": 1026,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560900",
+      "rows": 992,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560910",
+      "rows": 32,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560920",
+      "rows": 2,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560930",
+      "rows": 37,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560950",
+      "rows": 709,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560970",
+      "rows": 20,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560980",
+      "rows": 871,
+      "repair_events": 0
+    },
+    {
+      "symbol": "560990",
+      "rows": 976,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561000",
+      "rows": 841,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561010",
+      "rows": 620,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561030",
+      "rows": 26,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561050",
+      "rows": 31,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561060",
+      "rows": 671,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561080",
+      "rows": 286,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561090",
+      "rows": 245,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561100",
+      "rows": 1069,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561120",
+      "rows": 1064,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561130",
+      "rows": 1144,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561160",
+      "rows": 967,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561170",
+      "rows": 800,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561180",
+      "rows": 876,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561190",
+      "rows": 960,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561200",
+      "rows": 589,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561220",
+      "rows": 267,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561230",
+      "rows": 557,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561260",
+      "rows": 702,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561280",
+      "rows": 670,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561300",
+      "rows": 1105,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561310",
+      "rows": 1116,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561320",
+      "rows": 864,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561350",
+      "rows": 1170,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561370",
+      "rows": 671,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561380",
+      "rows": 370,
+      "repair_events": 1
+    },
+    {
+      "symbol": "561430",
+      "rows": 5,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561460",
+      "rows": 2,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561500",
+      "rows": 1217,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561510",
+      "rows": 948,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561550",
+      "rows": 1105,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561560",
+      "rows": 1005,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561570",
+      "rows": 416,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561580",
+      "rows": 751,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561590",
+      "rows": 862,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561600",
+      "rows": 1164,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561660",
+      "rows": 158,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561680",
+      "rows": 198,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561700",
+      "rows": 962,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561750",
+      "rows": 267,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561760",
+      "rows": 529,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561770",
+      "rows": 251,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561780",
+      "rows": 641,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561790",
+      "rows": 702,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561870",
+      "rows": 282,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561880",
+      "rows": 347,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561900",
+      "rows": 1204,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561910",
+      "rows": 1184,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561920",
+      "rows": 791,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561930",
+      "rows": 431,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561950",
+      "rows": 774,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561960",
+      "rows": 746,
+      "repair_events": 0
+    },
+    {
+      "symbol": "561990",
+      "rows": 1105,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562000",
+      "rows": 951,
+      "repair_events": 1
+    },
+    {
+      "symbol": "562010",
+      "rows": 847,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562030",
+      "rows": 662,
+      "repair_events": 1
+    },
+    {
+      "symbol": "562050",
+      "rows": 254,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562060",
+      "rows": 607,
+      "repair_events": 1
+    },
+    {
+      "symbol": "562070",
+      "rows": 125,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562080",
+      "rows": 297,
+      "repair_events": 1
+    },
+    {
+      "symbol": "562300",
+      "rows": 1088,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562310",
+      "rows": 922,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562320",
+      "rows": 840,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562330",
+      "rows": 778,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562340",
+      "rows": 524,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562350",
+      "rows": 965,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562360",
+      "rows": 1145,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562380",
+      "rows": 726,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562390",
+      "rows": 953,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562510",
+      "rows": 1091,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562520",
+      "rows": 1039,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562530",
+      "rows": 942,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562550",
+      "rows": 793,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562560",
+      "rows": 540,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562570",
+      "rows": 528,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562580",
+      "rows": 551,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562600",
+      "rows": 620,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562660",
+      "rows": 676,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562700",
+      "rows": 521,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562810",
+      "rows": 319,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562820",
+      "rows": 534,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562850",
+      "rows": 702,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562860",
+      "rows": 814,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562870",
+      "rows": 228,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562880",
+      "rows": 1201,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562890",
+      "rows": 557,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562900",
+      "rows": 1104,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562910",
+      "rows": 1085,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562920",
+      "rows": 742,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562930",
+      "rows": 747,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562950",
+      "rows": 1077,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562960",
+      "rows": 782,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562970",
+      "rows": 402,
+      "repair_events": 0
+    },
+    {
+      "symbol": "562990",
+      "rows": 960,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563000",
+      "rows": 1129,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563010",
+      "rows": 721,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563020",
+      "rows": 617,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563030",
+      "rows": 803,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563050",
+      "rows": 726,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563060",
+      "rows": 276,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563080",
+      "rows": 557,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563090",
+      "rows": 504,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563150",
+      "rows": 509,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563180",
+      "rows": 521,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563200",
+      "rows": 658,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563210",
+      "rows": 347,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563220",
+      "rows": 419,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563230",
+      "rows": 190,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563280",
+      "rows": 537,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563330",
+      "rows": 644,
+      "repair_events": 1
+    },
+    {
+      "symbol": "563350",
+      "rows": 554,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563380",
+      "rows": 159,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563390",
+      "rows": 286,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563500",
+      "rows": 385,
+      "repair_events": 1
+    },
+    {
+      "symbol": "563510",
+      "rows": 143,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563520",
+      "rows": 395,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563530",
+      "rows": 154,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563550",
+      "rows": 277,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563560",
+      "rows": 87,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563570",
+      "rows": 157,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563580",
+      "rows": 228,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563590",
+      "rows": 161,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563600",
+      "rows": 183,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563620",
+      "rows": 210,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563630",
+      "rows": 246,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563650",
+      "rows": 304,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563660",
+      "rows": 305,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563670",
+      "rows": 177,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563680",
+      "rows": 278,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563690",
+      "rows": 179,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563700",
+      "rows": 288,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563750",
+      "rows": 165,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563760",
+      "rows": 263,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563770",
+      "rows": 277,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563780",
+      "rows": 280,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563790",
+      "rows": 120,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563800",
+      "rows": 395,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563830",
+      "rows": 273,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563850",
+      "rows": 129,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563860",
+      "rows": 340,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563870",
+      "rows": 112,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563880",
+      "rows": 390,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563890",
+      "rows": 174,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563900",
+      "rows": 284,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563930",
+      "rows": 119,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563960",
+      "rows": 117,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563980",
+      "rows": 159,
+      "repair_events": 0
+    },
+    {
+      "symbol": "563990",
+      "rows": 290,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588010",
+      "rows": 895,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588020",
+      "rows": 686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588030",
+      "rows": 675,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588040",
+      "rows": 298,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588050",
+      "rows": 1366,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588060",
+      "rows": 1194,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588070",
+      "rows": 397,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588110",
+      "rows": 686,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588120",
+      "rows": 675,
+      "repair_events": 1
+    },
+    {
+      "symbol": "588130",
+      "rows": 269,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588140",
+      "rows": 176,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588150",
+      "rows": 1099,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588160",
+      "rows": 895,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588180",
+      "rows": 1214,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588190",
+      "rows": 675,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588210",
+      "rows": 637,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588230",
+      "rows": 369,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588240",
+      "rows": 331,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588250",
+      "rows": 313,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588260",
+      "rows": 996,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588270",
+      "rows": 257,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588280",
+      "rows": 1135,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588290",
+      "rows": 895,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588300",
+      "rows": 1212,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588310",
+      "rows": 1111,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588320",
+      "rows": 843,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588330",
+      "rows": 1211,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588350",
+      "rows": 884,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588360",
+      "rows": 1211,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588370",
+      "rows": 861,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588380",
+      "rows": 1211,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588390",
+      "rows": 1172,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588400",
+      "rows": 1212,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588410",
+      "rows": 120,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588420",
+      "rows": 120,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588430",
+      "rows": 123,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588450",
+      "rows": 515,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588460",
+      "rows": 845,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588470",
+      "rows": 27,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588480",
+      "rows": 39,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588500",
+      "rows": 474,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588510",
+      "rows": 26,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588520",
+      "rows": 241,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588550",
+      "rows": 193,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588660",
+      "rows": 317,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588670",
+      "rows": 258,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588680",
+      "rows": 484,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588690",
+      "rows": 203,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588700",
+      "rows": 602,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588720",
+      "rows": 297,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588730",
+      "rows": 347,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588770",
+      "rows": 312,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588780",
+      "rows": 367,
+      "repair_events": 1
+    },
+    {
+      "symbol": "588800",
+      "rows": 637,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588810",
+      "rows": 358,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588820",
+      "rows": 361,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588830",
+      "rows": 459,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588840",
+      "rows": 322,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588850",
+      "rows": 290,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588860",
+      "rows": 449,
+      "repair_events": 1
+    },
+    {
+      "symbol": "588870",
+      "rows": 346,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588880",
+      "rows": 637,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588890",
+      "rows": 533,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588900",
+      "rows": 615,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588910",
+      "rows": 303,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588920",
+      "rows": 227,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588930",
+      "rows": 355,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588940",
+      "rows": 266,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588950",
+      "rows": 347,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588960",
+      "rows": 335,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588980",
+      "rows": 223,
+      "repair_events": 0
+    },
+    {
+      "symbol": "588990",
+      "rows": 454,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589000",
+      "rows": 325,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589010",
+      "rows": 301,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589030",
+      "rows": 110,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589050",
+      "rows": 212,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589060",
+      "rows": 309,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589070",
+      "rows": 106,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589080",
+      "rows": 325,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589090",
+      "rows": 205,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589100",
+      "rows": 303,
+      "repair_events": 1
+    },
+    {
+      "symbol": "589110",
+      "rows": 176,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589120",
+      "rows": 188,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589130",
+      "rows": 117,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589150",
+      "rows": 119,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589160",
+      "rows": 101,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589170",
+      "rows": 96,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589180",
+      "rows": 257,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589190",
+      "rows": 104,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589200",
+      "rows": 218,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589210",
+      "rows": 127,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589220",
+      "rows": 105,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589230",
+      "rows": 100,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589250",
+      "rows": 64,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589260",
+      "rows": 63,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589270",
+      "rows": 46,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589280",
+      "rows": 33,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589290",
+      "rows": 7,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589300",
+      "rows": 295,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589310",
+      "rows": 2,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589320",
+      "rows": 27,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589330",
+      "rows": 26,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589350",
+      "rows": 5,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589360",
+      "rows": 7,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589380",
+      "rows": 246,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589500",
+      "rows": 327,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589520",
+      "rows": 319,
+      "repair_events": 1
+    },
+    {
+      "symbol": "589550",
+      "rows": 227,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589560",
+      "rows": 198,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589580",
+      "rows": 260,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589600",
+      "rows": 323,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589630",
+      "rows": 320,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589660",
+      "rows": 325,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589680",
+      "rows": 325,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589700",
+      "rows": 264,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589770",
+      "rows": 325,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589780",
+      "rows": 183,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589820",
+      "rows": 192,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589850",
+      "rows": 217,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589860",
+      "rows": 325,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589880",
+      "rows": 328,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589890",
+      "rows": 325,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589900",
+      "rows": 325,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589950",
+      "rows": 174,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589960",
+      "rows": 187,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589980",
+      "rows": 281,
+      "repair_events": 0
+    },
+    {
+      "symbol": "589990",
+      "rows": 325,
+      "repair_events": 0
+    }
+  ],
+  "skipped": {},
+  "repair_event_count": 65,
+  "started_at": "2026-07-07 01:56:13",
+  "completed": 1302,
+  "updated_at": "2026-07-07 02:09:45",
+  "finished_at": "2026-07-07 02:09:45"
+}

@@ -1,0 +1,38 @@
+{
+  "run_id": "406faf75-f779-4cca-9da8-23124b4a1bb6",
+  "start_date": "2020-01-01",
+  "end_date": "2026-07-06",
+  "metrics": {
+    "total_return": 16.95069204868462,
+    "annualized_return": 0.5877439665982016,
+    "max_drawdown": -0.3036078320061407,
+    "trade_count": 817,
+    "win_rate": 0.5324357405140759
+  },
+  "incremental_price_plan_windows": 210,
+  "incremental_price_fetched_windows": 204,
+  "incremental_price_empty_windows": 0,
+  "incremental_price_skipped_windows": 6,
+  "incremental_price_first_active_dates_used": true,
+  "incremental_price_reason_counts": {
+    "interior_gaps": 205,
+    "missing_prefix": 3,
+    "missing_suffix": 2
+  },
+  "threshold_min": 1335068.967713043,
+  "threshold_median": 4482626.41957562,
+  "threshold_max": 24613343.41767628,
+  "threshold_latest": 17235834.434786484,
+  "jq_target_compared_days": 1440,
+  "jq_target_matched_days": 1004,
+  "jq_target_match_rate": 0.6972222222222222,
+  "dynamic_audit_rows": 1440,
+  "jq_in_dynamic_pool_rate": 0.6111111111111112,
+  "jq_in_candidates_rate": 0.7694444444444445,
+  "dynamic_audit_reason_counts": {
+    "matched_target": 1004,
+    "not_in_local_dynamic_pool": 167,
+    "in_dynamic_pool_not_candidate": 165,
+    "in_candidates_not_top": 104
+  }
+}

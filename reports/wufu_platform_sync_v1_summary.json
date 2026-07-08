@@ -1,0 +1,82 @@
+{
+  "run_id": "70bc7d0b-7307-4dd9-b38e-d0c1bb93b708",
+  "start_date": "2020-01-01",
+  "end_date": "2026-07-06",
+  "metrics": {
+    "total_return": 10.47456879392985,
+    "annualized_return": 0.4779697454817402,
+    "max_drawdown": -0.3744945863451271,
+    "trade_count": 809,
+    "win_rate": 0.5302843016069221
+  },
+  "target_rows": 1575,
+  "trade_rows": 809,
+  "data_quality_excluded_symbols": [
+    "159305",
+    "159507",
+    "159537",
+    "159583",
+    "159876",
+    "159901",
+    "159907",
+    "159925",
+    "159970",
+    "159971",
+    "510030",
+    "510100",
+    "510150",
+    "510170",
+    "510210",
+    "510230",
+    "510580",
+    "510630",
+    "512010",
+    "512070",
+    "512100",
+    "512120",
+    "512170",
+    "512480",
+    "512560",
+    "512600",
+    "512670",
+    "512690",
+    "512710",
+    "512760",
+    "512890",
+    "513100",
+    "513500",
+    "513660",
+    "515580",
+    "516070",
+    "516090",
+    "560010"
+  ],
+  "metadata_symbols": 1530,
+  "threshold_min": 1335068.967713043,
+  "threshold_median": 4540847.545136698,
+  "threshold_max": 24613343.41767628,
+  "jq_signal_match": {
+    "days": 1575,
+    "matched_days": 931,
+    "match_rate": 0.5911111111111111,
+    "weak_days": 766
+  },
+  "ths_signal_match": {
+    "days": 1574,
+    "matched_days": 784,
+    "match_rate": 0.49809402795425667,
+    "weak_days": 765
+  },
+  "dynamic_audit": {
+    "rows": 1575,
+    "target_match_rate": 0.5911111111111111,
+    "jq_in_dynamic_pool_rate": 0.6558730158730158,
+    "jq_in_candidates_rate": 0.5885714285714285,
+    "reason_counts": {
+      "matched_target": 931,
+      "in_dynamic_pool_not_candidate": 322,
+      "not_in_local_dynamic_pool": 242,
+      "in_candidates_not_top": 80
+    }
+  }
+}

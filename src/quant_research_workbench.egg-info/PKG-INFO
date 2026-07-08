@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: quant-research-workbench
+Version: 0.1.0
+Summary: Local quant research workbench with akshare, DuckDB, Streamlit, and reproducible backtests.
+Requires-Python: >=3.11
+Requires-Dist: akshare>=1.15.0
+Requires-Dist: duckdb>=1.1.0
+Requires-Dist: pandas>=2.2.0
+Requires-Dist: plotly>=5.24.0
+Requires-Dist: streamlit>=1.38.0

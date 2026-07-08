@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>THS JQ V8 Deep Analysis</title>
+  <style>
+    body{font-family:"Microsoft YaHei","Segoe UI",sans-serif;max-width:1120px;margin:32px auto;line-height:1.72;color:#1f2937}
+    h1{font-size:28px}
+    h2{font-size:21px;margin-top:30px;border-bottom:1px solid #e5e7eb;padding-bottom:4px}
+    h3{font-size:17px;margin-top:22px}
+    p,li{font-size:15px}
+    code{background:#f3f4f6;padding:2px 5px;border-radius:4px}
+    table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}
+    th,td{border:1px solid #e5e7eb;padding:7px 8px;text-align:right}
+    th:first-child,td:first-child{text-align:left}
+    th{background:#f9fafb}
+  </style>
+</head>
+<body>
+  <h1>同花顺 vs 聚宽分钟级 V8 精细化对比报告</h1>
+  <h2>结论摘要</h2>
+  <p>本轮 V8 的执行层改造基本达成，但弱市自动化目标没有达成。弱市匹配率为 89.84%，目标匹配率为 90.60%，低于 V7 的弱市 100%、目标 98.48%。</p>
+  <p>核心根因是同花顺 A500 探测失败：<code>000510.SH</code> 解析结果 <code>rows=0</code>，候选 <code>000510.SH,000510.XSHG,000510.CSI,000510,1B0510,1B0510.SH</code> 均未取到有效日线。同花顺没有触发 fallback，因为前三个指数可用，当前规则允许三指数状态机继续运行。</p>
+
+  <h2>关键指标</h2>
+  <table>
+    <tr><th>指标</th><th>结果</th></tr>
+    <tr><td>弱市匹配率</td><td>1415 / 1575 = 89.84%</td></tr>
+    <tr><td>目标匹配率</td><td>1427 / 1575 = 90.60%</td></tr>
+    <tr><td>目标不一致日</td><td>148</td></tr>
+    <tr><td>目标不一致且弱市不一致</td><td>125</td></tr>
+    <tr><td>执行失败订单</td><td>同花顺 0，聚宽 0</td></tr>
+    <tr><td>同花顺最终权益</td><td>5118.81 万</td></tr>
+    <tr><td>聚宽最终权益</td><td>7599.27 万</td></tr>
+    <tr><td>权益比</td><td>67.36%</td></tr>
+  </table>
+
+  <h2>对标设计目的</h2>
+  <h3>1. A500 数据源：未达成</h3>
+  <table>
+    <tr><th>指数</th><th>解析结果</th><th>行数</th><th>状态</th></tr>
+    <tr><td>000300.SH</td><td>000300.SH</td><td>12</td><td>可用</td></tr>
+    <tr><td>399101.SZ</td><td>399101.SZ</td><td>12</td><td>可用</td></tr>
+    <tr><td>399006.SZ</td><td>399006.SZ</td><td>12</td><td>可用</td></tr>
+    <tr><td>000510.SH</td><td>000510.SH</td><td>0</td><td>不可用</td></tr>
+  </table>
+
+  <h3>2. 弱市匹配 95%+：未达成</h3>
+  <p>弱市错位 160 天。典型错位日中，同花顺和聚宽的候选池从全球 ETF 池与固定 ETF 池之间切换，导致目标明显分叉。</p>
+
+  <h3>3. 目标匹配 95%+：未达成</h3>
+  <p>148 个目标不一致日里，125 天同时弱市不一致，占 84.46%。剩余 23 天主要是 V7 已知的池子边界、成交额阈值和评分边界问题。</p>
+
+  <h3>4. 执行层规则：基本达成</h3>
+  <p>两边完整输出 1575 条 <code>WUFU_ORDER_PLAN</code>，包含 <code>estimated_cost / residual_cash / round_lot</code>。本轮 order_fail 均为 0。权益差异主要来自弱市和目标错位后的复利路径分叉。</p>
+
+  <h2>弱市根本统一方案</h2>
+  <h3>第一层：同步主线先恢复稳定</h3>
+  <p>把同花顺 <code>WEAK_MIN_VALID_INDEXES</code> 从 3 改为 4。只要四个指数中任意一个缺失，立即触发 <code>WUFU_WEAK_FALLBACK</code>。A500 未修通前，收益对标主线继续使用回放弱市；自动弱市只作为诊断分支。</p>
+
+  <h3>第二层：建立弱市日历 SSOT</h3>
+  <p>本地每天生成统一弱市状态表：<code>trade_date / is_weak / source / below_count / above_count / weak_start / weak_days / detail_hash</code>，再嵌入同花顺和聚宽脚本。两端输出 <code>WUFU_WEAK_CALENDAR_VERSION</code> 和 <code>WUFU_WEAK_SOURCE</code>，保证三边共享同一事实源。</p>
+
+  <h3>第三层：自动 A500 源修通后再切主线</h3>
+  <p>自动源必须逐日输出四个指数的 resolved code、last_date、close、MA10、above/below/equal，以及状态机 before/after/weak_start/weak_days。只有当自动弱市匹配率达到 99%+，才替代弱市日历。</p>
+
+  <h2>优化路径</h2>
+  <ul>
+    <li><b>V9：</b>恢复同步主线。强制四指数有效，A500 缺失即 fallback，目标是弱市回到 95%+，目标回到 95%+。</li>
+    <li><b>V10：</b>A500 数据源专项修复。尝试同花顺指数函数或板块指数函数，而不仅是证券行情 <code>get_price</code>。</li>
+    <li><b>V11：</b>完全复刻弱市状态机。统一 previous_date、MA10 窗口、交易日 weak_days、进入退出优先级。</li>
+    <li><b>V12：</b>弱市一致后，修复剩余池子/评分边界的 23 天。</li>
+  </ul>
+
+  <h2>产物</h2>
+  <ul>
+    <li><code>reports/ths_jq_fast_v8_acceptance_new_summary.json</code></li>
+    <li><code>reports/ths_jq_fast_v8_acceptance_new_signal_compare.csv</code></li>
+    <li><code>reports/ths_jq_fast_v8_acceptance_new_morning_compare.csv</code></li>
+    <li><code>reports/ths_jq_fast_v8_acceptance_new_score_compare.csv</code></li>
+    <li><code>reports/ths_jq_fast_v8_acceptance_new_order_plan_compare.csv</code></li>
+    <li><code>reports/ths_jq_fast_v8_acceptance_new_position_compare.csv</code></li>
+  </ul>
+</body>
+</html>

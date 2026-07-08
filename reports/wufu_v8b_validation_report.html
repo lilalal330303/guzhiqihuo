@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Wufu V8b Validation Report</title>
+  <style>
+    body{font-family:"Microsoft YaHei","Segoe UI",sans-serif;max-width:1080px;margin:32px auto;line-height:1.72;color:#1f2937}
+    h1{font-size:28px}
+    h2{font-size:21px;margin-top:30px;border-bottom:1px solid #e5e7eb;padding-bottom:4px}
+    h3{font-size:17px;margin-top:22px}
+    p,li{font-size:15px}
+    code{background:#f3f4f6;padding:2px 5px;border-radius:4px}
+    table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}
+    th,td{border:1px solid #e5e7eb;padding:7px 8px;text-align:right}
+    th:first-child,td:first-child{text-align:left}
+    th{background:#f9fafb}
+  </style>
+</head>
+<body>
+  <h1>五福 ETF V8b 本地差异验证报告</h1>
+  <h2>验证目的</h2>
+  <p>本轮把差异拆成三层：warmup 历史不足、自动 A500 弱市状态、V8 执行层撮合规则。</p>
+
+  <h2>验证设置</h2>
+  <p>统一使用 2020-01-02 到 2026-07-06 区间，warmup 起点为 2019-09-01；执行引擎为 V8 现金/份额撮合，包含 0.2% 现金保留、100 份向下取整、佣金 0.01%、滑点 0.01%、最低佣金 5 元，并剔除 12 个疑似价格断点标的。</p>
+
+  <h2>核心结果</h2>
+  <table>
+    <tr><th>版本</th><th>最终权益</th><th>总收益</th><th>年化</th><th>最大回撤</th><th>交易记录</th><th>目标匹配 V6</th><th>弱市匹配 V6</th></tr>
+    <tr><td>V6 目标 + V8 执行</td><td>954.20 万</td><td>854.20%</td><td>39.05%</td><td>-35.77%</td><td>1541</td><td>100.00%</td><td>100.00%</td></tr>
+    <tr><td>V8 自动弱市 + warmup</td><td>568.47 万</td><td>468.47%</td><td>28.92%</td><td>-29.93%</td><td>1525</td><td>88.76%</td><td>84.83%</td></tr>
+    <tr><td>V8 回放弱市 + warmup</td><td>988.37 万</td><td>888.37%</td><td>39.77%</td><td>-35.77%</td><td>1539</td><td>99.68%</td><td>100.00%</td></tr>
+  </table>
+
+  <h2>结论</h2>
+  <h3>1. warmup 不是主要问题</h3>
+  <p>加上 2019-09-01 起的 warmup 后，V8 回放弱市目标与 V6 目标匹配率达到 99.68%，最终权益也非常接近。这说明目标生成主体逻辑没有明显走偏。</p>
+
+  <h3>2. 自动弱市是当前最大差异来源</h3>
+  <p>V8 自动弱市与 V6 的弱市匹配率只有 84.83%，目标匹配率只有 88.76%。最终权益从接近 988 万降到 568 万，说明自动指数弱市不能直接替代回放弱市作为收益对标主线。</p>
+
+  <h3>3. V8 执行层规则不是主要拖累</h3>
+  <p>同一套 V8 执行引擎跑 V6 目标，最终权益为 954.20 万；跑 V8 回放弱市目标，最终权益为 988.37 万。因此上一轮低收益主要不是 100 份取整、现金缓冲、佣金滑点造成的，而是自动弱市口径导致的目标错位。</p>
+
+  <h2>解释</h2>
+  <p>上一轮没有 warmup 时，早期有一段被迫落到防御 ETF，这确实是缺陷，但它刚好避开了部分自动弱市口径下的早期风险暴露。补齐 warmup 后，自动弱市策略更早参与轮动；如果弱市状态本身与聚宽/回放不一致，收益反而更低。</p>
+
+  <h2>下一步</h2>
+  <ul>
+    <li>平台同步主版本继续使用“自动弱市优先 + 回放兜底”，但验收时单独统计 <code>WUFU_WEAK_DETAIL</code>、<code>WUFU_WEAK_FALLBACK</code>、<code>WUFU_INDEX_RESOLVE</code>。</li>
+    <li>本地收益对标版本先使用 <code>v8_replay_weak_warmup</code>，因为它和 V6 目标匹配 99.68%。</li>
+    <li>自动 A500 弱市作为研究分支，下一轮做日期级弱市差异表，逐日比较四个指数 close、MA10、below/above、进入退出边界。</li>
+    <li>本地回测脚本后续应默认补 warmup，并增加 <code>weak_mode=replay|auto</code> 参数。</li>
+  </ul>
+
+  <h2>本轮产物</h2>
+  <ul>
+    <li><code>reports/run_wufu_v8b_validation.py</code></li>
+    <li><code>reports/wufu_v8b_validation_summary.json</code></li>
+    <li><code>reports/wufu_v8b_validation_v6_targets_equity.csv</code></li>
+    <li><code>reports/wufu_v8b_validation_v8_auto_weak_warmup_equity.csv</code></li>
+    <li><code>reports/wufu_v8b_validation_v8_replay_weak_warmup_equity.csv</code></li>
+    <li><code>reports/wufu_v8b_validation_*_targets.csv</code></li>
+  </ul>
+</body>
+</html>

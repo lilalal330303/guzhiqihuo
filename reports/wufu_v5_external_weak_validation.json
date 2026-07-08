@@ -1,0 +1,9 @@
+{
+  "script": "reports\\同花顺_聚宽五福ETF同步快速V5_弱市注入.py",
+  "days": 1575,
+  "weak_days": 766,
+  "ranges": 120,
+  "matched_days": 1575,
+  "match_rate": 1.0,
+  "mismatch_dates": []
+}

@@ -1,0 +1,79 @@
+{
+  "run_id": "041f6848-6d71-44e4-8a88-acbe4427fcc1",
+  "start_date": "2020-01-01",
+  "end_date": "2026-07-06",
+  "metrics": {
+    "total_return": 14.180534341823732,
+    "annualized_return": 0.5457028560429338,
+    "max_drawdown": -0.3279773781347237,
+    "trade_count": 771,
+    "win_rate": 0.5317769130998703
+  },
+  "target_rows": 1575,
+  "trade_rows": 771,
+  "data_quality_excluded_symbols": [
+    "159583",
+    "512010",
+    "512070",
+    "512100",
+    "512170",
+    "512480",
+    "512670",
+    "512690",
+    "512710",
+    "512890",
+    "513100",
+    "513500"
+  ],
+  "threshold_min": 538165.6219182631,
+  "threshold_median": 2008515.0402004397,
+  "threshold_max": 12944403.061522877,
+  "local_vs_ths": {
+    "days": 1575,
+    "matched_days": 978,
+    "match_rate": 0.6209523809523809,
+    "weak_days": 766,
+    "by_local_weak": [
+      {
+        "is_weak": false,
+        "days": 809,
+        "match_rate": 0.588380716934487
+      },
+      {
+        "is_weak": true,
+        "days": 766,
+        "match_rate": 0.6553524804177546
+      }
+    ]
+  },
+  "local_vs_jq": {
+    "days": 1575,
+    "matched_days": 1065,
+    "match_rate": 0.6761904761904762,
+    "weak_days": 766,
+    "by_local_weak": [
+      {
+        "is_weak": false,
+        "days": 809,
+        "match_rate": 0.6365883807169345
+      },
+      {
+        "is_weak": true,
+        "days": 766,
+        "match_rate": 0.7180156657963447
+      }
+    ]
+  },
+  "ths_vs_jq_v3": {
+    "target_match_rate": 0.9060317460317461,
+    "weak_match_rate": 0.8984126984126984,
+    "weak_mismatch_days": 160,
+    "threshold_ratio_median": 0.9932244542539431,
+    "ths_total_return_from_first_close": 50.64544884031384
+  },
+  "iteration_reading": [
+    "V4 platform scripts isolate the remaining biggest platform mismatch: SuperMind missing 000510 weak-index data.",
+    "Local V4 now applies fixed-pool liquidity filtering, so its pool construction is closer to both platforms than V1.",
+    "Local still uses daily close for scoring, while both platform minute scripts use 13:10 current price/volume; this remains the largest local-platform scoring gap."
+  ]
+}

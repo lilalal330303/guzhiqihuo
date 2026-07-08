@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Wufu V7 Script Iteration</title>
+  <style>
+    body{font-family:"Microsoft YaHei","Segoe UI",sans-serif;max-width:980px;margin:32px auto;line-height:1.72;color:#1f2937}
+    h1{font-size:28px}
+    h2{font-size:20px;margin-top:28px}
+    p{margin:8px 0}
+    li{margin:6px 0}
+    code{background:#f3f4f6;padding:2px 5px;border-radius:4px}
+  </style>
+</head>
+<body>
+  <h1>五福 ETF 平台同步 V7 脚本迭代报告</h1>
+  <h2>本轮目标</h2>
+  <p>在 V6 达到“弱市状态 100% 一致、目标日期 98.48% 一致”的基础上，继续压缩剩余差异，并让下一轮同花顺、聚宽分钟级日志可以更直接定位原因。</p>
+  <h2>已完成改动</h2>
+  <p>1. 同花顺 <code>WUFU_SCORE_DETAIL</code> 补齐无候选日期格式：V7 已统一为 <code>date / weak / pool / passed / target / top10</code>，修复专项 24 日中无候选日期无法解析的问题。</p>
+  <p>2. 两个平台统一输出 <code>WUFU_ORDER_PLAN</code>：字段包括日期、目标代码、账户权益、0.2% 现金缓冲后的可用金额、当前价、100 份向下取整后的份额、实际目标下单金额。</p>
+  <p>3. 聚宽日终持仓日志防重复：<code>reset_daily_flags</code> 和 <code>after_trading_end</code> 都可触发持仓记录，V7 增加同日保护，保证每天只输出一条 <code>WUFU_POSITION</code>。</p>
+  <p>4. 初始化版本号升级：同花顺新增 <code>WUFU_THS_FAST_V7</code>，聚宽升级为 <code>WUFU_JQ_FIXED_POOL_V7</code>。</p>
+  <h2>输出脚本</h2>
+  <ul>
+    <li>同花顺英文路径：<code>reports/ths_wufu_fast_v7_score_pool_execution.py</code></li>
+    <li>同花顺中文副本：<code>reports/同花顺_聚宽五福ETF同步快速V7_诊断执行.py</code></li>
+    <li>聚宽英文路径：<code>reports/jq_wufu_fixed_pool_v7_score_pool_execution.py</code></li>
+    <li>聚宽中文副本：<code>reports/聚宽_五福ETF同步固定池V7_诊断执行.py</code></li>
+  </ul>
+  <h2>验证结果</h2>
+  <p>已用本地 Python 对两份 V7 脚本做语法检查，通过。</p>
+  <h2>下一轮日志验收重点</h2>
+  <p>优先检查 <code>WUFU_SCORE_DETAIL</code> 是否两边都能解析到专项 24 日；目标一致但收益不同，则看 <code>WUFU_ORDER_PLAN</code> 的价格、份额和下单金额；目标一致但持仓不同，则看 <code>WUFU_POSITION</code>、卖出失败、买入失败、停牌、整手不足和现金缓冲。</p>
+  <p>速度方面，V7 继续保持只在 24 个诊断日输出重日志，常规回测不要打开全量逐标的明细，否则同花顺分钟级环境会明显变慢。</p>
+</body>
+</html>

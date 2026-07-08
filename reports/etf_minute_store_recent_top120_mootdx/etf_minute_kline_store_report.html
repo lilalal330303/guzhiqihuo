@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>ETF 分钟 K 线库搭建报告</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; line-height: 1.65; margin: 40px; color: #1f2937; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 20px; margin-top: 28px; }
+    p { margin: 8px 0; }
+    code { background: #f3f4f6; padding: 2px 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+<h1>ETF 分钟 K 线库搭建报告</h1>
+<h2>本轮结果</h2>
+<p>- 候选标的数：120</p>
+<p>- 新增分钟行数：736000</p>
+<p>- 本轮成功补数标的：115</p>
+<p>- 本轮失败或源不可用标的：0</p>
+<p>- 请求区间：2026-05-29 至 2026-07-07</p>
+<p>- 分批天数：31</p>
+<p>- 配置数据源：['mootdx', 'akshare']</p>
+<p>- 可用数据源：['mootdx', 'akshare']</p>
+<h2>数据源预检</h2>
+<p>- mootdx: 可用，ok</p>
+<p>- akshare: 可用，ok</p>
+<h2>数据源优先级</h2>
+<p>1. Pandadata `get_stock_min`：适合作为长周期 1 分钟历史库主源，需要账号权限。</p>
+<p>2. JQData / Tushare Pro / 米筐 / Wind / Choice / iFinD：适合授权长周期分钟数据，可作为 Pandadata 的替代主源。</p>
+<p>3. mootdx：免 key，适合近期分钟增量和盘后验证，历史长度有限。</p>
+<p>4. AkShare/东方财富：免 key 兜底，通常只适合近期数据，易受网络和限流影响。</p>
+<h2>输出文件</h2>
+<p>- `etf_minute_fetch_results.csv`</p>
+<p>- `etf_minute_coverage.csv`</p>
+</body>
+</html>

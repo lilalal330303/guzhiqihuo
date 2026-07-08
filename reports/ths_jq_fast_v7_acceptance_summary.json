@@ -1,0 +1,178 @@
+{
+  "ths_counts": {
+    "line_count": 10242,
+    "warnings": 668,
+    "errors": 0,
+    "version_v7": true,
+    "version_lines": [
+      "2020-01-02 00:00:00INFOWUFU_THS_FAST_V5 external_weak=True source=joinquant_v4_log_ranges start=2020-01-02 end=2026-07-06 ranges=120 dynamic_pool=False full_market_threshold=False",
+      "2020-01-02 00:00:00INFOWUFU_THS_FAST_V7 diagnostics=24 execution_buffer=0.998 round_lot=100 score_detail_top_n=10"
+    ]
+  },
+  "jq_counts": {
+    "line_count": 8271,
+    "warnings": 1,
+    "errors": 282,
+    "version_v7": true,
+    "version_lines": [
+      "2020-01-01 00:00:00 - INFO  - WUFU_JQ_FIXED_POOL_V7 schedule morning=09:40 signal=13:10 execute=13:11 reset=15:10 diagnostics=24 execution_buffer=0.998 round_lot=100"
+    ]
+  },
+  "ths_rows": {
+    "signals": 1575,
+    "executes": 1575,
+    "morning": 1575,
+    "score_detail": 24,
+    "threshold_detail": 24,
+    "pool_filter": 24,
+    "order_plan": 1575,
+    "position": 1575,
+    "close": 1575,
+    "order_fail": 0
+  },
+  "jq_rows": {
+    "signals": 1575,
+    "executes": 1575,
+    "morning": 1575,
+    "score_detail": 24,
+    "threshold_detail": 24,
+    "pool_filter": 24,
+    "order_plan": 1575,
+    "position": 1575,
+    "close": 0,
+    "order_fail": 0
+  },
+  "signal": {
+    "days": 1575,
+    "target_match_days": 1551,
+    "target_match_rate": 0.9847619047619047,
+    "top1_match_rate": 0.9847619047619047,
+    "top10_overlap_mean": 6.093333333333334,
+    "mismatch_dates": [
+      "2020-07-17",
+      "2020-12-14",
+      "2021-04-20",
+      "2021-05-26",
+      "2021-05-27",
+      "2021-05-28",
+      "2021-05-31",
+      "2021-06-03",
+      "2021-07-01",
+      "2021-07-02",
+      "2021-07-21",
+      "2021-08-31",
+      "2021-09-10",
+      "2021-11-30",
+      "2021-12-01",
+      "2021-12-09",
+      "2021-12-10",
+      "2022-03-29",
+      "2024-11-25",
+      "2025-07-22",
+      "2025-09-04",
+      "2025-09-09",
+      "2025-11-14",
+      "2026-07-02"
+    ]
+  },
+  "morning": {
+    "days": 1575,
+    "weak_match_days": 1575,
+    "weak_match_rate": 1.0,
+    "threshold_ratio_median": 0.9932244542539431,
+    "pool_diff_median": 0.0
+  },
+  "score": {
+    "ths_rows": 24,
+    "jq_rows": 24,
+    "missing_in_ths": [],
+    "missing_in_jq": [],
+    "diagnostic_dates_covered_ths": 24,
+    "diagnostic_dates_covered_jq": 24,
+    "matched_days": 24,
+    "target_match_rate": 0.0,
+    "top1_match_rate": 0.0,
+    "top10_overlap_mean": 7.75,
+    "passed_diff_median": -1.0,
+    "mismatch_dates": [
+      "2020-07-17",
+      "2020-12-14",
+      "2021-04-20",
+      "2021-05-26",
+      "2021-05-27",
+      "2021-05-28",
+      "2021-05-31",
+      "2021-06-03",
+      "2021-07-01",
+      "2021-07-02",
+      "2021-07-21",
+      "2021-08-31",
+      "2021-09-10",
+      "2021-11-30",
+      "2021-12-01",
+      "2021-12-09",
+      "2021-12-10",
+      "2022-03-29",
+      "2024-11-25",
+      "2025-07-22",
+      "2025-09-04",
+      "2025-09-09",
+      "2025-11-14",
+      "2026-07-02"
+    ]
+  },
+  "order_plan": {
+    "days": 1575,
+    "code_match_rate": 0.9847619047619047,
+    "price_abs_diff_max": 99.994,
+    "shares_abs_diff_median": 201200.0,
+    "shares_abs_diff_p95": 4056660.0,
+    "order_value_abs_diff_median": 290291.2999999998,
+    "account_value_ratio_median": 0.9499117766404005,
+    "same_code_days": 1551
+  },
+  "position": {
+    "days": 1575,
+    "symbol_match_rate": 0.9650793650793651,
+    "value_ratio_median": 0.9497856520644892,
+    "value_abs_diff_median": 288975.18000000017,
+    "final_ths_value": 69094453.25,
+    "final_jq_value": 76044474.32,
+    "final_value_ratio": 0.9086058371479582
+  },
+  "pool_filter": {
+    "days": 24,
+    "output_diff_median": -2.0,
+    "output_diff_abs_max": 3.0,
+    "selected_overlap_median": 64.0
+  },
+  "threshold": {
+    "days": 24,
+    "threshold_ratio_median": 0.9906145846652805,
+    "threshold_ratio_min": 0.9780033043387878,
+    "threshold_ratio_max": 1.0025230356594008,
+    "valid_diff_median": -2.0
+  },
+  "ths_equity": {
+    "days": 1575,
+    "first_date": "2020-01-02",
+    "last_date": "2026-07-06",
+    "first_value": 998496.53,
+    "final_value": 69094453.25,
+    "total_return_from_first_position": 68.19849110542226,
+    "max_drawdown": -0.23671921298598497
+  },
+  "jq_equity": {
+    "days": 1575,
+    "first_date": "2020-01-02",
+    "last_date": "2026-07-06",
+    "first_value": 998546.1,
+    "final_value": 76044474.32,
+    "total_return_from_first_position": 75.15519635998778,
+    "max_drawdown": -0.24956391445072812
+  },
+  "order_fail": {
+    "ths": 0,
+    "jq": 0
+  }
+}

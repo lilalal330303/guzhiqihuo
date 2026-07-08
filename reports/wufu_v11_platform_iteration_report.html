@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>五福 ETF V11 双平台整合迭代报告</title><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;line-height:1.75;max-width:1120px;margin:32px auto;padding:0 24px;color:#1f2937}h1{font-size:30px}h2{margin-top:30px;font-size:22px}h3{margin-top:22px;font-size:18px}pre{background:#f6f8fa;padding:12px;overflow:auto;border-radius:6px}p{margin:10px 0}</style></head><body>
+<h1>五福 ETF V11 双平台整合迭代报告</h1>
+<h2>结论</h2>
+<p>同花顺 V10 的主要问题不是选股完全失败，而是执行层没有真正进入 V10 日内择时状态机；聚宽 V10 已完整运行趋势等待、强制买入和分钟止损。</p>
+<pre>| 项目 | 同花顺 V10 | 聚宽 V10 |
+|---|---:|---:|
+| 调度注册失败 | 4 | 0 |
+| WUFU_INTRADAY_TREND | 0 | 1,523 |
+| WUFU_PENDING_BUY | 0 | 2,029 |
+| WUFU_STOP_LOSS | 0 | 17 |
+| 同花顺成交量 25% 限制 WARN | 132 | - |
+| 同花顺下单股数为 0 WARN | 502 | - |</pre>
+<h2>V11 固化参数</h2>
+<pre>| 参数 | V11 |
+|---|---:|
+| trend_lookback_minutes | 30 |
+| trend_slope_threshold | 0.002 |
+| fixed_stop_loss_threshold | 0.97 |
+| force_buy_minute | 14:40 |
+| cash_buffer | 0.998 |</pre>
+<h2>输出脚本</h2>
+<p>聚宽 V11：reports/jq_wufu_fixed_pool_v11_intraday_best_params.py</p>
+<p>同花顺 V11：reports/ths_wufu_fast_v11_intraday_best_params.py</p>
+<h2>同花顺后续验证</h2>
+<p>先验收 WUFU_INTRADAY_TREND、WUFU_PENDING_BUY、WUFU_STOP_LOSS 是否出现，再分析成交量 25% 限制、下单股数为 0、资金不足对收益差异的贡献。</p>
+</body></html>

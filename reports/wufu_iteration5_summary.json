@@ -1,0 +1,21 @@
+{
+  "run_id": "54b15a3a-b8ee-41eb-97de-70108b7b1865",
+  "elapsed_seconds": 391.72,
+  "metrics": {
+    "total_return": 15.753766120807395,
+    "annualized_return": 0.5702992564395744,
+    "max_drawdown": -0.2859386254410272,
+    "trade_count": 808,
+    "win_rate": 0.530940594059406
+  },
+  "target_rows": 1575,
+  "trade_rows": 808,
+  "data_quality_excluded_symbols": [],
+  "target_compare_rows": 1440,
+  "target_match_count": 979,
+  "target_match_ratio": 0.6798611111111111,
+  "weak_lag_days": 1,
+  "weak_match_ratio": 1.0,
+  "full_market_price_symbols": 1530,
+  "repair_event_rows": 65
+}

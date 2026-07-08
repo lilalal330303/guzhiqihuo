@@ -1,0 +1,151 @@
+{
+  "ths_counts": {
+    "line_count": 7397,
+    "warnings": 1047,
+    "errors": 0
+  },
+  "jq_counts": {
+    "line_count": 5393,
+    "warnings": 1,
+    "errors": 626
+  },
+  "ths_rows": {
+    "signals": 1575,
+    "executes": 1575,
+    "morning": 1575,
+    "threshold_detail": 0,
+    "weak_detail": 13,
+    "score_detail": 0,
+    "close": 1575,
+    "fast_cache": 0,
+    "order_errors": 0
+  },
+  "jq_rows": {
+    "signals": 1575,
+    "executes": 1575,
+    "morning": 1575,
+    "threshold_detail": 0,
+    "weak_detail": 38,
+    "score_detail": 0,
+    "close": 0,
+    "fast_cache": 0,
+    "order_errors": 0
+  },
+  "signal": {
+    "days": 1575,
+    "target_match_days": 1427,
+    "target_match_rate": 0.9060317460317461,
+    "top1_match_rate": 0.9060317460317461,
+    "top10_overlap_mean": 5.603809523809524,
+    "first_date": "2020-01-02",
+    "last_date": "2026-07-06",
+    "yearly": {
+      "2020": {
+        "target_match": 0.9423868312757202,
+        "top10_overlap": 5.909465020576132
+      },
+      "2021": {
+        "target_match": 0.7942386831275721,
+        "top10_overlap": 5.127572016460905
+      },
+      "2022": {
+        "target_match": 0.9256198347107438,
+        "top10_overlap": 4.380165289256198
+      },
+      "2023": {
+        "target_match": 0.9132231404958677,
+        "top10_overlap": 5.070247933884297
+      },
+      "2024": {
+        "target_match": 0.9338842975206612,
+        "top10_overlap": 5.863636363636363
+      },
+      "2025": {
+        "target_match": 0.934156378600823,
+        "top10_overlap": 7.139917695473251
+      },
+      "2026": {
+        "target_match": 0.8916666666666667,
+        "top10_overlap": 5.858333333333333
+      }
+    }
+  },
+  "morning": {
+    "days": 1575,
+    "weak_match_days": 1415,
+    "weak_match_rate": 0.8984126984126984,
+    "weak_mismatch_days": 160,
+    "threshold_ratio_min": 0.944727529305648,
+    "threshold_ratio_median": 0.9932244542539431,
+    "threshold_ratio_mean": 0.9930174362076434,
+    "threshold_ratio_max": 1.027233814000306,
+    "ths_requested_median": null,
+    "ths_fetched_median": null,
+    "jq_universe_median": null,
+    "ths_pool_median": 41.0,
+    "jq_pool_median": 36.0,
+    "yearly": {
+      "2020": {
+        "weak_match": 0.9300411522633745,
+        "threshold_ratio": 1.0000936064895507,
+        "ths_pool": 40.0,
+        "jq_pool": 40.0
+      },
+      "2021": {
+        "weak_match": 0.831275720164609,
+        "threshold_ratio": 0.9891210969064448,
+        "ths_pool": 51.0,
+        "jq_pool": 52.0
+      },
+      "2022": {
+        "weak_match": 0.9090909090909091,
+        "threshold_ratio": 0.9881466525450897,
+        "ths_pool": 10.0,
+        "jq_pool": 10.0
+      },
+      "2023": {
+        "weak_match": 0.9049586776859504,
+        "threshold_ratio": 0.9902986156169646,
+        "ths_pool": 13.0,
+        "jq_pool": 13.0
+      },
+      "2024": {
+        "weak_match": 0.9090909090909091,
+        "threshold_ratio": 0.9955575421005807,
+        "ths_pool": 17.0,
+        "jq_pool": 17.0
+      },
+      "2025": {
+        "weak_match": 0.934156378600823,
+        "threshold_ratio": 0.9968276543497223,
+        "ths_pool": 107.0,
+        "jq_pool": 109.0
+      },
+      "2026": {
+        "weak_match": 0.8416666666666667,
+        "threshold_ratio": 0.9949860293348338,
+        "ths_pool": 112.0,
+        "jq_pool": 114.0
+      }
+    }
+  },
+  "score": {
+    "days": 0
+  },
+  "ths_close": {
+    "days": 1575,
+    "first_date": "2020-01-02",
+    "last_date": "2026-07-06",
+    "first_value": 998493.42,
+    "final_value": 51567640.84,
+    "total_return_from_first_close": 50.64544884031384,
+    "max_drawdown": -0.22230340242948832,
+    "daily_volatility": 0.02081216019262736
+  },
+  "ths_order_warnings": {
+    "count": 0
+  },
+  "jq_order_errors": {
+    "count": 0
+  }
+}

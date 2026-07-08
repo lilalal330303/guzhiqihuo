@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>五福 ETF V10 长周期分钟补库与复评报告</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; line-height: 1.7; max-width: 1080px; margin: 32px auto; padding: 0 24px; color: #1f2933; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 20px; margin-top: 28px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    th, td { border: 1px solid #d0d7de; padding: 8px; text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    code { background: #f6f8fa; padding: 2px 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>五福 ETF V10 长周期分钟补库与复评报告</h1>
+  <h2>执行结论</h2>
+  <p>本轮已把本地分钟补库器升级为“源预检 + 按月分批 + 断点增量 + 中文 HTML 报告”的长期补库流程，但当前机器没有 Pandadata 凭据，且 <code>jqdatasdk</code>、<code>tushare</code> SDK 尚未安装或配置账号，因此无法真正拉取 2020-2026 全池历史分钟线。</p>
+  <p>本轮没有新增长周期分钟数据。V10 复跑后仍是“真实分钟优先、缺口日期日线代理兜底”的结果。</p>
+  <h2>数据源状态</h2>
+  <p>- Pandadata：SDK 已安装，但缺少账号凭据，预检失败。</p>
+  <p>- JQData：<code>jqdatasdk</code> 未安装，未配置账号。</p>
+  <p>- Tushare Pro：<code>tushare</code> 未安装，未配置 token。</p>
+  <p>- mootdx：可用，但只能覆盖近期分钟数据。</p>
+  <p>- AkShare/东方财富：可作为近期兜底，不适合作为全历史主源。</p>
+  <h2>本地分钟库现状</h2>
+  <p>- <code>prices_minute</code> 总行数：38,400</p>
+  <p>- 覆盖标的数：6</p>
+  <p>- 覆盖日期：2026-05-29 至 2026-07-07</p>
+  <p>- V10 回测区间命中分钟行数：36,960</p>
+  <h2>Pandadata 预检结果</h2>
+  <p>运行范围：2020-01-02 至 2026-07-06；样本标的：511880、510300、159967；新增 0 行。</p>
+  <p>阻断原因：<code>Pandadata credentials are missing. Set DEFAULT_USERNAME and DEFAULT_PASSWORD, or create ~/.pandadata/pandadata.env.</code></p>
+  <h2>V10 复评结果</h2>
+  <table>
+    <tr><th>指标</th><th>基准：真实 13:11 买入</th><th>V10：真实分钟择时</th><th>差异</th></tr>
+    <tr><td>最终权益</td><td>6,120,732.57</td><td>33,171,533.35</td><td>27,050,800.78</td></tr>
+    <tr><td>总收益</td><td>512.07%</td><td>3217.15%</td><td>2705.08%</td></tr>
+    <tr><td>年化收益</td><td>32.10%</td><td>71.27%</td><td>39.17%</td></tr>
+    <tr><td>最大回撤</td><td>-29.93%</td><td>-24.91%</td><td>5.02%</td></tr>
+    <tr><td>交易数</td><td>1509</td><td>1521</td><td>12</td></tr>
+    <tr><td>止损次数</td><td>0</td><td>29</td><td>29</td></tr>
+  </table>
+  <p>买入模式：<code>force_proxy</code> 395、<code>trend_proxy</code> 364、<code>force_real</code> 2。</p>
+  <p>卖出/止损执行：<code>daily_close</code> 729、<code>stop_proxy</code> 29、<code>minute</code> 2。</p>
+  <h2>判断</h2>
+  <p>当前 V10 的收益仍不能当作完整真实分钟回测结论。原因是 2020-2026 的大部分交易仍走日线代理，真实分钟只命中最近少量交易。它只能说明真实分钟执行链路已经打通。</p>
+  <h2>下一步</h2>
+  <p>配置 Pandadata、JQData 或 Tushare Pro 账号权限后，直接复用现有补库脚本按月补齐历史分钟，再重跑 V10。验收目标是 <code>trend_real/force_real</code> 和 <code>minute/stop_real</code> 替代代理模式，真实分钟覆盖率达到 95%+。</p>
+</body>
+</html>

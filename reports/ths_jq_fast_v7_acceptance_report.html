@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>THS JQ V7 Acceptance Report</title>
+  <style>
+    body{font-family:"Microsoft YaHei","Segoe UI",sans-serif;max-width:1080px;margin:32px auto;line-height:1.72;color:#1f2937}
+    h1{font-size:28px;margin-bottom:12px}
+    h2{font-size:21px;margin-top:30px;border-bottom:1px solid #e5e7eb;padding-bottom:4px}
+    h3{font-size:17px;margin-top:22px}
+    p,li{font-size:15px}
+    code{background:#f3f4f6;padding:2px 5px;border-radius:4px}
+    table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}
+    th,td{border:1px solid #e5e7eb;padding:7px 8px;text-align:right}
+    th:first-child,td:first-child{text-align:left}
+    th{background:#f9fafb}
+    .ok{color:#047857;font-weight:700}
+    .warn{color:#b45309;font-weight:700}
+    .bad{color:#b91c1c;font-weight:700}
+  </style>
+</head>
+<body>
+  <h1>同花顺 vs 聚宽分钟级 V7 验收分析报告</h1>
+
+  <h2>结论摘要</h2>
+  <p>本轮 V7 的设计目的“诊断信息补全、执行层可解释、持仓日志稳定”基本达成，但“平台表现完全一致”还没有达成。</p>
+  <ul>
+    <li>两边脚本均确认为 V7。</li>
+    <li>信号目标一致：1551 / 1575 天，匹配率 <b>98.48%</b>。</li>
+    <li>弱市状态一致：1575 / 1575 天，匹配率 <b>100%</b>。</li>
+    <li>专项 24 个不一致日期的 <code>WUFU_SCORE_DETAIL</code> 已全部补齐：同花顺 24 条，聚宽 24 条。</li>
+    <li>专项 24 日中，评分 Top10 平均重合 7.75 个，但目标 24 / 24 仍不一致。</li>
+    <li>最终权益：同花顺 6909.45 万，聚宽 7604.45 万，同花顺约为聚宽的 90.86%。</li>
+  </ul>
+
+  <h2>对标设计目的</h2>
+  <h3>1. 补齐专项评分日志：<span class="ok">达成</span></h3>
+  <p>V6 中同花顺缺少 <code>2021-07-21</code> 的评分明细，V7 已修复。现在 24 个专项日期两边都有评分明细，可以进入真正的日期级归因。</p>
+  <p>但评分层暴露出新的核心矛盾：24 个专项日目标仍全部不一致。多数日期 Top10 重合度很高，说明趋势评分主逻辑接近；差异来自过滤后池子边界、成交额阈值和个别临界标的排序。</p>
+
+  <table>
+    <tr><th>日期</th><th>同花顺目标</th><th>聚宽目标</th><th>同花顺池</th><th>聚宽池</th><th>同花顺通过</th><th>聚宽通过</th><th>Top10 重合</th></tr>
+    <tr><td>2021-04-20</td><td>512480</td><td>512690</td><td>60</td><td>62</td><td>30</td><td>31</td><td>10</td></tr>
+    <tr><td>2021-05-26</td><td>512690</td><td>512010</td><td>60</td><td>63</td><td>21</td><td>22</td><td>10</td></tr>
+    <tr><td>2021-07-21</td><td>511880</td><td>159985</td><td>9</td><td>9</td><td>0</td><td>1</td><td>0</td></tr>
+    <tr><td>2025-07-22</td><td>515210</td><td>516150</td><td>109</td><td>111</td><td>84</td><td>86</td><td>9</td></tr>
+    <tr><td>2026-07-02</td><td>513290</td><td>159667</td><td>112</td><td>114</td><td>9</td><td>10</td><td>9</td></tr>
+  </table>
+
+  <h3>2. 输出过滤后池子和成交额阈值：<span class="ok">基本达成</span></h3>
+  <p>专项 24 日两边都输出了 <code>WUFU_POOL_FILTER</code> 与 <code>WUFU_THRESHOLD_DETAIL</code>。成交额阈值中位比为 0.9906，范围 0.9780 到 1.0025；过滤后池子数量差中位数为 -2，即同花顺通常比聚宽少 2 只。</p>
+  <p>这解释了“Top10 高重合但目标不一致”：少量边界 ETF 进入或退出池子后，第一名或阈值候选发生变化。</p>
+
+  <h3>3. 执行层统一并输出下单计划：<span class="warn">部分达成</span></h3>
+  <p>两边 1575 天都完整输出 <code>WUFU_ORDER_PLAN</code>。目标相同的 1551 天里，价格差为 0，说明当前价口径已经对齐。</p>
+  <p>但份额和下单金额仍有明显差异，主要不是价格差，而是账户权益已经发生漂移。账户权益中位比为 0.9499，同目标日期下下单金额绝对差中位数约 29.03 万。</p>
+
+  <h3>4. 日终持仓稳定性：<span class="ok">达成</span></h3>
+  <p>同花顺和聚宽均输出 1575 条 <code>WUFU_POSITION</code>，重复日期为 0。持仓标的一致率为 96.51%，低于信号目标一致率 98.48%，因为目标错位会让持仓延续多天。</p>
+
+  <h2>主要差异来源</h2>
+  <p><b>第一层：池子边界差异。</b>专项 24 日中，同花顺过滤后池子通常比聚宽少 1 到 3 只，少掉的标的经常正好处在 Top10 或候选阈值附近。</p>
+  <p><b>第二层：成交额阈值小差异。</b>两边阈值整体非常接近，但过滤对边界很敏感。0.5% 到 2% 的阈值差，在低成交额或新上市 ETF 上会改变是否入池。</p>
+  <p><b>第三层：得分通过数差异。</b>专项 24 日中，通过打分数量差中位数为 -1，足以改变第一目标。</p>
+  <p><b>第四层：权益路径复利放大。</b>目标错位只有 24 天，但持仓错位达到 55 天；后续即使重新买到同一目标，因为账户权益不同，下单份额也不同，最终收益差扩大到约 9.14%。</p>
+
+  <h2>合理解释</h2>
+  <p>这版结果符合 V7 的设计预期：V7 不是直接提高收益，而是把“黑箱差异”拆成可定位的层级。现在可以明确说：弱市状态不是差异来源；价格源在同目标日期不是主要差异来源；执行时点和 100 份取整已可对齐；剩余主要差异来自专项日期的池子过滤和临界标的进入/退出。</p>
+
+  <h2>后续优化路径</h2>
+  <p><b>V8：先做池子边界修复。</b>把 24 个专项日的过滤后池子从“数量接近”推进到“成分完全一致”。建议输出边界附近 rejected 标的完整成交额，并把同花顺 rejected 中的 <code>NA</code> 分成无历史价格、无成交额字段、接口未返回、上市日期不足四类。</p>
+  <p><b>V9：做分数细节逐标的对齐。</b>池子成分一致后，对共同 Top10 的 <code>annualized / r2 / price / today_volume</code> 做逐标的差异表，检查前复权、停牌、当天 volume 和历史窗口边界。</p>
+  <p><b>V10：执行层收益归因。</b>信号目标达到 100% 后，再同步佣金、滑点、成交价口径，并输出理论下单份额与实际成交份额差异。</p>
+
+  <h2>本轮产物</h2>
+  <ul>
+    <li><code>reports/ths_jq_fast_v7_acceptance_summary.json</code></li>
+    <li><code>reports/ths_jq_fast_v7_acceptance_signal_compare.csv</code></li>
+    <li><code>reports/ths_jq_fast_v7_acceptance_score_compare.csv</code></li>
+    <li><code>reports/ths_jq_fast_v7_acceptance_pool_filter_compare.csv</code></li>
+    <li><code>reports/ths_jq_fast_v7_acceptance_order_plan_compare.csv</code></li>
+    <li><code>reports/ths_jq_fast_v7_acceptance_position_compare.csv</code></li>
+  </ul>
+</body>
+</html>

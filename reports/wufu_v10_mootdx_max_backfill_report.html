@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>五福 ETF V10 mootdx 分批极限补分钟报告</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; line-height: 1.7; max-width: 1080px; margin: 32px auto; padding: 0 24px; color: #1f2933; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 20px; margin-top: 28px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    th, td { border: 1px solid #d0d7de; padding: 8px; text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    code { background: #f6f8fa; padding: 2px 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>五福 ETF V10 mootdx 分批极限补分钟报告</h1>
+  <h2>执行结论</h2>
+  <p>本轮沿免费路径继续向前补 ETF 分钟数据。代表标的 <code>510300</code> 探测显示，mootdx 当前最多可回溯到 <code>2026-02-06</code>，继续增加页数到 48、64、96 都不会再往前。</p>
+  <p>随后使用 32 页、每页 800 行，对成交额靠前的 120 只 ETF 分批补库。最终本地分钟库从 <code>2026-05-29</code> 扩展到最早 <code>2026-02-06</code>。</p>
+  <h2>页数探测</h2>
+  <table>
+    <tr><th>pages</th><th>行数</th><th>最早日期</th><th>最晚日期</th><th>交易日数</th></tr>
+    <tr><td>8</td><td>6,400</td><td>2026-05-29</td><td>2026-07-07</td><td>27</td></tr>
+    <tr><td>16</td><td>12,800</td><td>2026-04-17</td><td>2026-07-07</td><td>54</td></tr>
+    <tr><td>24</td><td>19,200</td><td>2026-03-11</td><td>2026-07-07</td><td>80</td></tr>
+    <tr><td>32</td><td>23,280</td><td>2026-02-06</td><td>2026-07-07</td><td>97</td></tr>
+    <tr><td>48</td><td>23,280</td><td>2026-02-06</td><td>2026-07-07</td><td>97</td></tr>
+    <tr><td>64</td><td>23,280</td><td>2026-02-06</td><td>2026-07-07</td><td>97</td></tr>
+    <tr><td>96</td><td>23,280</td><td>2026-02-06</td><td>2026-07-07</td><td>97</td></tr>
+  </table>
+  <h2>补库结果</h2>
+  <p>- 候选标的：120；成功补数标的：120。</p>
+  <p>- 本轮覆盖行数：2,735,760。</p>
+  <p>- 本地 <code>prices_minute</code> 总行数：2,844,560。</p>
+  <p>- 本地分钟库总覆盖标的：137。</p>
+  <p>- 全库日期范围：2026-02-06 至 2026-07-07。</p>
+  <h2>V10 复跑结果</h2>
+  <table>
+    <tr><th>指标</th><th>基准：真实 13:11 买入</th><th>V10：真实分钟择时</th><th>差异</th></tr>
+    <tr><td>最终权益</td><td>6,167,869.37</td><td>31,272,498.49</td><td>25,104,629.13</td></tr>
+    <tr><td>总收益</td><td>516.79%</td><td>3027.25%</td><td>2510.46%</td></tr>
+    <tr><td>年化收益</td><td>32.26%</td><td>69.73%</td><td>37.47%</td></tr>
+    <tr><td>最大回撤</td><td>-58.81%</td><td>-58.86%</td><td>-0.04%</td></tr>
+    <tr><td>交易数</td><td>1509</td><td>1521</td><td>12</td></tr>
+    <tr><td>止损次数</td><td>0</td><td>28</td><td>28</td></tr>
+  </table>
+  <h2>真实分钟命中</h2>
+  <p>本轮极限补数后：V10 命中分钟行数 1,483,520，命中分钟标的 67，<code>trend_real</code> 34，<code>force_real</code> 11，<code>minute</code> 卖出 46。</p>
+  <p>真实分钟买入覆盖日期：2026-02-06 至 2026-07-02；真实分钟卖出覆盖日期：2026-02-06 至 2026-07-03。</p>
+  <h2>判断</h2>
+  <p>mootdx 当前能提供的 ETF 1 分钟数据基本补到极限，最多只能补到 2026-02-06 左右。它显著提升了 2026 年以来的真实分钟覆盖，但无法继续向 2025、2024 或 2020 回溯。</p>
+  <p>后续如果继续用 mootdx，适合做每日或每周增量更新；如果要做 2020 起完整真实分钟回测，仍需要授权历史分钟源。</p>
+</body>
+</html>

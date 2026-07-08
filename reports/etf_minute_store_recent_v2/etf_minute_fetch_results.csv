@@ -1,0 +1,7 @@
+symbol,status,source,start_date,end_date,rows,error
+510300.SH,ok,mootdx,2026-05-29,2026-07-07,6400,
+159915.SZ,ok,mootdx,2026-05-29,2026-07-07,6400,
+159949.SZ,ok,mootdx,2026-05-29,2026-07-07,6400,
+159967.SZ,ok,mootdx,2026-05-29,2026-07-07,6400,
+159985.SZ,ok,mootdx,2026-05-29,2026-07-07,6400,
+511880.SH,up_to_date,,,,0,

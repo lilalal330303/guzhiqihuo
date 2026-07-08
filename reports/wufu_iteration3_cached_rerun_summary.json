@@ -1,0 +1,13 @@
+{
+  "run_id": "008d0416-6a51-4aae-a511-ae83e40adbbc",
+  "metrics": {
+    "total_return": 16.745952995688633,
+    "annualized_return": 0.5848306640450536,
+    "max_drawdown": -0.2624767292948029,
+    "trade_count": 773,
+    "win_rate": 0.5252263906856404
+  },
+  "elapsed_seconds": 6.59,
+  "target_rows": 1575,
+  "trade_rows": 773
+}

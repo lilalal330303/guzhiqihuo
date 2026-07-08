@@ -1,0 +1,13 @@
+pyproject.toml
+src/quant_lab/__init__.py
+src/quant_lab/app/__init__.py
+src/quant_lab/backtest/__init__.py
+src/quant_lab/data/__init__.py
+src/quant_lab/research/__init__.py
+src/quant_lab/strategies/__init__.py
+src/quant_research_workbench.egg-info/PKG-INFO
+src/quant_research_workbench.egg-info/SOURCES.txt
+src/quant_research_workbench.egg-info/dependency_links.txt
+src/quant_research_workbench.egg-info/requires.txt
+src/quant_research_workbench.egg-info/top_level.txt
+tests/test_ma_cross.py

@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Wufu V8 Iteration Analysis</title>
+  <style>
+    body{font-family:"Microsoft YaHei","Segoe UI",sans-serif;max-width:1080px;margin:32px auto;line-height:1.72;color:#1f2937}
+    h1{font-size:28px}
+    h2{font-size:21px;margin-top:30px;border-bottom:1px solid #e5e7eb;padding-bottom:4px}
+    h3{font-size:17px;margin-top:22px}
+    p,li{font-size:15px}
+    code{background:#f3f4f6;padding:2px 5px;border-radius:4px}
+    table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}
+    th,td{border:1px solid #e5e7eb;padding:7px 8px;text-align:right}
+    th:first-child,td:first-child{text-align:left}
+    th{background:#f9fafb}
+  </style>
+</head>
+<body>
+  <h1>五福 ETF V8 迭代与本地回测分析</h1>
+  <h2>本轮目标</h2>
+  <p>本轮把同花顺弱市状态从“聚宽日志回放”推进到“本地指数自动计算优先”，同时处理执行层 100 份取整、碎股、资金不足和成本预留规则，并输出新版同花顺、聚宽和本地回测脚本。</p>
+
+  <h2>中证 A500 数据源结论</h2>
+  <p>公开口径确认：中证 A500 指数代码为 <code>000510</code>；同花顺行情中心的中证 A500 页面 URL 使用 <code>1B0510</code>。</p>
+  <p>V8 同花顺脚本采用候选顺序：<code>000510.SH -> 000510.XSHG -> 000510.CSI -> 000510 -> 1B0510 -> 1B0510.SH</code>。运行时会输出 <code>WUFU_INDEX_RESOLVE</code>，确认实际可用源；若有效指数不足 3 个，会输出 <code>WUFU_WEAK_FALLBACK</code> 并回退到 V7 弱市区间。</p>
+
+  <h2>平台脚本改动</h2>
+  <h3>同花顺 V8</h3>
+  <ul>
+    <li>默认启用自动弱市计算：<code>USE_EXTERNAL_WEAK_STATES = False</code>。</li>
+    <li>保留聚宽日志弱市兜底：<code>FALLBACK_EXTERNAL_WEAK_STATES = True</code>。</li>
+    <li>中证 A500 增加 <code>1B0510 / 1B0510.SH</code>。</li>
+    <li>初始化日志升级为 <code>WUFU_THS_FAST_V8</code>。</li>
+    <li><code>WUFU_ORDER_PLAN</code> 增加 <code>estimated_cost / residual_cash / round_lot</code>。</li>
+  </ul>
+  <h3>聚宽 V8</h3>
+  <ul>
+    <li>初始化日志升级为 <code>WUFU_JQ_FIXED_POOL_V8</code>。</li>
+    <li>弱市指数继续使用 <code>000300.XSHG / 399101.XSHE / 399006.XSHE / 000510.XSHG</code>。</li>
+    <li>下单计划字段与同花顺一致，买入预算加入成本预留并按 100 份向下取整。</li>
+  </ul>
+
+  <h2>本地执行版回测</h2>
+  <p>本地脚本：<code>reports/run_wufu_v8_local_execution_backtest.py</code>。规则为 T 日信号、T+1 日执行，佣金 0.01%、滑点 0.01%、最低佣金 5 元，保留 0.2% 现金，按 100 份向下取整。</p>
+  <table>
+    <tr><th>指标</th><th>数值</th></tr>
+    <tr><td>ETF 价格行数</td><td>115401</td></tr>
+    <tr><td>有效 ETF 数</td><td>103</td></tr>
+    <tr><td>剔除异常标的</td><td>12</td></tr>
+    <tr><td>目标日期</td><td>1575</td></tr>
+    <tr><td>弱市日期</td><td>1575</td></tr>
+    <tr><td>最终权益</td><td>611.52 万</td></tr>
+    <tr><td>总收益</td><td>511.52%</td></tr>
+    <tr><td>年化收益</td><td>32.08%</td></tr>
+    <tr><td>最大回撤</td><td>-29.93%</td></tr>
+    <tr><td>交易记录</td><td>1509</td></tr>
+    <tr><td>买入次数</td><td>755</td></tr>
+    <tr><td>卖出次数</td><td>754</td></tr>
+    <tr><td>胜率</td><td>49.47%</td></tr>
+  </table>
+  <p>本地收益低于同花顺和聚宽平台日志，主要因为本地 ETF 数据仍存在前复权/断点处理不足，12 个疑似断点标的被剔除。本地结果适合作为执行规则验证版，暂不适合作为收益绝对值对标版。</p>
+
+  <h2>与 V7 平台验收目标的关系</h2>
+  <p>V7 已经达到弱市匹配率 100%、目标匹配率 98.48%。V8 的目标是在不破坏 95%+ 匹配率的前提下，完成同花顺 A500 自动源探测和执行层规则统一。下一轮平台验收要重点看 <code>WUFU_INDEX_RESOLVE</code>、<code>WUFU_WEAK_FALLBACK</code> 和新 <code>WUFU_ORDER_PLAN</code> 字段。</p>
+
+  <h2>输出文件</h2>
+  <ul>
+    <li><code>reports/ths_wufu_fast_v8_a500_execution.py</code></li>
+    <li><code>reports/同花顺_聚宽五福ETF同步快速V8_A500执行修复.py</code></li>
+    <li><code>reports/jq_wufu_fixed_pool_v8_a500_execution.py</code></li>
+    <li><code>reports/聚宽_五福ETF同步固定池V8_A500执行修复.py</code></li>
+    <li><code>reports/run_wufu_v8_local_execution_backtest.py</code></li>
+    <li><code>reports/wufu_v8_local_execution_summary.json</code></li>
+    <li><code>reports/wufu_v8_local_execution_equity.csv</code></li>
+    <li><code>reports/wufu_v8_local_execution_trades.csv</code></li>
+    <li><code>reports/wufu_v8_local_execution_targets.csv</code></li>
+  </ul>
+</body>
+</html>

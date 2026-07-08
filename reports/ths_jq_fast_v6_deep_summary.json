@@ -1,0 +1,740 @@
+{
+  "summary": {
+    "ths_counts": {
+      "line_count": 8666,
+      "warnings": 668,
+      "errors": 0
+    },
+    "jq_counts": {
+      "line_count": 6696,
+      "warnings": 1,
+      "errors": 282
+    },
+    "ths_rows": {
+      "signals": 1575,
+      "executes": 1575,
+      "morning": 1575,
+      "threshold_detail": 24,
+      "weak_detail": 0,
+      "score_detail": 23,
+      "close": 1575,
+      "fast_cache": 0,
+      "order_errors": 0
+    },
+    "jq_rows": {
+      "signals": 1575,
+      "executes": 1575,
+      "morning": 1575,
+      "threshold_detail": 24,
+      "weak_detail": 38,
+      "score_detail": 24,
+      "close": 0,
+      "fast_cache": 0,
+      "order_errors": 0
+    },
+    "signal": {
+      "days": 1575,
+      "target_match_days": 1551,
+      "target_match_rate": 0.9847619047619047,
+      "top1_match_rate": 0.9847619047619047,
+      "top10_overlap_mean": 6.093333333333334,
+      "first_date": "2020-01-02",
+      "last_date": "2026-07-06",
+      "yearly": {
+        "2020": {
+          "target_match": 0.9917695473251029,
+          "top10_overlap": 6.181069958847736
+        },
+        "2021": {
+          "target_match": 0.9382716049382716,
+          "top10_overlap": 6.1234567901234565
+        },
+        "2022": {
+          "target_match": 0.9958677685950413,
+          "top10_overlap": 4.710743801652892
+        },
+        "2023": {
+          "target_match": 1.0,
+          "top10_overlap": 5.677685950413223
+        },
+        "2024": {
+          "target_match": 0.9958677685950413,
+          "top10_overlap": 6.256198347107438
+        },
+        "2025": {
+          "target_match": 0.9835390946502057,
+          "top10_overlap": 7.530864197530864
+        },
+        "2026": {
+          "target_match": 0.9916666666666667,
+          "top10_overlap": 6.241666666666666
+        }
+      }
+    },
+    "morning": {
+      "days": 1575,
+      "weak_match_days": 1575,
+      "weak_match_rate": 1.0,
+      "weak_mismatch_days": 0,
+      "threshold_ratio_min": 0.944727529305648,
+      "threshold_ratio_median": 0.9932244542539431,
+      "threshold_ratio_mean": 0.9930174362076434,
+      "threshold_ratio_max": 1.027233814000306,
+      "ths_requested_median": null,
+      "ths_fetched_median": null,
+      "jq_universe_median": 114.0,
+      "ths_pool_median": 36.0,
+      "jq_pool_median": 36.0,
+      "yearly": {
+        "2020": {
+          "weak_match": 1.0,
+          "threshold_ratio": 1.0000936064895507,
+          "ths_pool": 40.0,
+          "jq_pool": 40.0
+        },
+        "2021": {
+          "weak_match": 1.0,
+          "threshold_ratio": 0.9891210969064448,
+          "ths_pool": 51.0,
+          "jq_pool": 52.0
+        },
+        "2022": {
+          "weak_match": 1.0,
+          "threshold_ratio": 0.9881466525450897,
+          "ths_pool": 10.0,
+          "jq_pool": 10.0
+        },
+        "2023": {
+          "weak_match": 1.0,
+          "threshold_ratio": 0.9902986156169646,
+          "ths_pool": 13.0,
+          "jq_pool": 13.0
+        },
+        "2024": {
+          "weak_match": 1.0,
+          "threshold_ratio": 0.9955575421005807,
+          "ths_pool": 17.0,
+          "jq_pool": 17.0
+        },
+        "2025": {
+          "weak_match": 1.0,
+          "threshold_ratio": 0.9968276543497223,
+          "ths_pool": 107.0,
+          "jq_pool": 109.0
+        },
+        "2026": {
+          "weak_match": 1.0,
+          "threshold_ratio": 0.9949860293348338,
+          "ths_pool": 112.0,
+          "jq_pool": 114.0
+        }
+      }
+    },
+    "score": {
+      "days": 23,
+      "target_match_rate": 0.0,
+      "top10_overlap_mean": 8.08695652173913,
+      "ths_passed_median": 22.0,
+      "jq_passed_median": 24.0,
+      "passed_diff_median": -1.0
+    },
+    "ths_close": {
+      "days": 1575,
+      "first_date": "2020-01-02",
+      "last_date": "2026-07-06",
+      "first_value": 998496.53,
+      "final_value": 69094453.25,
+      "total_return_from_first_close": 68.19849110542226,
+      "max_drawdown": -0.23671921298598497,
+      "daily_volatility": 0.020597513786192092
+    },
+    "ths_order_warnings": {
+      "count": 0
+    },
+    "jq_order_errors": {
+      "count": 0
+    }
+  },
+  "coverage": {
+    "diagnostic_mismatch_days": 24,
+    "ths_threshold_detail_rows": 24,
+    "jq_threshold_detail_rows": 24,
+    "ths_score_detail_rows": 23,
+    "jq_score_detail_rows": 24,
+    "ths_pool_filter_rows": 24,
+    "jq_pool_filter_rows": 24,
+    "ths_position_rows": 1575,
+    "jq_position_rows": 1575,
+    "missing_ths_score_dates": [
+      "2021-07-21"
+    ],
+    "missing_jq_score_dates": [],
+    "missing_ths_pool_dates": [],
+    "missing_jq_pool_dates": []
+  },
+  "warnings": {
+    "ths_warn_lines": 668,
+    "ths_order_fail_lines": 0,
+    "jq_errors": 282
+  },
+  "score_compare_rows": [
+    {
+      "date": "2020-07-17",
+      "ths_target": "161226",
+      "jq_target": "159980",
+      "target_match": false,
+      "ths_passed": 3.0,
+      "jq_passed": 4,
+      "top_overlap": 3,
+      "ths_top1": "161226",
+      "jq_top1": "159980",
+      "score_delta_json": "[{\"code\": \"161226\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 23100.0}, {\"code\": \"513030\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 3000.0}, {\"code\": \"513500\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 5900.0}]"
+    },
+    {
+      "date": "2020-12-14",
+      "ths_target": "501018",
+      "jq_target": "159980",
+      "target_match": false,
+      "ths_passed": 2.0,
+      "jq_passed": 3,
+      "top_overlap": 2,
+      "ths_top1": "501018",
+      "jq_top1": "159980",
+      "score_delta_json": "[{\"code\": \"501018\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 351300.0}, {\"code\": \"513500\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 480900.0}]"
+    },
+    {
+      "date": "2021-04-20",
+      "ths_target": "512480",
+      "jq_target": "512690",
+      "target_match": false,
+      "ths_passed": 30.0,
+      "jq_passed": 31,
+      "top_overlap": 10,
+      "ths_top1": "512480",
+      "jq_top1": "512690",
+      "score_delta_json": "[{\"code\": \"159967\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 2414715.0}, {\"code\": \"159981\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1000.0}, {\"code\": \"159995\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 239400.0}, {\"code\": \"512480\", \"score_diff\": 0.601, \"price_diff\": 0.0, \"volume_diff\": 410300.0}, {\"code\": \"512690\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 514400.0}, {\"code\": \"513030\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": NaN}, {\"code\": \"513100\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 3800.0}, {\"code\": \"513500\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 32300.0}, {\"code\": \"515170\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 338800.0}, {\"code\": \"515210\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 5200.0}]"
+    },
+    {
+      "date": "2021-05-26",
+      "ths_target": "512690",
+      "jq_target": "512010",
+      "target_match": false,
+      "ths_passed": 21.0,
+      "jq_passed": 22,
+      "top_overlap": 10,
+      "ths_top1": "512690",
+      "jq_top1": "512010",
+      "score_delta_json": "[{\"code\": \"159915\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 219400.0}, {\"code\": \"159949\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 682600.0}, {\"code\": \"159967\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 180200.0}, {\"code\": \"159992\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 6300.0}, {\"code\": \"512010\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 15500.0}, {\"code\": \"512170\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 72400.0}, {\"code\": \"512690\", \"score_diff\": 0.7876000000000001, \"price_diff\": 0.0, \"volume_diff\": 343900.0}, {\"code\": \"515030\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 216200.0}, {\"code\": \"515120\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 5500.0}, {\"code\": \"515170\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 287600.0}]"
+    },
+    {
+      "date": "2021-05-27",
+      "ths_target": "512690",
+      "jq_target": "512170",
+      "target_match": false,
+      "ths_passed": 22.0,
+      "jq_passed": 24,
+      "top_overlap": 10,
+      "ths_top1": "512690",
+      "jq_top1": "512170",
+      "score_delta_json": "[{\"code\": \"159915\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 189000.0}, {\"code\": \"159949\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 525600.0}, {\"code\": \"159967\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 225800.0}, {\"code\": \"159992\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 59200.0}, {\"code\": \"512010\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 57100.0}, {\"code\": \"512170\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 541900.0}, {\"code\": \"512690\", \"score_diff\": 0.9051000000000002, \"price_diff\": 0.0, \"volume_diff\": 480400.0}, {\"code\": \"515030\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 445000.0}, {\"code\": \"515120\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1000.0}, {\"code\": \"515170\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 461000.0}]"
+    },
+    {
+      "date": "2021-05-28",
+      "ths_target": "512690",
+      "jq_target": "159949",
+      "target_match": false,
+      "ths_passed": 29.0,
+      "jq_passed": 30,
+      "top_overlap": 9,
+      "ths_top1": "512690",
+      "jq_top1": "159949",
+      "score_delta_json": "[{\"code\": \"159915\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 614900.0}, {\"code\": \"159949\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 2327100.0}, {\"code\": \"159967\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 377800.0}, {\"code\": \"512010\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 149600.0}, {\"code\": \"512170\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 576300.0}, {\"code\": \"512690\", \"score_diff\": 1.0464, \"price_diff\": 0.0, \"volume_diff\": 2250700.0}, {\"code\": \"512880\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 12503800.0}, {\"code\": \"515030\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1762300.0}, {\"code\": \"515170\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1831400.0}]"
+    },
+    {
+      "date": "2021-05-31",
+      "ths_target": "512690",
+      "jq_target": "515030",
+      "target_match": false,
+      "ths_passed": 33.0,
+      "jq_passed": 34,
+      "top_overlap": 9,
+      "ths_top1": "512690",
+      "jq_top1": "515030",
+      "score_delta_json": "[{\"code\": \"159915\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 105100.0}, {\"code\": \"159949\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 704200.0}, {\"code\": \"159967\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 101900.0}, {\"code\": \"512170\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1615900.0}, {\"code\": \"512670\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 25900.0}, {\"code\": \"512690\", \"score_diff\": 1.1005, \"price_diff\": 0.0, \"volume_diff\": 389300.0}, {\"code\": \"512880\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 2035000.0}, {\"code\": \"515030\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 150600.0}, {\"code\": \"515170\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 366500.0}]"
+    },
+    {
+      "date": "2021-06-03",
+      "ths_target": "512690",
+      "jq_target": "512670",
+      "target_match": false,
+      "ths_passed": 42.0,
+      "jq_passed": 43,
+      "top_overlap": 9,
+      "ths_top1": "512690",
+      "jq_top1": "512670",
+      "score_delta_json": "[{\"code\": \"159915\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 214500.0}, {\"code\": \"159949\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 2044500.0}, {\"code\": \"512660\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1127000.0}, {\"code\": \"512670\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1045200.0}, {\"code\": \"512690\", \"score_diff\": 1.3136, \"price_diff\": 0.0, \"volume_diff\": 723700.0}, {\"code\": \"512710\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 240100.0}, {\"code\": \"512880\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 916100.0}, {\"code\": \"515170\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 157900.0}, {\"code\": \"588080\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 203177.0}]"
+    },
+    {
+      "date": "2021-07-01",
+      "ths_target": "515030",
+      "jq_target": "516160",
+      "target_match": false,
+      "ths_passed": 18.0,
+      "jq_passed": 20,
+      "top_overlap": 9,
+      "ths_top1": "515030",
+      "jq_top1": "516160",
+      "score_delta_json": "[{\"code\": \"159851\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": NaN}, {\"code\": \"159967\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1054642.0}, {\"code\": \"501018\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 22600.0}, {\"code\": \"513100\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 151000.0}, {\"code\": \"515030\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 44000.0}, {\"code\": \"515050\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 2417200.0}, {\"code\": \"515880\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 15500.0}, {\"code\": \"516520\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": NaN}, {\"code\": \"588080\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 431628.0}]"
+    },
+    {
+      "date": "2021-07-02",
+      "ths_target": "515030",
+      "jq_target": "516160",
+      "target_match": false,
+      "ths_passed": 15.0,
+      "jq_passed": 16,
+      "top_overlap": 9,
+      "ths_top1": "515030",
+      "jq_top1": "516160",
+      "score_delta_json": "[{\"code\": \"159949\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 2507800.0}, {\"code\": \"159967\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 301375.0}, {\"code\": \"501018\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 19500.0}, {\"code\": \"513100\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 8400.0}, {\"code\": \"515030\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1744500.0}, {\"code\": \"515050\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 711400.0}, {\"code\": \"515980\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": NaN}, {\"code\": \"516520\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 52000.0}, {\"code\": \"588080\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 189924.0}]"
+    },
+    {
+      "date": "2021-07-21",
+      "ths_target": NaN,
+      "jq_target": "159985",
+      "target_match": false,
+      "ths_passed": NaN,
+      "jq_passed": 1,
+      "top_overlap": 0,
+      "ths_top1": NaN,
+      "jq_top1": "159985",
+      "score_delta_json": "[]"
+    },
+    {
+      "date": "2021-08-31",
+      "ths_target": "512400",
+      "jq_target": "516150",
+      "target_match": false,
+      "ths_passed": 17.0,
+      "jq_passed": 19,
+      "top_overlap": 9,
+      "ths_top1": "512400",
+      "jq_top1": "516150",
+      "score_delta_json": "[{\"code\": \"159766\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 3100.0}, {\"code\": \"510880\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 50900.0}, {\"code\": \"512400\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 582400.0}, {\"code\": \"512660\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 624100.0}, {\"code\": \"512670\", \"score_diff\": -0.11580000000000013, \"price_diff\": 0.0, \"volume_diff\": 974000.0}, {\"code\": \"512710\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 106200.0}, {\"code\": \"512880\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 19392800.0}, {\"code\": \"512890\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": NaN}, {\"code\": \"515790\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1149900.0}]"
+    },
+    {
+      "date": "2021-09-10",
+      "ths_target": "512890",
+      "jq_target": "516150",
+      "target_match": false,
+      "ths_passed": 18.0,
+      "jq_passed": 18,
+      "top_overlap": 9,
+      "ths_top1": "512890",
+      "jq_top1": "516150",
+      "score_delta_json": "[{\"code\": \"159766\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 87000.0}, {\"code\": \"159981\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 800.0}, {\"code\": \"510500\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 3365700.0}, {\"code\": \"512400\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 130200.0}, {\"code\": \"512880\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 4261000.0}, {\"code\": \"512890\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": NaN}, {\"code\": \"512980\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 66000.0}, {\"code\": \"513090\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1179800.0}, {\"code\": \"513520\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": NaN}]"
+    },
+    {
+      "date": "2021-11-30",
+      "ths_target": "516520",
+      "jq_target": "516150",
+      "target_match": false,
+      "ths_passed": 27.0,
+      "jq_passed": 29,
+      "top_overlap": 9,
+      "ths_top1": "516520",
+      "jq_top1": "516150",
+      "score_delta_json": "[{\"code\": \"159732\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 2000.0}, {\"code\": \"159851\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1200.0}, {\"code\": \"512100\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 3270100.0}, {\"code\": \"512660\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 982400.0}, {\"code\": \"512670\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 57700.0}, {\"code\": \"515050\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 56900.0}, {\"code\": \"515880\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 26000.0}, {\"code\": \"516520\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": NaN}, {\"code\": \"562800\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1500.0}]"
+    },
+    {
+      "date": "2021-12-01",
+      "ths_target": "562800",
+      "jq_target": "516150",
+      "target_match": false,
+      "ths_passed": 29.0,
+      "jq_passed": 30,
+      "top_overlap": 9,
+      "ths_top1": "562800",
+      "jq_top1": "516150",
+      "score_delta_json": "[{\"code\": \"159732\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": NaN}, {\"code\": \"159851\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 123500.0}, {\"code\": \"512100\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 700.0}, {\"code\": \"512660\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1110600.0}, {\"code\": \"512670\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 22900.0}, {\"code\": \"515050\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 463500.0}, {\"code\": \"515880\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 577100.0}, {\"code\": \"516520\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1400.0}, {\"code\": \"562800\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 35000.0}]"
+    },
+    {
+      "date": "2021-12-09",
+      "ths_target": "562800",
+      "jq_target": "516150",
+      "target_match": false,
+      "ths_passed": 22.0,
+      "jq_passed": 23,
+      "top_overlap": 9,
+      "ths_top1": "562800",
+      "jq_top1": "516150",
+      "score_delta_json": "[{\"code\": \"159732\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 300.0}, {\"code\": \"159851\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 12800.0}, {\"code\": \"512200\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 999500.0}, {\"code\": \"512400\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 49000.0}, {\"code\": \"512690\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1707900.0}, {\"code\": \"515210\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 219800.0}, {\"code\": \"515220\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 157700.0}, {\"code\": \"516520\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 3000.0}, {\"code\": \"562800\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 532300.0}]"
+    },
+    {
+      "date": "2021-12-10",
+      "ths_target": "512690",
+      "jq_target": "516150",
+      "target_match": false,
+      "ths_passed": 23.0,
+      "jq_passed": 24,
+      "top_overlap": 9,
+      "ths_top1": "512690",
+      "jq_top1": "516150",
+      "score_delta_json": "[{\"code\": \"159732\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1000.0}, {\"code\": \"159851\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": NaN}, {\"code\": \"512400\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 44500.0}, {\"code\": \"512690\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1344400.0}, {\"code\": \"515170\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 758700.0}, {\"code\": \"515210\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 64100.0}, {\"code\": \"515220\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 62600.0}, {\"code\": \"516520\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": NaN}, {\"code\": \"562800\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 30800.0}]"
+    },
+    {
+      "date": "2022-03-29",
+      "ths_target": "513500",
+      "jq_target": "513100",
+      "target_match": false,
+      "ths_passed": 4.0,
+      "jq_passed": 3,
+      "top_overlap": 3,
+      "ths_top1": "513500",
+      "jq_top1": "513100",
+      "score_delta_json": "[{\"code\": \"159980\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 3100.0}, {\"code\": \"513030\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 31000.0}, {\"code\": \"513100\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 58500.0}]"
+    },
+    {
+      "date": "2024-11-25",
+      "ths_target": "159529",
+      "jq_target": "159518",
+      "target_match": false,
+      "ths_passed": 4.0,
+      "jq_passed": 5,
+      "top_overlap": 4,
+      "ths_top1": "159529",
+      "jq_top1": "159518",
+      "score_delta_json": "[{\"code\": \"159529\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 957200.0}, {\"code\": \"513100\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 232100.0}, {\"code\": \"513400\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 2146000.0}, {\"code\": \"513500\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 431000.0}]"
+    },
+    {
+      "date": "2025-07-22",
+      "ths_target": "515210",
+      "jq_target": "516150",
+      "target_match": false,
+      "ths_passed": 84.0,
+      "jq_passed": 86,
+      "top_overlap": 9,
+      "ths_top1": "515210",
+      "jq_top1": "516150",
+      "score_delta_json": "[{\"code\": \"159509\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 3130800.0}, {\"code\": \"159949\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 270400.0}, {\"code\": \"159992\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 282200.0}, {\"code\": \"515120\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 191700.0}, {\"code\": \"515210\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 2106800.0}, {\"code\": \"515790\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 2115300.0}, {\"code\": \"516510\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 146000.0}, {\"code\": \"560860\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 841500.0}, {\"code\": \"562800\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 109100.0}]"
+    },
+    {
+      "date": "2025-09-04",
+      "ths_target": "515790",
+      "jq_target": "516160",
+      "target_match": false,
+      "ths_passed": 37.0,
+      "jq_passed": 38,
+      "top_overlap": 9,
+      "ths_top1": "515790",
+      "jq_top1": "516160",
+      "score_delta_json": "[{\"code\": \"159870\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 3760700.0}, {\"code\": \"510300\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 5837600.0}, {\"code\": \"510500\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1296332.0}, {\"code\": \"512050\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 24873900.0}, {\"code\": \"512980\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 203600.0}, {\"code\": \"515030\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 140300.0}, {\"code\": \"515790\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 9736700.0}, {\"code\": \"516520\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 84100.0}, {\"code\": \"562500\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 5146600.0}]"
+    },
+    {
+      "date": "2025-09-09",
+      "ths_target": "562800",
+      "jq_target": "516150",
+      "target_match": false,
+      "ths_passed": 45.0,
+      "jq_passed": 46,
+      "top_overlap": 9,
+      "ths_top1": "562800",
+      "jq_top1": "516150",
+      "score_delta_json": "[{\"code\": \"159667\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 800.0}, {\"code\": \"159732\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1809900.0}, {\"code\": \"159870\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1813300.0}, {\"code\": \"159967\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 178600.0}, {\"code\": \"512480\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 822400.0}, {\"code\": \"516510\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 239900.0}, {\"code\": \"516520\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1279300.0}, {\"code\": \"562800\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 106300.0}, {\"code\": \"588220\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 245600.0}]"
+    },
+    {
+      "date": "2025-11-14",
+      "ths_target": "159766",
+      "jq_target": "516160",
+      "target_match": false,
+      "ths_passed": 31.0,
+      "jq_passed": 32,
+      "top_overlap": 9,
+      "ths_top1": "159766",
+      "jq_top1": "516160",
+      "score_delta_json": "[{\"code\": \"159326\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 180700.0}, {\"code\": \"159566\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 351600.0}, {\"code\": \"159766\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1554100.0}, {\"code\": \"159870\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1491700.0}, {\"code\": \"513190\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 240100.0}, {\"code\": \"513290\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 461700.0}, {\"code\": \"513310\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1432000.0}, {\"code\": \"513920\", \"score_diff\": 0.0047000000000001485, \"price_diff\": 0.0, \"volume_diff\": 182100.0}, {\"code\": \"561360\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 2900.0}]"
+    },
+    {
+      "date": "2026-07-02",
+      "ths_target": "513290",
+      "jq_target": "159667",
+      "target_match": false,
+      "ths_passed": 9.0,
+      "jq_passed": 10,
+      "top_overlap": 9,
+      "ths_top1": "513290",
+      "jq_top1": "159667",
+      "score_delta_json": "[{\"code\": \"159870\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 1072700.0}, {\"code\": \"510500\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 269200.0}, {\"code\": \"512070\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 2960600.0}, {\"code\": \"512100\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 668900.0}, {\"code\": \"512880\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 18948200.0}, {\"code\": \"513290\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 3517700.0}, {\"code\": \"513400\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 94600.0}, {\"code\": \"513520\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 389100.0}, {\"code\": \"562800\", \"score_diff\": 0.0, \"price_diff\": 0.0, \"volume_diff\": 229800.0}]"
+    }
+  ],
+  "pool_compare_rows": [
+    {
+      "date": "2020-07-17",
+      "ths_input": 17,
+      "jq_input": 17,
+      "ths_output": 9,
+      "jq_output": 9,
+      "threshold_ratio": 0.9869102038939335,
+      "only_ths": "",
+      "only_jq": "",
+      "selected_overlap": 9
+    },
+    {
+      "date": "2020-12-14",
+      "ths_input": 17,
+      "jq_input": 17,
+      "ths_output": 9,
+      "jq_output": 9,
+      "threshold_ratio": 0.9957357670930477,
+      "only_ths": "",
+      "only_jq": "",
+      "selected_overlap": 9
+    },
+    {
+      "date": "2021-04-20",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 60,
+      "jq_output": 62,
+      "threshold_ratio": 0.9978407274442493,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 60
+    },
+    {
+      "date": "2021-05-26",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 60,
+      "jq_output": 63,
+      "threshold_ratio": 0.9871896865163453,
+      "only_ths": "",
+      "only_jq": "513180,516150,516160",
+      "selected_overlap": 60
+    },
+    {
+      "date": "2021-05-27",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 61,
+      "jq_output": 64,
+      "threshold_ratio": 0.9809326958596684,
+      "only_ths": "",
+      "only_jq": "513180,516150,516160",
+      "selected_overlap": 61
+    },
+    {
+      "date": "2021-05-28",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 62,
+      "jq_output": 64,
+      "threshold_ratio": 0.9981054111906924,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 62
+    },
+    {
+      "date": "2021-05-31",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 62,
+      "jq_output": 64,
+      "threshold_ratio": 0.9910120685563941,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 62
+    },
+    {
+      "date": "2021-06-03",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 62,
+      "jq_output": 64,
+      "threshold_ratio": 0.9911654875259323,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 62
+    },
+    {
+      "date": "2021-07-01",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 64,
+      "jq_output": 66,
+      "threshold_ratio": 0.9893603576469476,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 64
+    },
+    {
+      "date": "2021-07-02",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 64,
+      "jq_output": 66,
+      "threshold_ratio": 0.9865272793755486,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 64
+    },
+    {
+      "date": "2021-07-21",
+      "ths_input": 17,
+      "jq_input": 17,
+      "ths_output": 9,
+      "jq_output": 9,
+      "threshold_ratio": 0.9856256925371855,
+      "only_ths": "",
+      "only_jq": "",
+      "selected_overlap": 9
+    },
+    {
+      "date": "2021-08-31",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 67,
+      "jq_output": 69,
+      "threshold_ratio": 0.9827782220678057,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 67
+    },
+    {
+      "date": "2021-09-10",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 67,
+      "jq_output": 69,
+      "threshold_ratio": 0.9903169634812313,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 67
+    },
+    {
+      "date": "2021-11-30",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 70,
+      "jq_output": 72,
+      "threshold_ratio": 0.9780033043387878,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 70
+    },
+    {
+      "date": "2021-12-01",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 70,
+      "jq_output": 72,
+      "threshold_ratio": 0.9809323620094698,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 70
+    },
+    {
+      "date": "2021-12-09",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 70,
+      "jq_output": 72,
+      "threshold_ratio": 0.9857825203643807,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 70
+    },
+    {
+      "date": "2021-12-10",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 70,
+      "jq_output": 72,
+      "threshold_ratio": 0.9909122058493298,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 70
+    },
+    {
+      "date": "2022-03-29",
+      "ths_input": 17,
+      "jq_input": 17,
+      "ths_output": 9,
+      "jq_output": 9,
+      "threshold_ratio": 0.984447425285915,
+      "only_ths": "",
+      "only_jq": "",
+      "selected_overlap": 9
+    },
+    {
+      "date": "2024-11-25",
+      "ths_input": 17,
+      "jq_input": 17,
+      "ths_output": 17,
+      "jq_output": 17,
+      "threshold_ratio": 0.9919559158134243,
+      "only_ths": "",
+      "only_jq": "",
+      "selected_overlap": 17
+    },
+    {
+      "date": "2025-07-22",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 109,
+      "jq_output": 111,
+      "threshold_ratio": 0.9980382376755643,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 109
+    },
+    {
+      "date": "2025-09-04",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 111,
+      "jq_output": 113,
+      "threshold_ratio": 0.9914110295261837,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 111
+    },
+    {
+      "date": "2025-09-09",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 111,
+      "jq_output": 113,
+      "threshold_ratio": 0.9949357482999389,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 111
+    },
+    {
+      "date": "2025-11-14",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 112,
+      "jq_output": 114,
+      "threshold_ratio": 0.9954651292158047,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 112
+    },
+    {
+      "date": "2026-07-02",
+      "ths_input": 114,
+      "jq_input": 114,
+      "ths_output": 112,
+      "jq_output": 114,
+      "threshold_ratio": 1.0025230356594008,
+      "only_ths": "",
+      "only_jq": "516150,516160",
+      "selected_overlap": 112
+    }
+  ],
+  "position_compare": {
+    "rows": 1575,
+    "same_position_symbol_rate": 0.9422222222222222
+  }
+}

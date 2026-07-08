@@ -1,0 +1,21 @@
+{
+  "run_id": "2af8d1ea-39ed-4ee2-b2c7-a4cc6c424fcc",
+  "elapsed_seconds": 254.94,
+  "metrics": {
+    "total_return": 23.64097390635578,
+    "annualized_return": 0.6703470853563553,
+    "max_drawdown": -0.21488811642596417,
+    "trade_count": 802,
+    "win_rate": 0.527431421446384
+  },
+  "target_rows": 1575,
+  "trade_rows": 802,
+  "data_quality_excluded_symbols": [],
+  "target_compare_rows": 1440,
+  "target_match_count": 889,
+  "target_match_ratio": 0.6173611111111111,
+  "weak_compare_rows": 1574,
+  "weak_match_count": 1335,
+  "weak_match_ratio": 0.8481575603557815,
+  "weak_mismatch_count": 239
+}

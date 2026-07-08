@@ -1,0 +1,42 @@
+{
+  "10pct": {
+    "avg_fill": 0.26472340785435305,
+    "median_fill": 0.26120865354614553,
+    "full_fill_count": 0,
+    "partial_count": 94,
+    "blocked_value_matched": 176637761.98000002
+  },
+  "15pct": {
+    "avg_fill": 0.3970851117815295,
+    "median_fill": 0.3918129803192183,
+    "full_fill_count": 0,
+    "partial_count": 94,
+    "blocked_value_matched": 151536821.82000002
+  },
+  "25pct": {
+    "avg_fill": 0.6618085196358826,
+    "median_fill": 0.6530216338653638,
+    "full_fill_count": 0,
+    "partial_count": 94,
+    "blocked_value_matched": 101334941.5
+  },
+  "50pct": {
+    "avg_fill": 0.9310313029869619,
+    "median_fill": 1.0,
+    "full_fill_count": 66,
+    "partial_count": 28,
+    "blocked_value_matched": 30050968.5
+  },
+  "100pct": {
+    "avg_fill": 0.9955336066975482,
+    "median_fill": 1.0,
+    "full_fill_count": 91,
+    "partial_count": 3,
+    "blocked_value_matched": 1431196.4000000001
+  },
+  "rows": {
+    "cap_rows": 94,
+    "matched_price_rows": 52,
+    "csv": "reports\\wufu_ths_25pct_capacity_impact.csv"
+  }
+}

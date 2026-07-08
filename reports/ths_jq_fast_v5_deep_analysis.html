@@ -1,0 +1,43 @@
+﻿<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Wufu ETF V5 Report</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65;max-width:1120px;margin:32px auto;padding:0 24px;color:#202124}h1,h2{line-height:1.25}code{background:#f1f3f4;padding:2px 5px;border-radius:4px}pre{margin:0;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap}li{margin:6px 0}</style></head><body><h1>Wufu ETF THS vs JQ V5 Minute Log Report</h1>
+
+<h2>Conclusion</h2>
+
+<p>V5 worked as a validation version. After THS enabled `external_weak=True`, weak-state match reached `100.00%`, and target match improved from V4 `90.60%` to V5 `98.48%`. This confirms the main V4 issue: THS could not fetch `000510`, so the weak-market state machine diverged.</p>
+
+<h2>Key Metrics</h2>
+
+<ul>
+<li>Common trading days: `1575`</li>
+<li>Date range: `2020-01-02` to `2026-07-06`</li>
+<li>Target match: `1551/1575`, or `98.48%`</li>
+<li>Remaining mismatch days: `24`</li>
+<li>Weak-state match: `1575/1575`, or `100.00%`</li>
+<li>THS total return from first close: `6860.66%`</li>
+<li>THS max drawdown: `-23.70%`</li>
+</ul>
+
+<h2>V4 to V5</h2>
+
+<pre>| Metric | V4 | V5 |</pre>
+<pre>|---|---:|---:|</pre>
+<pre>| Target match | 90.60% | 98.48% |</pre>
+<pre>| Weak-state match | 89.84% | 100.00% |</pre>
+<pre>| Weak-state mismatch days | 160 | 0 |</pre>
+<pre>| Target mismatch days | 148 | 24 |</pre>
+
+<h2>Remaining Difference</h2>
+
+<p>The remaining 24 mismatch days are no longer caused by weak-state divergence. Most of them have Top10 overlap of `9/10` or `10/10`, which means the candidate sets are already very close. The remaining differences likely come from 13:10 current price, intraday volume, R2/momentum score inputs, liquidity-filter boundary, or execution handling.</p>
+
+<h2>Next Step</h2>
+
+<p>V6 adds diagnostics only for these 24 dates:</p>
+
+<ul>
+<li>`WUFU_SCORE_DETAIL`</li>
+<li>`WUFU_THRESHOLD_DETAIL`</li>
+<li>`WUFU_POOL_FILTER`</li>
+<li>`WUFU_POSITION`</li>
+</ul>
+
+<p>Use the V6 scripts and compare the new logs to isolate the remaining score and execution differences.</p></body></html>

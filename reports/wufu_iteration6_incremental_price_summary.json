@@ -1,0 +1,19 @@
+{
+  "planned_windows": 210,
+  "fetched_windows": 204,
+  "empty_windows": 0,
+  "skipped_windows": {
+    "161226:2019-07-20:2019-07-21": "akshare returned no ETF rows for 161226 from 2019-07-20 to 2019-07-21",
+    "501018:2019-07-20:2019-07-21": "akshare returned no ETF rows for 501018 from 2019-07-20 to 2019-07-21",
+    "511380:2019-07-20:2020-04-06": "akshare returned no ETF rows for 511380 from 2019-07-20 to 2020-04-06",
+    "511820:2019-07-22:2026-07-06": "HTTPSConnectionPool(host='finance.sina.com.cn', port=443): Max retries exceeded with url: /realstock/company/sh511820/hisdata_klc2/klc_kl.js (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)')))",
+    "560000:2026-05-01:2026-07-06": "akshare returned no ETF rows for 560000 from 2026-05-01 to 2026-07-06",
+    "560650:2026-07-02:2026-07-06": "akshare returned no ETF rows for 560650 from 2026-07-02 to 2026-07-06"
+  },
+  "first_active_dates_used": true,
+  "reason_counts": {
+    "interior_gaps": 205,
+    "missing_prefix": 3,
+    "missing_suffix": 2
+  }
+}

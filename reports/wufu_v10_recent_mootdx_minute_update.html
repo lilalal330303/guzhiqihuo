@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>五福 ETF V10 近期分钟数据补充报告</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; line-height: 1.7; max-width: 1080px; margin: 32px auto; padding: 0 24px; color: #1f2933; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 20px; margin-top: 28px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    th, td { border: 1px solid #d0d7de; padding: 8px; text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    code { background: #f6f8fa; padding: 2px 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>五福 ETF V10 近期分钟数据补充报告</h1>
+  <h2>执行结论</h2>
+  <p>本轮未使用 Pandadata，改用免费/免账号路径补充近期分钟数据：主源为 mootdx/通达信，AkShare/东方财富作为兜底。</p>
+  <p>补数区间为 2026-05-29 至 2026-07-07，范围为本地日线库中成交额靠前的 120 只 ETF。</p>
+  <h2>补库结果</h2>
+  <p>- 本轮新增分钟行数：736,000</p>
+  <p>- 本轮成功补数标的：115</p>
+  <p>- 本地 <code>prices_minute</code> 总行数：774,400</p>
+  <p>- 本地 <code>prices_minute</code> 覆盖标的：121</p>
+  <p>- 覆盖日期：2026-05-29 至 2026-07-07</p>
+  <h2>V10 复跑结果</h2>
+  <table>
+    <tr><th>指标</th><th>基准：真实 13:11 买入</th><th>V10：真实分钟择时</th><th>差异</th></tr>
+    <tr><td>最终权益</td><td>5,911,010.89</td><td>31,903,458.35</td><td>25,992,447.46</td></tr>
+    <tr><td>总收益</td><td>491.10%</td><td>3090.35%</td><td>2599.24%</td></tr>
+    <tr><td>年化收益</td><td>31.39%</td><td>70.25%</td><td>38.85%</td></tr>
+    <tr><td>最大回撤</td><td>-54.94%</td><td>-55.01%</td><td>-0.07%</td></tr>
+    <tr><td>交易数</td><td>1509</td><td>1521</td><td>12</td></tr>
+    <tr><td>止损次数</td><td>0</td><td>28</td><td>28</td></tr>
+  </table>
+  <h2>真实分钟命中变化</h2>
+  <p>补数前：命中分钟行数 36,960，命中标的 6，<code>force_real</code> 2，<code>minute</code> 2。</p>
+  <p>补数后：命中分钟行数 357,280，命中标的 58，<code>trend_real</code> 9，<code>force_real</code> 3，<code>minute</code> 13。</p>
+  <h2>判断</h2>
+  <p>这次补数达成了“先不用 Pandadata、扩大近期真实分钟覆盖”的目标。V10 执行链路从只命中少数防御 ETF，扩展到更多行业/跨境/宽基 ETF。</p>
+  <p>但它仍不是完整历史分钟回测。mootdx 适合近期补数和链路验证，不能替代 2020 起全历史授权分钟源。</p>
+</body>
+</html>

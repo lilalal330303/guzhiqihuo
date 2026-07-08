@@ -1,0 +1,24 @@
+[project]
+name = "quant-research-workbench"
+version = "0.1.0"
+description = "Local quant research workbench with akshare, DuckDB, Streamlit, and reproducible backtests."
+requires-python = ">=3.11"
+dependencies = [
+    "akshare>=1.15.0",
+    "duckdb>=1.1.0",
+    "mootdx>=0.11.0",
+    "panda_data==0.0.9",
+    "pandas>=2.2.0",
+    "plotly>=5.24.0",
+    "streamlit>=1.38.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"

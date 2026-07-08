@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Wufu V9 Weak Sync Iteration</title>
+  <style>
+    body{font-family:"Microsoft YaHei","Segoe UI",sans-serif;max-width:980px;margin:32px auto;line-height:1.72;color:#1f2937}
+    h1{font-size:28px}
+    h2{font-size:21px;margin-top:28px;border-bottom:1px solid #e5e7eb;padding-bottom:4px}
+    p,li{font-size:15px}
+    code{background:#f3f4f6;padding:2px 5px;border-radius:4px}
+  </style>
+</head>
+<body>
+  <h1>五福 ETF V9 弱市同步迭代说明</h1>
+  <h2>本轮目标</h2>
+  <p>V8 日志显示同花顺 A500 日线不可用，但脚本仍用前三个指数运行自动弱市，导致弱市匹配率降到 89.84%，目标匹配率降到 90.60%。V9 先恢复同步主线：四个弱市指数缺一不可，A500 缺失时强制回退到统一弱市日历/回放弱市。</p>
+  <h2>同花顺 V9</h2>
+  <ul>
+    <li><code>WEAK_MIN_VALID_INDEXES</code> 从 3 改为 4。</li>
+    <li>四个指数中任意一个日线不足，立即触发 <code>WUFU_WEAK_FALLBACK</code>。</li>
+    <li>新增 <code>WUFU_WEAK_SOURCE</code> 和 <code>WUFU_A500_SOURCE</code>。</li>
+    <li>保留 V8 执行层规则：现金缓冲、成本预留、100 份取整。</li>
+  </ul>
+  <h2>聚宽 V9</h2>
+  <ul>
+    <li>初始化版本升级为 <code>WUFU_JQ_FIXED_POOL_V9</code>。</li>
+    <li>新增相同弱市日历版本字段。</li>
+    <li>新增 <code>WUFU_WEAK_SOURCE</code>，便于和同花顺直接对比。</li>
+  </ul>
+  <h2>验收重点</h2>
+  <ul>
+    <li>同花顺是否出现 <code>WUFU_WEAK_SOURCE mode=fallback</code>。</li>
+    <li>同花顺 <code>WUFU_A500_SOURCE</code> 是否仍为 <code>status=missing</code>。</li>
+    <li>弱市匹配率是否恢复到 95% 以上。</li>
+    <li>目标匹配率是否恢复到 95% 以上。</li>
+    <li><code>order_fail</code> 是否继续为 0。</li>
+  </ul>
+  <h2>输出文件</h2>
+  <ul>
+    <li><code>reports/ths_wufu_fast_v9_weak_calendar_fallback.py</code></li>
+    <li><code>reports/同花顺_聚宽五福ETF同步快速V9_弱市日历兜底.py</code></li>
+    <li><code>reports/jq_wufu_fixed_pool_v9_weak_calendar_fallback.py</code></li>
+    <li><code>reports/聚宽_五福ETF同步固定池V9_弱市来源日志.py</code></li>
+  </ul>
+</body>
+</html>

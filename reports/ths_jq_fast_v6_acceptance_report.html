@@ -1,0 +1,62 @@
+﻿<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>?? ETF V6 ????</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65;max-width:1120px;margin:32px auto;padding:0 24px;color:#202124}h1,h2{line-height:1.25}code{background:#f1f3f4;padding:2px 5px;border-radius:4px}pre{margin:0;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap}li{margin:6px 0}</style></head><body><h1>五福 ETF V6 平台日志验收报告</h1>
+
+<h2>结论</h2>
+
+<p>V6 的主要设计目标基本达成：弱市状态继续保持 `100.00%` 一致，目标匹配率保持 `98.48%`，两端均输出了阈值、池子、评分和持仓相关诊断日志。执行层统一后，同花顺 WARN 从 V5 的 `1055` 条降到 `668` 条，聚宽错误从 `626` 条降到 `282` 条，说明现金缓冲和整手处理有效。</p>
+
+<p>仍需继续优化两点：同花顺少 1 个评分诊断日，缺失日期为 `2021-07-21`；两端虽然都有 `1575` 条持仓日志，但日终持仓标的完全一致率为 `94.22%`，说明净值层仍有执行和成交差异。</p>
+
+<h2>对标设计目的</h2>
+
+<pre>| 设计目标 | 达成情况 | 证据 |</pre>
+<pre>|---|---|---|</pre>
+<pre>| 只在 24 个差异日打开评分明细 | 部分达成 | 同花顺 `23` 条，聚宽 `24` 条，缺 `2021-07-21` |</pre>
+<pre>| 输出成交额阈值明细 | 达成 | 两端各 `24` 条 |</pre>
+<pre>| 输出过滤后池子列表 | 达成 | 两端各 `24` 条 |</pre>
+<pre>| 执行层保留现金并整手 | 达成 | 同花顺 WARN 降至 `668`，聚宽错误降至 `282` |</pre>
+<pre>| 输出日终持仓 | 达成 | 两端各 `1575` 条 |</pre>
+
+<h2>核心指标</h2>
+
+<ul>
+<li>共同交易日：`1575`</li>
+<li>目标匹配：`1551/1575`，匹配率 `98.48%`</li>
+<li>弱市匹配：`1575/1575`，匹配率 `100.00%`</li>
+<li>Top10 平均交集：`6.09`</li>
+<li>阈值比中位数：`0.9932`</li>
+<li>同花顺首日收盘起总收益：`6819.85%`</li>
+<li>同花顺最大回撤：`-23.67%`</li>
+</ul>
+
+<h2>评分明细发现</h2>
+
+<p>V6 针对剩余差异日输出了 Top10 分数细节。标准解析显示：23 个共同评分明细日里，目标匹配率为 `0%`，Top10 平均交集约 `8.09`。这说明这些日期确实是 Top1 排序或过滤边界问题，而不是大范围候选池错位。</p>
+
+<p>下一步应直接读取 `ths_jq_fast_v6_score_detail_deep_compare.csv`，逐日比较共同标的的 `score / price / today_volume` 差异。如果 `price_diff` 和 `volume_diff` 接近 0，就回到 R2 和候选过滤；如果差异较大，就优先统一行情字段。</p>
+
+<h2>池子和阈值发现</h2>
+
+<p>阈值明细和池子过滤明细已覆盖 24 个诊断日。V5 剩余差异里多次出现同花顺池子比聚宽少 2 到 3 个；V6 的 `WUFU_POOL_FILTER` 已经能列出 `only_ths / only_jq`，下一轮可以直接定位具体被边界剔除的标的。</p>
+
+<h2>执行层发现</h2>
+
+<p>执行层改动有效：同花顺 WARN 从 `1055` 降到 `668`；聚宽错误从 `626` 降到 `282`。两端都输出了 `1575` 条 `WUFU_POSITION`，持仓标的完全一致率为 `94.22%`。这说明执行层已改善，但仍未完全一致，后续应继续对齐买入金额、成交价、现金留存和失败订单处理。</p>
+
+<h2>后续优化路径</h2>
+
+<p>1. 修复同花顺缺失的 `2021-07-21` 评分诊断，重点看是否是 `passed=0` 或日志格式未被解析。</p>
+<p>2. 用 `score_detail_deep_compare` 定位 24 天 Top1 互换来源：价格、成交量、R2，还是过滤边界。</p>
+<p>3. 若差异主要来自 `today_volume`，两端统一用分钟累计量或日线历史量兜底。</p>
+<p>4. 若差异主要来自池子边界，统一 `amount/money` 字段和阈值取整方式。</p>
+<p>5. 对持仓不一致日期输出买入金额、成交后现金、目标份额和实际份额。</p>
+<p>6. 弱市注入仍只作为验证版；长期继续寻找同花顺可用的中证 A500 指数源。</p>
+
+<h2>附件</h2>
+
+<ul>
+<li>标准摘要：`reports/ths_jq_fast_v6_summary.json`</li>
+<li>深度摘要：`reports/ths_jq_fast_v6_deep_summary.json`</li>
+<li>评分深度对比：`reports/ths_jq_fast_v6_score_detail_deep_compare.csv`</li>
+<li>池子过滤对比：`reports/ths_jq_fast_v6_pool_filter_compare.csv`</li>
+<li>持仓对比：`reports/ths_jq_fast_v6_position_compare.csv`</li>
+</ul></body></html>
