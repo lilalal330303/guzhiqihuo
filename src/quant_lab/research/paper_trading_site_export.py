@@ -56,6 +56,9 @@ def build_site_snapshot(
         "source": "local_paper_trading_audit",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "market_data_as_of": market_data_as_of,
+        "snapshot_schedule": {
+            "label": "盘后快照", "time": "15:30", "timezone": "Asia/Shanghai",
+        },
         "combined_holdings": _combine_holdings(account_snapshots),
         "accounts": account_snapshots,
     }
@@ -123,6 +126,7 @@ def _account_snapshot(repo: DuckDBRepository, account: PaperAccount, panel: Any,
         },
         "equity_curve": equity_curve,
         "daily_equity_bars": _daily_equity_bars(equity_curve),
+        "five_day_equity_candles": _five_day_equity_candles(equity_curve),
         "positions": positions,
         "position_history": position_history,
         "orders": orders,
@@ -215,6 +219,35 @@ def _daily_equity_bars(curve: list[dict[str, object]]) -> list[dict[str, object]
             "change": closing - opening, "return": (closing / opening - 1.0) if opening else 0.0,
         })
     return bars
+
+
+def _five_day_equity_candles(curve: list[dict[str, object]]) -> list[dict[str, object]]:
+    """Aggregate observed account equity into five-minute OHLC buckets for five trade days."""
+    if not curve:
+        return []
+    frame = pd.DataFrame(curve)
+    if not {"timestamp", "equity"}.issubset(frame.columns):
+        return []
+    frame["timestamp"] = pd.to_datetime(frame["timestamp"], errors="coerce")
+    frame["equity"] = pd.to_numeric(frame["equity"], errors="coerce")
+    frame = frame.dropna(subset=["timestamp", "equity"]).sort_values("timestamp", kind="stable")
+    if frame.empty:
+        return []
+    frame["trade_date"] = frame["timestamp"].dt.strftime("%Y-%m-%d")
+    latest_days = sorted(frame["trade_date"].unique())[-5:]
+    frame = frame[frame["trade_date"].isin(latest_days)].copy()
+    frame["bucket"] = frame["timestamp"].dt.floor("5min")
+    result: list[dict[str, object]] = []
+    for (trade_date, bucket), group in frame.groupby(["trade_date", "bucket"], sort=True):
+        result.append({
+            "timestamp": pd.Timestamp(bucket).isoformat(),
+            "trade_date": str(trade_date),
+            "open": float(group.iloc[0]["equity"]),
+            "high": float(group["equity"].max()),
+            "low": float(group["equity"].min()),
+            "close": float(group.iloc[-1]["equity"]),
+        })
+    return result
 
 
 def _daily_close_prices(

@@ -4,6 +4,7 @@
   const page = document.body.dataset.page || "overview";
   const app = document.getElementById("app");
   const currency = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 2 });
+  const wholeCurrency = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 0 });
   const numeric = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
 
   fetch("data/snapshot.json")
@@ -60,7 +61,7 @@
 
   function accountCard(account) {
     const m = account.metrics || {};
-    return `<a class="strategy-card" href="strategy.html?id=${encodeURIComponent(account.id)}"><div class="eyebrow">独立策略账户</div><h2>${escapeHtml(account.display?.name || account.id)}</h2>${kpis([["账户权益", money(m.equity)], ["可用现金", money(m.cash)], ["持仓市值", money(m.position_market_value)], ["累计收益", percent(m.total_return)]])}</a>`;
+    return `<a class="strategy-card" href="strategy.html?id=${encodeURIComponent(account.id)}"><div class="eyebrow">独立策略账户</div><h2>${escapeHtml(account.display?.name || account.id)}</h2>${kpis([["账户权益", wholeMoney(m.equity)], ["可用现金", wholeMoney(m.cash)], ["持仓市值", wholeMoney(m.position_market_value)], ["累计收益", percent(m.total_return)]])}</a>`;
   }
 
   function renderStrategy(root, account, snapshot) {
@@ -73,11 +74,12 @@
     const content = root.querySelector("#tab-content");
     const show = (tab) => {
       content.innerHTML = tab === "positions" ? positionHistoryMarkup(account.position_history || [])
-        : tab === "orders" ? orderTable(visibleOrders(account.orders || []))
-        : tab === "fills" ? fillTable(account.fills || [])
-        : tab === "timeline" ? `<div class="timeline">${timelineMarkup(visibleTimeline(account.timeline || []).slice().reverse())}</div>`
-        : logMarkup(account);
+        : tab === "orders" ? datedAuditMarkup("order-date", "订单日期", visibleOrders(account.orders || []), orderTable)
+        : tab === "fills" ? datedAuditMarkup("fill-date", "成交日期", account.fills || [], fillTable)
+        : tab === "timeline" ? datedAuditMarkup("activity-date", "活动日期", visibleTimeline(account.timeline || []).slice().reverse(), (rows) => `<div class="timeline">${timelineMarkup(rows)}</div>`)
+        : datedAuditMarkup("log-date", "日志日期", auditLogRows(account), (rows) => `<div class="timeline">${timelineMarkup(rows)}</div>`);
       if (tab === "positions") wirePositionHistory(content, account.position_history || []);
+      else wireDateFilter(content);
     };
     show("positions");
     root.querySelectorAll(".tab").forEach((button) => button.addEventListener("click", () => {
@@ -92,11 +94,14 @@
   }
 
   function renderOrders(root, account, snapshot) {
-    root.innerHTML = scopedHead("订单与成交", account, snapshot, "仅展示已成交或部分成交的有效订单；被拒绝订单仍保留在底层审计库。") + `<section class="panel"><h2>有效订单</h2>${orderTable(visibleOrders(account.orders || []))}</section><section class="panel"><h2>成交</h2>${fillTable(account.fills || [])}</section>`;
+    const orders = visibleOrders(account.orders || []), fills = account.fills || [];
+    root.innerHTML = scopedHead("订单与成交", account, snapshot, "按交易日核对有效订单与成交；被拒绝订单仅保留在底层审计库。") + `<section class="panel"><div class="section-title"><div><h2>订单与成交</h2><p>同一日期口径联动展示</p></div></div>${combinedOrderFilterMarkup(orders, fills)}</section>`;
+    wireOrderDateFilter(root, orders, fills);
   }
 
   function renderLogs(root, account, snapshot) {
-    root.innerHTML = scopedHead("运行日志", account, snapshot, "执行活动和异常记录仅属于当前策略。") + `<section class="panel">${logMarkup(account)}</section>`;
+    root.innerHTML = scopedHead("运行日志", account, snapshot, "执行活动和异常记录仅属于当前策略，可按交易日回溯。") + `<section class="panel">${datedAuditMarkup("log-date", "日志日期", auditLogRows(account), (rows) => `<div class="timeline">${timelineMarkup(rows)}</div>`)}</section>`;
+    wireDateFilter(root);
   }
 
   function scopedHead(title, account, snapshot, description) {
@@ -105,7 +110,8 @@
 
   function pageHead(title, description, snapshot) {
     const asOf = snapshot.market_data_as_of ? formatTime(snapshot.market_data_as_of) : "暂无可用行情时点";
-    return `<div class="page-head"><div><div class="eyebrow">本地模拟盘</div><h1>${escapeHtml(title)}</h1><p class="snapshot-note">${escapeHtml(description)}</p></div><div class="snapshot-note">行情数据截至：${escapeHtml(asOf)}<br>快照导出时间：${escapeHtml(formatTime(snapshot.generated_at))}</div></div>`;
+    const schedule = snapshot.snapshot_schedule || { label: "盘后快照", time: "15:30" };
+    return `<div class="page-head"><div><div class="eyebrow">本地模拟盘</div><h1>${escapeHtml(title)}</h1><p class="snapshot-note">${escapeHtml(description)}</p></div><div class="snapshot-status"><span class="live-dot"></span><div>行情实际截至：<b>${escapeHtml(asOf)}</b><br>${escapeHtml(schedule.label || "盘后快照")}计划：<b>${escapeHtml(schedule.time || "15:30")}</b><br><small>快照导出：${escapeHtml(formatTime(snapshot.generated_at))}</small></div></div></div>`;
   }
 
   function kpis(items) { return `<section class="kpis">${items.map(([name, value]) => `<div class="kpi"><span>${name}</span><b>${value}</b></div>`).join("")}</section>`; }
@@ -115,9 +121,10 @@
     const chart = root.querySelector("#equity-chart");
     const curve = account.equity_curve || [];
     const dailyBars = account.daily_equity_bars || [];
+    const fiveDayCandles = account.five_day_equity_candles || [];
     const draw = (period) => {
       if (period === "daily") renderDailyEquityBars(chart, dailyBars, label);
-      else if (period === "five-day") renderEquityCandlesticks(chart, dailyBars.slice(-5), label);
+      else if (period === "five-day") renderEquityCandlesticks(chart, fiveDayCandles, label);
       else renderEquityChart(chart, curve, label, period);
     };
     draw("intraday");
@@ -149,6 +156,53 @@
   function visibleTimeline(rows) {
     return (Array.isArray(rows) ? rows : []).filter((row) => [row.event, row.reason, row.message, row.exception_type]
       .every((value) => String(value || "").toLowerCase() !== "intent_missing"));
+  }
+
+  function tradeDate(row) { return String(row.timestamp || row.created_at || row.trade_date || "").slice(0, 10); }
+  function filterByTradeDate(rows, date) { return (Array.isArray(rows) ? rows : []).filter((row) => tradeDate(row) === date); }
+  function auditDates(...groups) { return [...new Set(groups.flat().map(tradeDate).filter(Boolean))].sort().reverse(); }
+  function dateOptions(dates) { return dates.map((date, index) => `<option value="${escapeHtml(date)}"${index === 0 ? " selected" : ""}>${escapeHtml(date)}</option>`).join(""); }
+
+  function datedAuditMarkup(id, label, rows, renderer) {
+    const dates = auditDates(rows);
+    if (!dates.length) return renderer([]);
+    return `<div class="audit-filter"><label for="${id}">${escapeHtml(label)}</label><select id="${id}" data-date-filter>${dateOptions(dates)}</select><span>${dates.length} 个交易日可回溯</span></div><div class="dated-audit" data-date-target data-records="${escapeHtml(JSON.stringify(rows))}"></div>`;
+  }
+
+  function wireDateFilter(root) {
+    root.querySelectorAll("[data-date-filter]").forEach((select) => {
+      const target = select.parentElement?.nextElementSibling;
+      if (!target) return;
+      let rows = [];
+      try { rows = JSON.parse(target.dataset.records || "[]"); } catch (_) { rows = []; }
+      const kind = select.id.startsWith("order") ? "order" : select.id.startsWith("fill") ? "fill" : "timeline";
+      const draw = () => {
+        const filtered = filterByTradeDate(rows, select.value);
+        target.innerHTML = kind === "order" ? orderTable(filtered) : kind === "fill" ? fillTable(filtered) : `<div class="timeline">${timelineMarkup(filtered)}</div>`;
+        target.classList.remove("view-refresh"); void target.offsetWidth; target.classList.add("view-refresh");
+      };
+      select.addEventListener("change", draw); draw();
+    });
+  }
+
+  function combinedOrderFilterMarkup(orders, fills) {
+    const dates = auditDates(orders, fills);
+    if (!dates.length) return empty("暂无订单与成交审计记录。");
+    return `<div class="audit-filter"><label for="order-date">交易日期</label><select id="order-date">${dateOptions(dates)}</select><span>订单与成交同步切换</span></div><div id="order-day-content"></div>`;
+  }
+
+  function wireOrderDateFilter(root, orders, fills) {
+    const select = root.querySelector("#order-date"), target = root.querySelector("#order-day-content");
+    if (!select || !target) return;
+    const draw = () => {
+      target.innerHTML = `<div class="audit-split"><section><h3>有效订单</h3>${orderTable(filterByTradeDate(orders, select.value))}</section><section><h3>成交明细</h3>${fillTable(filterByTradeDate(fills, select.value))}</section></div>`;
+      target.classList.remove("view-refresh"); void target.offsetWidth; target.classList.add("view-refresh");
+    };
+    select.addEventListener("change", draw); draw();
+  }
+
+  function auditLogRows(account) {
+    return visibleTimeline([...(account.timeline || []), ...(account.exceptions || [])]).sort((a, b) => String(b.timestamp || "").localeCompare(String(a.timestamp || "")));
   }
 
   function positionHistoryMarkup(history) {
@@ -286,22 +340,36 @@
     container.innerHTML = "";
     if (!bars.length) { container.innerHTML = empty("暂无连续5日权益 K 线数据。"); return; }
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.classList.add("equity-chart"); svg.setAttribute("viewBox", "0 0 760 300"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `${label}连续5日权益K线图`);
+    svg.classList.add("equity-chart"); svg.setAttribute("viewBox", "0 0 760 300"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `${label}连续5日5分钟权益K线图`);
     const left = 74, top = 20, width = 650, height = 220, bottom = top + height;
     const lows = bars.map((row) => numeric(row.low)), highs = bars.map((row) => numeric(row.high));
     const min = Math.min(...lows), max = Math.max(...highs), padding = Math.max((max - min) * .12, Math.abs(max) * .003, 1), range = max - min + padding * 2;
     const y = (value) => top + height - (value - (min - padding)) / range * height;
-    const slot = width / bars.length, bodyWidth = Math.min(46, slot * .48);
+    const slot = width / bars.length, bodyWidth = Math.max(2, Math.min(10, slot * .58));
     const add = (name, attrs, text) => { const node = document.createElementNS("http://www.w3.org/2000/svg", name); Object.entries(attrs || {}).forEach(([key, value]) => node.setAttribute(key, value)); if (text !== undefined) node.textContent = text; svg.appendChild(node); return node; };
     add("line", { x1: left, y1: top, x2: left, y2: bottom, class: "axis" }); add("line", { x1: left, y1: bottom, x2: left + width, y2: bottom, class: "axis" });
     for (let index = 0; index < 4; index += 1) { const value = min - padding + range * index / 3; const yy = y(value); add("line", { x1: left, y1: yy, x2: left + width, y2: yy, class: "axis", opacity: ".4" }); add("text", { x: 4, y: yy + 4, class: "axis-label" }, compactMoney(value)); }
-    bars.forEach((row, index) => { const center = left + slot * index + slot / 2; const up = numeric(row.close) >= numeric(row.open); add("line", { x1: center, y1: y(numeric(row.high)), x2: center, y2: y(numeric(row.low)), class: "candle-wick", "data-tone": up ? "up" : "down" }); const bodyTop = Math.min(y(numeric(row.open)), y(numeric(row.close))); const body = add("rect", { x: center - bodyWidth / 2, y: bodyTop, width: bodyWidth, height: Math.max(2, Math.abs(y(numeric(row.open)) - y(numeric(row.close)))), class: "candle-body", "data-tone": up ? "up" : "down" }); body.appendChild(Object.assign(document.createElementNS("http://www.w3.org/2000/svg", "title"), { textContent: `${row.trade_date}  开 ${money(row.open)}  高 ${money(row.high)}  低 ${money(row.low)}  收 ${money(row.close)}` })); add("text", { x: center, y: bottom + 22, "text-anchor": "middle", class: "axis-label" }, String(row.trade_date).slice(5)); });
+    let previousDay = "";
+    bars.forEach((row, index) => {
+      const center = left + slot * index + slot / 2;
+      if (row.trade_date !== previousDay) {
+        if (index > 0) add("line", { x1: left + slot * index, y1: top, x2: left + slot * index, y2: bottom, class: "day-separator" });
+        add("text", { x: center, y: bottom + 22, "text-anchor": "start", class: "axis-label day-label" }, String(row.trade_date).slice(5));
+        previousDay = row.trade_date;
+      }
+      const up = numeric(row.close) >= numeric(row.open);
+      add("line", { x1: center, y1: y(numeric(row.high)), x2: center, y2: y(numeric(row.low)), class: "candle-wick", "data-tone": up ? "up" : "down" });
+      const bodyTop = Math.min(y(numeric(row.open)), y(numeric(row.close)));
+      const body = add("rect", { x: center - bodyWidth / 2, y: bodyTop, width: bodyWidth, height: Math.max(1.5, Math.abs(y(numeric(row.open)) - y(numeric(row.close)))), class: "candle-body", "data-tone": up ? "up" : "down" });
+      body.appendChild(Object.assign(document.createElementNS("http://www.w3.org/2000/svg", "title"), { textContent: `${shortTime(row.timestamp)} · 5分钟  开 ${money(row.open)}  高 ${money(row.high)}  低 ${money(row.low)}  收 ${money(row.close)}` }));
+    });
     container.append(svg);
   }
 
   function formatCell(row, key) { if (key === "symbol_display") return symbolCell(row); if (key === "market_value") return money(row.market_value); if (key === "timestamp") return escapeHtml(formatTime(row.timestamp)); return escapeHtml(String(row[key] ?? "—")); }
   function labelFor(key) { return ({ symbol_display: "标的", quantity: "数量", market_value: "市值", timestamp: "快照时间" })[key] || key; }
   function money(value) { return Number.isFinite(Number(value)) ? currency.format(Number(value)) : "—"; }
+  function wholeMoney(value) { return Number.isFinite(Number(value)) ? wholeCurrency.format(Math.trunc(Number(value))) : "—"; }
   function percent(value) { return Number.isFinite(Number(value)) ? `${(Number(value) * 100).toFixed(2)}%` : "—"; }
   function compactMoney(value) { return `${(numeric(value) / 10000).toFixed(1)}万`; }
   function formatTime(value) { const date = value ? new Date(value) : null; return date && !Number.isNaN(date.valueOf()) ? date.toLocaleString("zh-CN", { hour12: false }) : (value || "—"); }

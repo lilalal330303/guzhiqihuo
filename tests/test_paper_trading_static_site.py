@@ -146,3 +146,38 @@ def test_daily_equity_uses_columns_and_five_day_equity_uses_candlesticks():
     assert "daily_equity_bars" in source
     assert 'class: "candle-wick"' in source
     assert 'class: "daily-bar"' in source
+
+
+def test_orders_fills_activity_and_logs_have_trade_date_filters():
+    source = _read("app.js")
+    for identifier in ("order-date", "activity-date", "log-date"):
+        assert identifier in source
+    assert "filterByTradeDate" in source
+    assert "wireDateFilter" in source
+
+
+def test_five_day_chart_uses_concatenated_five_minute_candles_and_day_separators():
+    source = _read("app.js")
+    styles = _read("styles.css")
+    assert "five_day_equity_candles" in source
+    assert "5分钟" in source
+    assert "day-separator" in source
+    assert ".day-separator" in styles
+
+
+def test_account_card_money_metrics_drop_decimal_places_and_schedule_is_visible():
+    source = _read("app.js")
+    assert "function wholeMoney" in source
+    assert '["账户权益", wholeMoney(m.equity)]' in source
+    assert '["可用现金", wholeMoney(m.cash)]' in source
+    assert '["持仓市值", wholeMoney(m.position_market_value)]' in source
+    assert "snapshot_schedule" in source
+    assert "15:30" in source
+
+
+def test_selected_strategy_tabs_keep_a_luminous_panel_and_ui_has_motion_feedback():
+    styles = _read("styles.css")
+    assert '.tab[aria-selected="true"]' in styles
+    assert "box-shadow" in styles
+    assert ".audit-filter" in styles
+    assert "@keyframes viewIn" in styles

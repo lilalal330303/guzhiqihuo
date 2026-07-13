@@ -262,6 +262,44 @@ def test_daily_equity_bars_aggregate_intraday_equity_to_ohlc():
     assert bars[1]["close"] == 1005.0
 
 
+def test_five_day_equity_candles_aggregate_five_minute_buckets_for_latest_trade_days():
+    curve = []
+    for index, day in enumerate(("07", "08", "09", "10", "13", "14")):
+        base = 1000 + index * 10
+        curve.extend([
+            {"timestamp": f"2026-07-{day}T09:31:00", "equity": base},
+            {"timestamp": f"2026-07-{day}T09:34:00", "equity": base + 4},
+            {"timestamp": f"2026-07-{day}T09:36:00", "equity": base - 2},
+        ])
+
+    candles = site_export._five_day_equity_candles(curve)
+
+    assert sorted({row["trade_date"] for row in candles}) == [
+        "2026-07-08", "2026-07-09", "2026-07-10", "2026-07-13", "2026-07-14",
+    ]
+    first = candles[0]
+    assert first == {
+        "timestamp": "2026-07-08T09:30:00", "trade_date": "2026-07-08",
+        "open": 1010.0, "high": 1014.0, "low": 1010.0, "close": 1014.0,
+    }
+
+
+def test_snapshot_declares_after_close_refresh_schedule(tmp_path, monkeypatch):
+    repo = DuckDBRepository(tmp_path / "market.duckdb")
+    account = PaperAccount("alpha", "alpha", 1_000)
+    _seed_audit(repo, account)
+    monkeypatch.setattr(
+        "quant_lab.app.paper_trading_view_model.assess_readiness",
+        lambda _: pd.DataFrame([{"account_id": "alpha", "reason": None}]),
+    )
+
+    snapshot = site_export.build_site_snapshot(repo, accounts=[account])
+
+    assert snapshot["snapshot_schedule"] == {
+        "label": "盘后快照", "time": "15:30", "timezone": "Asia/Shanghai",
+    }
+
+
 def test_daily_position_history_keeps_zero_quantity_exit_and_symbol_pnl():
     position_rows = [
         {"timestamp": "2026-07-10T14:56:00", "symbol": "510300", "quantity": 100},
