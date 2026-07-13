@@ -174,3 +174,38 @@ def test_snapshot_keeps_sell_profit_loss_empty_unless_durable_fill_supplies_it(t
     fills = {row["fill_id"]: row for row in snapshot["accounts"][0]["fills"]}
     assert fills["sell-fill"]["profit_loss"] == 10.0
     assert fills["fill-alpha"]["profit_loss"] is None
+
+
+def test_snapshot_uses_only_latest_position_snapshot_and_latest_minute_price(tmp_path, monkeypatch):
+    repo = DuckDBRepository(tmp_path / "market.duckdb")
+    account = PaperAccount("alpha", "alpha", 1_000)
+    _seed_audit(repo, account)
+    latest = pd.Timestamp("2026-07-13 14:50")
+    repo.save_paper_positions(account.account_id, account.strategy_id, latest, [
+        {"symbol": "510300.SH", "quantity": 40, "market_value": 0},
+        {"symbol": "159915.SZ", "quantity": 0, "market_value": 0},
+    ])
+    repo.save_paper_equity(account.account_id, account.strategy_id, latest, cash=800, equity=940)
+    repo.upsert_minute_bars(pd.DataFrame([{
+        "symbol": "510300.SH", "trade_date": latest.date(), "minute": 1449,
+        "datetime": latest - pd.Timedelta(minutes=1), "open": 3.4, "high": 3.6,
+        "low": 3.3, "close": 3.5, "volume": 100, "amount": 350,
+    }]), source="test")
+    monkeypatch.setattr(
+        "quant_lab.app.paper_trading_view_model.assess_readiness",
+        lambda _: pd.DataFrame([{"account_id": "alpha", "reason": None}]),
+    )
+
+    snapshot = site_export.build_site_snapshot(repo, accounts=[account])
+
+    positions = snapshot["accounts"][0]["positions"]
+    assert len(positions) == 1
+    assert positions[0]["timestamp"] == "2026-07-13T14:50:00"
+    assert positions[0]["symbol"] == "510300.SH"
+    assert positions[0]["quantity"] == 40
+    assert positions[0]["latest_price"] == 3.5
+    assert positions[0]["market_value"] == 140.0
+    assert snapshot["combined_holdings"] == [{
+        "symbol": "510300.SH", "display_name": "510300.SH", "quantity": 40.0,
+        "market_value": 140.0, "strategies": ["alpha"], "strategy_count": 1,
+    }]

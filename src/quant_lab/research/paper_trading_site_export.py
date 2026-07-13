@@ -50,10 +50,12 @@ def build_site_snapshot(
         for panel in build_command_center_snapshot(repo, account_list).account_panels
     }
     account_snapshots = [_account_snapshot(repo, account, panels[account.account_id], limit) for account in account_list]
+    market_data_as_of = _latest_market_timestamp(account_snapshots)
+    _apply_latest_market_values(repo, account_snapshots, market_data_as_of)
     return {
         "source": "local_paper_trading_audit",
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "market_data_as_of": _latest_market_timestamp(account_snapshots),
+        "market_data_as_of": market_data_as_of,
         "combined_holdings": _combine_holdings(account_snapshots),
         "accounts": account_snapshots,
     }
@@ -83,7 +85,7 @@ def export_site_snapshot(
 def _account_snapshot(repo: DuckDBRepository, account: PaperAccount, panel: Any, limit: int) -> dict[str, object]:
     symbol_names = _symbol_names(repo)
     positions = _enrich_records(
-        _records(decode_payload_frame(repo.load_paper_positions(panel.account_id)), limit), symbol_names,
+        _latest_position_records(repo, panel.account_id), symbol_names,
     )
     orders = _enrich_records(
         _records(decode_payload_frame(repo.load_paper_orders(panel.account_id)), limit), symbol_names,
@@ -116,6 +118,55 @@ def _account_snapshot(repo: DuckDBRepository, account: PaperAccount, panel: Any,
         "timeline": _records(build_execution_timeline(repo, panel.account_id, panel.strategy_id), limit),
         "exceptions": _records(decode_payload_frame(repo.load_paper_exceptions(panel.account_id)), limit),
     }
+
+
+def _latest_position_records(repo: DuckDBRepository, account_id: str) -> list[dict[str, object]]:
+    """Expose one durable position snapshot only, omitting zero-quantity tombstones."""
+    rows = decode_payload_frame(repo.load_paper_positions(account_id))
+    if rows.empty:
+        return []
+    timestamps = pd.to_datetime(rows["timestamp"])
+    latest = timestamps.max()
+    latest_rows = rows.loc[timestamps == latest].copy()
+    quantities = pd.to_numeric(latest_rows.get("quantity"), errors="coerce").fillna(0)
+    return _records(latest_rows.loc[quantities > 0], len(latest_rows))
+
+
+def _apply_latest_market_values(
+    repo: DuckDBRepository, accounts: list[dict[str, object]], market_data_as_of: str | None,
+) -> None:
+    """Mark latest durable holdings with the last available local minute close at the audit timestamp."""
+    if not market_data_as_of:
+        return
+    as_of = pd.Timestamp(market_data_as_of)
+    positions = [
+        row for account in accounts for row in account.get("positions", [])
+        if isinstance(row, dict) and row.get("symbol")
+    ]
+    prices = _latest_minute_prices(repo, [str(row["symbol"]) for row in positions], as_of)
+    for row in positions:
+        price = prices.get(str(row["symbol"]))
+        row["latest_price"] = price
+        if price is not None:
+            row["market_value"] = float(row.get("quantity") or 0) * price
+
+
+def _latest_minute_prices(
+    repo: DuckDBRepository, symbols: list[str], as_of: pd.Timestamp,
+) -> dict[str, float]:
+    unique_symbols = list(dict.fromkeys(symbols))
+    if not unique_symbols:
+        return {}
+    start_date = (as_of.normalize() - pd.Timedelta(days=7)).strftime("%Y-%m-%d")
+    bars = repo.load_minute_bars(unique_symbols, start_date, as_of.strftime("%Y-%m-%d"))
+    if bars.empty:
+        return {}
+    rows = bars[pd.to_datetime(bars["datetime"]) <= as_of].copy()
+    if rows.empty:
+        return {}
+    rows["datetime"] = pd.to_datetime(rows["datetime"])
+    latest = rows.sort_values(["symbol", "datetime"], kind="stable").groupby("symbol", as_index=False).tail(1)
+    return {str(row.symbol): float(row.close) for row in latest.itertuples(index=False)}
 
 
 def _symbol_names(repo: DuckDBRepository) -> dict[str, str]:
