@@ -1,6 +1,28 @@
 {
   "source": "local_paper_trading_audit",
-  "generated_at": "2026-07-13T13:20:55.439394+00:00",
+  "generated_at": "2026-07-13T13:58:57.190524+00:00",
+  "market_data_as_of": "2026-07-07T14:56:00",
+  "combined_holdings": [
+    {
+      "symbol": "513400",
+      "quantity": 23313500.0,
+      "market_value": 0.0,
+      "strategies": [
+        "v7k_wufu_qixing",
+        "wufu_v12d"
+      ],
+      "strategy_count": 2
+    },
+    {
+      "symbol": "515120",
+      "quantity": 29699100.0,
+      "market_value": 0.0,
+      "strategies": [
+        "v7k_wufu_qixing"
+      ],
+      "strategy_count": 1
+    }
+  ],
   "accounts": [
     {
       "id": "v7k_wufu_qixing",
