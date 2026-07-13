@@ -54,8 +54,8 @@
     root.innerHTML = pageHead("模拟盘策略总览", "账户之间独立核算；点击左侧策略进入其独立详情。", snapshot) +
       `<section class="strategy-summary">${accounts.map(accountCard).join("")}</section>` +
       `<section class="panel"><div class="section-title"><div><h2>${escapeHtml(current.display?.name || current.id)} · 权益走势</h2><p>当前策略</p></div>${periodControls()}</div><div class="chart-wrap" id="equity-chart"></div></section>` +
-      `<section class="grid"><section class="panel"><h2>当前策略最近执行活动</h2><div class="timeline">${timelineMarkup((current.timeline || []).slice(-8).reverse())}</div></section><section class="panel"><h2>当前持仓</h2>${positionTable(latestPositions(current))}</section></section>`;
-    wireChartPeriod(root, current.equity_curve || [], current.display?.name || current.id);
+      `<section class="grid"><section class="panel"><h2>当前策略最近执行活动</h2><div class="timeline">${timelineMarkup(visibleTimeline(current.timeline || []).slice(-8).reverse())}</div></section><section class="panel"><h2>当前持仓</h2>${positionTable(latestPositions(current))}</section></section>`;
+    wireChartPeriod(root, current, current.display?.name || current.id);
   }
 
   function accountCard(account) {
@@ -69,14 +69,15 @@
       kpis([["账户权益", money(m.equity)], ["初始资金", money(account.display?.initial_cash)], ["可用现金", money(m.cash)], ["持仓市值", money(m.position_market_value)], ["累计收益", percent(m.total_return)]]) +
       `<section class="panel"><div class="section-title"><div><h2>权益走势</h2><p>当前策略</p></div>${periodControls()}</div><div class="chart-wrap" id="equity-chart"></div></section>` +
       `<div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-tab="positions">持仓</button><button class="tab" role="tab" aria-selected="false" data-tab="orders">订单</button><button class="tab" role="tab" aria-selected="false" data-tab="fills">成交</button><button class="tab" role="tab" aria-selected="false" data-tab="timeline">执行活动</button><button class="tab" role="tab" aria-selected="false" data-tab="logs">运行日志</button></div><section class="panel" id="tab-content"></section>`;
-    wireChartPeriod(root, account.equity_curve || [], account.display?.name || account.id);
+    wireChartPeriod(root, account, account.display?.name || account.id);
     const content = root.querySelector("#tab-content");
     const show = (tab) => {
-      content.innerHTML = tab === "positions" ? positionTable(latestPositions(account))
-        : tab === "orders" ? orderTable(account.orders || [])
+      content.innerHTML = tab === "positions" ? positionHistoryMarkup(account.position_history || [])
+        : tab === "orders" ? orderTable(visibleOrders(account.orders || []))
         : tab === "fills" ? fillTable(account.fills || [])
-        : tab === "timeline" ? `<div class="timeline">${timelineMarkup((account.timeline || []).slice().reverse())}</div>`
+        : tab === "timeline" ? `<div class="timeline">${timelineMarkup(visibleTimeline(account.timeline || []).slice().reverse())}</div>`
         : logMarkup(account);
+      if (tab === "positions") wirePositionHistory(content, account.position_history || []);
     };
     show("positions");
     root.querySelectorAll(".tab").forEach((button) => button.addEventListener("click", () => {
@@ -86,11 +87,12 @@
   }
 
   function renderPositions(root, account, snapshot) {
-    root.innerHTML = scopedHead("持仓", account, snapshot, "显示当前策略的最新持仓快照，不混入其他策略。") + `<section class="panel">${positionTable(latestPositions(account))}</section>`;
+    root.innerHTML = scopedHead("历史持仓", account, snapshot, "按交易日查看当日持仓品种变化和单品种盈亏。") + `<section class="panel">${positionHistoryMarkup(account.position_history || [])}</section>`;
+    wirePositionHistory(root, account.position_history || []);
   }
 
   function renderOrders(root, account, snapshot) {
-    root.innerHTML = scopedHead("订单与成交", account, snapshot, "订单和成交均来自当前策略的持久化审计记录。") + `<section class="panel"><h2>订单</h2>${orderTable(account.orders || [])}</section><section class="panel"><h2>成交</h2>${fillTable(account.fills || [])}</section>`;
+    root.innerHTML = scopedHead("订单与成交", account, snapshot, "仅展示已成交或部分成交的有效订单；被拒绝订单仍保留在底层审计库。") + `<section class="panel"><h2>有效订单</h2>${orderTable(visibleOrders(account.orders || []))}</section><section class="panel"><h2>成交</h2>${fillTable(account.fills || [])}</section>`;
   }
 
   function renderLogs(root, account, snapshot) {
@@ -109,9 +111,15 @@
   function kpis(items) { return `<section class="kpis">${items.map(([name, value]) => `<div class="kpi"><span>${name}</span><b>${value}</b></div>`).join("")}</section>`; }
   function periodControls() { return `<div class="period-controls" role="group" aria-label="权益图周期"><button data-period="intraday" class="period active">日内</button><button data-period="daily" class="period">按日</button><button data-period="five-day" class="period">近5日</button></div>`; }
 
-  function wireChartPeriod(root, curve, label) {
+  function wireChartPeriod(root, account, label) {
     const chart = root.querySelector("#equity-chart");
-    const draw = (period) => renderEquityChart(chart, filterEquityCurve(curve, period), label, period);
+    const curve = account.equity_curve || [];
+    const dailyBars = account.daily_equity_bars || [];
+    const draw = (period) => {
+      if (period === "daily") renderDailyEquityBars(chart, dailyBars, label);
+      else if (period === "five-day") renderEquityCandlesticks(chart, dailyBars.slice(-5), label);
+      else renderEquityChart(chart, curve, label, period);
+    };
     draw("intraday");
     root.querySelectorAll(".period").forEach((button) => button.addEventListener("click", () => {
       root.querySelectorAll(".period").forEach((item) => item.classList.toggle("active", item === button));
@@ -134,6 +142,38 @@
     return rows.filter((row) => (Date.parse(row.timestamp || "") || 0) === newest && numeric(row.quantity) > 0);
   }
 
+  function visibleOrders(rows) {
+    return (Array.isArray(rows) ? rows : []).filter((row) => String(row.status).toLowerCase() !== "rejected");
+  }
+
+  function visibleTimeline(rows) {
+    return (Array.isArray(rows) ? rows : []).filter((row) => [row.event, row.reason, row.message, row.exception_type]
+      .every((value) => String(value || "").toLowerCase() !== "intent_missing"));
+  }
+
+  function positionHistoryMarkup(history) {
+    if (!history.length) return empty("暂无历史持仓快照。");
+    const options = history.slice().reverse().map((day, index) => `<option value="${escapeHtml(day.trade_date)}"${index === 0 ? " selected" : ""}>${escapeHtml(day.trade_date)}</option>`).join("");
+    return `<div class="history-toolbar"><label for="history-date">持仓日期</label><select id="history-date" class="history-date">${options}</select><span>展示当日最后一个审计快照</span></div><div id="history-table"></div>`;
+  }
+
+  function wirePositionHistory(root, history) {
+    const select = root.querySelector("#history-date");
+    const target = root.querySelector("#history-table");
+    if (!select || !target || !history.length) return;
+    const draw = () => {
+      const day = history.find((item) => item.trade_date === select.value) || history[history.length - 1];
+      target.innerHTML = historyPositionTable(day.holdings || [], day);
+    };
+    select.addEventListener("change", draw);
+    draw();
+  }
+
+  function historyPositionTable(rows, day) {
+    if (!rows.length) return empty("当日无持仓变化记录。");
+    return `<div class="history-caption">${escapeHtml(day.trade_date)} · 快照 ${escapeHtml(formatTime(day.timestamp))}</div><div class="table-wrap"><table class="data-table history-table"><thead><tr><th>标的</th><th>动作</th><th>持仓数量</th><th>持仓变化</th><th>收盘价</th><th>市值</th><th>平均成本</th><th>已实现盈亏</th><th>浮动盈亏</th><th>单品种总盈亏</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${symbolCell(row)}</td><td><span class="action action-${escapeHtml(row.action)}">${escapeHtml(row.action)}</span></td><td>${formatQuantity(row.quantity)}</td><td>${signedQuantity(row.quantity_change)}</td><td>${priceCell(row.close)}</td><td>${money(row.market_value)}</td><td>${priceCell(row.average_cost)}</td><td>${pnlValue(row.realized_pnl)}</td><td>${pnlValue(row.unrealized_pnl)}</td><td>${pnlValue(row.total_pnl)}</td></tr>`).join("")}</tbody></table></div>`;
+  }
+
   function positionTable(rows) {
     return tableMarkup(rows, ["symbol_display", "quantity", "market_value", "timestamp"]);
   }
@@ -149,7 +189,7 @@
   }
 
   function logMarkup(account) {
-    const rows = [...(account.timeline || []), ...(account.exceptions || [])].sort((a, b) => String(b.timestamp || "").localeCompare(String(a.timestamp || "")));
+    const rows = visibleTimeline([...(account.timeline || []), ...(account.exceptions || [])]).sort((a, b) => String(b.timestamp || "").localeCompare(String(a.timestamp || "")));
     return `<div class="timeline">${timelineMarkup(rows)}</div>`;
   }
 
@@ -193,6 +233,10 @@
     return labels[raw.toLowerCase()] || raw;
   }
   function profitCell(row) { return row.profit_loss === null || row.profit_loss === undefined ? "—" : `<span class="${numeric(row.profit_loss) >= 0 ? "positive" : "negative"}">${money(row.profit_loss)}</span>`; }
+  function pnlValue(value) { return value === null || value === undefined ? "—" : `<span class="${numeric(value) >= 0 ? "positive" : "negative"}">${money(value)}</span>`; }
+  function priceCell(value) { return Number.isFinite(Number(value)) ? Number(value).toFixed(4) : "—"; }
+  function formatQuantity(value) { return Number.isFinite(Number(value)) ? Number(value).toLocaleString("zh-CN", { maximumFractionDigits: 0 }) : "—"; }
+  function signedQuantity(value) { const number = Number(value); return Number.isFinite(number) ? `${number > 0 ? "+" : ""}${number.toLocaleString("zh-CN", { maximumFractionDigits: 0 })}` : "—"; }
   function details(row) { return `<details class="audit-detail"><summary>展开</summary>${escapeHtml(JSON.stringify(row, null, 2))}</details>`; }
   function empty(message) { return `<div class="empty">${escapeHtml(message)}</div>`; }
 
@@ -216,6 +260,43 @@
     const focus = add("circle", { cx: x(0), cy: y(values[0]), r: 4, class: "point", opacity: "0" }); const tooltip = document.createElement("div"); tooltip.className = "chart-tooltip"; container.append(svg, tooltip);
     svg.addEventListener("pointermove", (event) => { const rect = svg.getBoundingClientRect(); const px = (event.clientX - rect.left) / rect.width * 760; const nearest = Math.max(0, Math.min(values.length - 1, Math.round((px - left) / width * (values.length - 1)))); focus.setAttribute("cx", x(nearest)); focus.setAttribute("cy", y(values[nearest])); focus.setAttribute("opacity", "1"); tooltip.style.display = "block"; tooltip.style.left = `${Math.min(container.clientWidth - 150, Math.max(5, event.clientX - rect.left + 10))}px`; tooltip.style.top = `${Math.max(4, event.clientY - rect.top - 44)}px`; tooltip.textContent = `${shortTime(pointsData[nearest].row.timestamp || pointsData[nearest].row.trade_date)} · ${money(values[nearest])}`; });
     svg.addEventListener("pointerleave", () => { tooltip.style.display = "none"; focus.setAttribute("opacity", "0"); });
+  }
+
+  function renderDailyEquityBars(container, bars, label) {
+    if (!container) return;
+    container.innerHTML = "";
+    if (!bars.length) { container.innerHTML = empty("暂无按日权益数据。"); return; }
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.classList.add("equity-chart"); svg.setAttribute("viewBox", "0 0 760 300"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `${label}按日权益柱状图`);
+    const left = 74, top = 20, width = 650, height = 220, bottom = top + height;
+    const values = bars.map((row) => numeric(row.close));
+    const min = Math.min(...values), max = Math.max(...values), padding = Math.max((max - min) * .15, Math.abs(max) * .005, 1);
+    const floorValue = min - padding, range = max - min + padding * 2;
+    const slot = width / bars.length, barWidth = Math.min(42, slot * .62);
+    const y = (value) => top + height - (value - floorValue) / range * height;
+    const add = (name, attrs, text) => { const node = document.createElementNS("http://www.w3.org/2000/svg", name); Object.entries(attrs || {}).forEach(([key, value]) => node.setAttribute(key, value)); if (text !== undefined) node.textContent = text; svg.appendChild(node); return node; };
+    add("line", { x1: left, y1: top, x2: left, y2: bottom, class: "axis" }); add("line", { x1: left, y1: bottom, x2: left + width, y2: bottom, class: "axis" });
+    for (let index = 0; index < 4; index += 1) { const value = floorValue + range * index / 3; const yy = y(value); add("line", { x1: left, y1: yy, x2: left + width, y2: yy, class: "axis", opacity: ".4" }); add("text", { x: 4, y: yy + 4, class: "axis-label" }, compactMoney(value)); }
+    bars.forEach((row, index) => { const xx = left + slot * index + (slot - barWidth) / 2; const yy = y(numeric(row.close)); const rect = add("rect", { x: xx, y: yy, width: barWidth, height: Math.max(1, bottom - yy), class: "daily-bar", "data-tone": numeric(row.return) >= 0 ? "up" : "down" }); rect.appendChild(Object.assign(document.createElementNS("http://www.w3.org/2000/svg", "title"), { textContent: `${row.trade_date}  收盘权益 ${money(row.close)}  日涨跌 ${percent(row.return)}` })); add("text", { x: xx + barWidth / 2, y: bottom + 22, "text-anchor": "middle", class: "axis-label" }, String(row.trade_date).slice(5)); });
+    container.append(svg);
+  }
+
+  function renderEquityCandlesticks(container, bars, label) {
+    if (!container) return;
+    container.innerHTML = "";
+    if (!bars.length) { container.innerHTML = empty("暂无连续5日权益 K 线数据。"); return; }
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.classList.add("equity-chart"); svg.setAttribute("viewBox", "0 0 760 300"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `${label}连续5日权益K线图`);
+    const left = 74, top = 20, width = 650, height = 220, bottom = top + height;
+    const lows = bars.map((row) => numeric(row.low)), highs = bars.map((row) => numeric(row.high));
+    const min = Math.min(...lows), max = Math.max(...highs), padding = Math.max((max - min) * .12, Math.abs(max) * .003, 1), range = max - min + padding * 2;
+    const y = (value) => top + height - (value - (min - padding)) / range * height;
+    const slot = width / bars.length, bodyWidth = Math.min(46, slot * .48);
+    const add = (name, attrs, text) => { const node = document.createElementNS("http://www.w3.org/2000/svg", name); Object.entries(attrs || {}).forEach(([key, value]) => node.setAttribute(key, value)); if (text !== undefined) node.textContent = text; svg.appendChild(node); return node; };
+    add("line", { x1: left, y1: top, x2: left, y2: bottom, class: "axis" }); add("line", { x1: left, y1: bottom, x2: left + width, y2: bottom, class: "axis" });
+    for (let index = 0; index < 4; index += 1) { const value = min - padding + range * index / 3; const yy = y(value); add("line", { x1: left, y1: yy, x2: left + width, y2: yy, class: "axis", opacity: ".4" }); add("text", { x: 4, y: yy + 4, class: "axis-label" }, compactMoney(value)); }
+    bars.forEach((row, index) => { const center = left + slot * index + slot / 2; const up = numeric(row.close) >= numeric(row.open); add("line", { x1: center, y1: y(numeric(row.high)), x2: center, y2: y(numeric(row.low)), class: "candle-wick", "data-tone": up ? "up" : "down" }); const bodyTop = Math.min(y(numeric(row.open)), y(numeric(row.close))); const body = add("rect", { x: center - bodyWidth / 2, y: bodyTop, width: bodyWidth, height: Math.max(2, Math.abs(y(numeric(row.open)) - y(numeric(row.close)))), class: "candle-body", "data-tone": up ? "up" : "down" }); body.appendChild(Object.assign(document.createElementNS("http://www.w3.org/2000/svg", "title"), { textContent: `${row.trade_date}  开 ${money(row.open)}  高 ${money(row.high)}  低 ${money(row.low)}  收 ${money(row.close)}` })); add("text", { x: center, y: bottom + 22, "text-anchor": "middle", class: "axis-label" }, String(row.trade_date).slice(5)); });
+    container.append(svg);
   }
 
   function formatCell(row, key) { if (key === "symbol_display") return symbolCell(row); if (key === "market_value") return money(row.market_value); if (key === "timestamp") return escapeHtml(formatTime(row.timestamp)); return escapeHtml(String(row[key] ?? "—")); }
