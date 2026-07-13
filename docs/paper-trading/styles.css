@@ -3,3 +3,16 @@
 @media(min-width:981px){.rail{position:sticky;top:70px;height:calc(100vh - 70px);overflow-y:auto;align-self:start}}
 /* Long identifiers and payload-derived values must remain inside their cells. */
 .data-table td{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.daily-bar[data-tone="up"],.candle-body[data-tone="up"]{fill:var(--red);stroke:var(--red)}
+.daily-bar[data-tone="down"],.candle-body[data-tone="down"]{fill:var(--green);stroke:var(--green)}
+.candle-wick[data-tone="up"]{stroke:var(--red);stroke-width:2}
+.candle-wick[data-tone="down"]{stroke:var(--green);stroke-width:2}
+.history-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;color:var(--muted)}
+.history-toolbar label{color:var(--text);font-weight:700}
+.history-date{border:1px solid var(--line);border-radius:8px;background:#091625;color:var(--text);padding:8px 34px 8px 10px}
+.history-caption{margin:5px 0 12px;color:var(--muted);font-size:12px}
+.history-table{min-width:1320px;table-layout:auto}
+.history-table th,.history-table td{white-space:nowrap;max-width:none}
+.action{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:3px 8px;font-size:12px}
+.action-新建,.action-增持{color:var(--red);border-color:#7a3542}
+.action-减持,.action-清仓{color:var(--green);border-color:#25654c}

@@ -121,3 +121,28 @@ def test_static_site_keeps_global_pages_strategy_scoped_by_default():
     assert "策略账户" in source
     assert "当前策略" in source
     assert "profit_loss" in source
+
+
+def test_static_site_hides_rejected_orders_and_low_value_intent_missing_events():
+    source = _read("app.js")
+    assert "visibleOrders" in source
+    assert "visibleTimeline" in source
+    assert 'status).toLowerCase() !== "rejected"' in source
+    assert '!== "intent_missing"' in source
+
+
+def test_position_view_supports_daily_history_and_per_symbol_profit_columns():
+    source = _read("app.js")
+    assert "position_history" in source
+    assert "history-date" in source
+    for field in ("持仓变化", "平均成本", "已实现盈亏", "浮动盈亏", "单品种总盈亏"):
+        assert field in source
+
+
+def test_daily_equity_uses_columns_and_five_day_equity_uses_candlesticks():
+    source = _read("app.js")
+    assert "renderDailyEquityBars" in source
+    assert "renderEquityCandlesticks" in source
+    assert "daily_equity_bars" in source
+    assert 'class: "candle-wick"' in source
+    assert 'class: "daily-bar"' in source

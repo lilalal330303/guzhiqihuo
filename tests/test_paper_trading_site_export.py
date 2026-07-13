@@ -209,3 +209,87 @@ def test_snapshot_uses_only_latest_position_snapshot_and_latest_minute_price(tmp
         "symbol": "510300.SH", "display_name": "510300.SH", "quantity": 40.0,
         "market_value": 140.0, "strategies": ["alpha"], "strategy_count": 1,
     }]
+
+
+def test_visible_audit_records_hide_rejected_orders_and_intent_missing_noise():
+    orders = [
+        {"order_id": "ok", "status": "filled"},
+        {"order_id": "partial", "status": "partial"},
+        {"order_id": "hidden", "status": "rejected"},
+    ]
+    timeline = [
+        {"audit_id": "keep", "event": "filled"},
+        {"audit_id": "hide-event", "event": "intent_missing"},
+        {"audit_id": "hide-reason", "reason": "intent_missing"},
+    ]
+
+    assert [row["order_id"] for row in site_export._visible_orders(orders)] == ["ok", "partial"]
+    assert [row["audit_id"] for row in site_export._visible_timeline(timeline)] == ["keep"]
+
+
+def test_fill_ledger_reconstructs_average_cost_and_realized_sell_profit_after_commissions():
+    fills = [
+        {"fill_id": "b1", "timestamp": "2026-07-07T13:11:00", "symbol": "510300", "side": "buy", "quantity": 100, "price": 2.0, "commission": 5.0},
+        {"fill_id": "b2", "timestamp": "2026-07-08T13:11:00", "symbol": "510300", "side": "buy", "quantity": 100, "price": 3.0, "commission": 5.0},
+        {"fill_id": "s1", "timestamp": "2026-07-09T13:11:00", "symbol": "510300", "side": "sell", "quantity": 150, "price": 4.0, "commission": 6.0},
+    ]
+
+    enriched = site_export._fill_ledger(fills)
+
+    sell = enriched[-1]
+    assert sell["average_cost"] == pytest.approx(2.55)
+    assert sell["profit_loss"] == pytest.approx(211.5)
+    assert sell["remaining_quantity"] == 50
+
+
+def test_daily_equity_bars_aggregate_intraday_equity_to_ohlc():
+    curve = [
+        {"timestamp": "2026-07-13T13:11:00", "equity": 1000},
+        {"timestamp": "2026-07-13T14:10:00", "equity": 980},
+        {"timestamp": "2026-07-13T14:56:00", "equity": 1010},
+        {"timestamp": "2026-07-14T13:11:00", "equity": 1020},
+        {"timestamp": "2026-07-14T14:56:00", "equity": 1005},
+    ]
+
+    bars = site_export._daily_equity_bars(curve)
+
+    assert {key: value for key, value in bars[0].items() if key != "return"} == {
+        "trade_date": "2026-07-13", "open": 1000.0, "high": 1010.0,
+        "low": 980.0, "close": 1010.0, "change": 10.0,
+    }
+    assert bars[0]["return"] == pytest.approx(0.01)
+    assert bars[1]["open"] == 1020.0
+    assert bars[1]["close"] == 1005.0
+
+
+def test_daily_position_history_keeps_zero_quantity_exit_and_symbol_pnl():
+    position_rows = [
+        {"timestamp": "2026-07-10T14:56:00", "symbol": "510300", "quantity": 100},
+        {"timestamp": "2026-07-13T13:11:00", "symbol": "510300", "quantity": 0},
+    ]
+    ledger = [
+        {"timestamp": "2026-07-10T13:11:00", "symbol": "510300", "side": "buy", "quantity": 100, "price": 2.0, "commission": 5.0, "average_cost_after": 2.05, "remaining_quantity": 100, "profit_loss": None},
+        {"timestamp": "2026-07-13T13:11:00", "symbol": "510300", "side": "sell", "quantity": 100, "price": 2.2, "commission": 5.0, "average_cost": 2.05, "average_cost_after": 0.0, "remaining_quantity": 0, "profit_loss": 10.0},
+    ]
+    prices = {("2026-07-10", "510300"): 2.1, ("2026-07-13", "510300"): 2.2}
+
+    history = site_export._daily_position_history(position_rows, ledger, prices, {"510300": "沪深300ETF"})
+
+    assert history[0]["holdings"][0]["quantity_change"] == 100
+    assert history[0]["holdings"][0]["unrealized_pnl"] == pytest.approx(5.0)
+    exit_row = history[1]["holdings"][0]
+    assert exit_row["action"] == "清仓"
+    assert exit_row["quantity"] == 0
+    assert exit_row["realized_pnl"] == pytest.approx(10.0)
+
+
+def test_history_price_never_uses_a_minute_after_the_position_snapshot(tmp_path):
+    repo = DuckDBRepository(tmp_path / "market.duckdb")
+    repo.upsert_minute_bars(pd.DataFrame([
+        {"symbol": "510300", "trade_date": "2026-07-13", "minute": 1456, "datetime": "2026-07-13 14:56", "open": 2.0, "high": 2.0, "low": 2.0, "close": 2.0, "volume": 100, "amount": 200},
+        {"symbol": "510300", "trade_date": "2026-07-13", "minute": 1500, "datetime": "2026-07-13 15:00", "open": 3.0, "high": 3.0, "low": 3.0, "close": 3.0, "volume": 100, "amount": 300},
+    ]), source="test")
+
+    prices = site_export._daily_close_prices(repo, ["510300"], ["2026-07-13T14:56:00"])
+
+    assert prices[("2026-07-13", "510300")] == 2.0

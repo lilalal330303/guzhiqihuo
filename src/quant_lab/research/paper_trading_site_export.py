@@ -84,15 +84,25 @@ def export_site_snapshot(
 
 def _account_snapshot(repo: DuckDBRepository, account: PaperAccount, panel: Any, limit: int) -> dict[str, object]:
     symbol_names = _symbol_names(repo)
+    raw_position_frame = decode_payload_frame(repo.load_paper_positions(panel.account_id))
+    raw_fill_frame = decode_payload_frame(repo.load_paper_fills(panel.account_id))
+    raw_equity_frame = repo.load_paper_equity(panel.account_id)
+    position_records = _records(raw_position_frame, max(len(raw_position_frame), 1))
+    fill_ledger = _fill_ledger(_records(raw_fill_frame, max(len(raw_fill_frame), 1)))
+    history_prices = _daily_close_prices(
+        repo,
+        [str(row.get("symbol") or "") for row in position_records],
+        [str(row.get("timestamp") or "") for row in position_records],
+    )
     positions = _enrich_records(
         _latest_position_records(repo, panel.account_id), symbol_names,
     )
-    orders = _enrich_records(
-        _records(decode_payload_frame(repo.load_paper_orders(panel.account_id)), limit), symbol_names,
-    )
-    fills = _enrich_records(
-        _records(decode_payload_frame(repo.load_paper_fills(panel.account_id)), limit), symbol_names,
-    )
+    orders = _apply_order_profit_loss(_enrich_records(
+        _visible_orders(_records(decode_payload_frame(repo.load_paper_orders(panel.account_id)), limit)), symbol_names,
+    ), fill_ledger)
+    fills = _enrich_records(fill_ledger[-limit:], symbol_names)
+    equity_curve = _records(raw_equity_frame, max(len(raw_equity_frame), 1))
+    position_history = _daily_position_history(position_records, fill_ledger, history_prices, symbol_names)
     return {
         "id": panel.account_id,
         "strategy_id": panel.strategy_id,
@@ -111,13 +121,174 @@ def _account_snapshot(repo: DuckDBRepository, account: PaperAccount, panel: Any,
             "latest_signal_intent": panel.latest_signal_intent,
             "readiness_reason": panel.readiness_reason,
         },
-        "equity_curve": _records(repo.load_paper_equity(panel.account_id), limit),
+        "equity_curve": equity_curve,
+        "daily_equity_bars": _daily_equity_bars(equity_curve),
         "positions": positions,
+        "position_history": position_history,
         "orders": orders,
         "fills": fills,
-        "timeline": _records(build_execution_timeline(repo, panel.account_id, panel.strategy_id), limit),
+        "timeline": _visible_timeline(_records(build_execution_timeline(repo, panel.account_id, panel.strategy_id), limit)),
         "exceptions": _records(decode_payload_frame(repo.load_paper_exceptions(panel.account_id)), limit),
     }
+
+
+def _visible_orders(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    """Hide non-executed orders from the operating view without deleting audit rows."""
+    return [row for row in rows if str(row.get("status") or "").lower() != "rejected"]
+
+
+def _visible_timeline(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    """Remove repetitive no-intent heartbeats from the reader-facing activity feed."""
+    return [row for row in rows if all(
+        str(row.get(key) or "").lower() != "intent_missing" for key in ("event", "reason", "message", "exception_type")
+    )]
+
+
+def _fill_ledger(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    """Rebuild moving-average cost and realized P/L from durable fills."""
+    states: dict[str, dict[str, float]] = {}
+    enriched: list[dict[str, object]] = []
+    ordered = sorted((dict(row) for row in rows), key=lambda row: str(row.get("timestamp") or ""))
+    for row in ordered:
+        symbol = str(row.get("symbol") or "")
+        side = str(row.get("side") or "").lower()
+        quantity = float(row.get("quantity") or 0)
+        price = float(row.get("price") or 0)
+        commission = float(row.get("commission") or 0)
+        state = states.setdefault(symbol, {"quantity": 0.0, "cost": 0.0, "realized": 0.0})
+        average_cost = state["cost"] / state["quantity"] if state["quantity"] > 0 else 0.0
+        profit_loss: float | None = None
+        if side == "buy" and quantity > 0:
+            state["quantity"] += quantity
+            state["cost"] += quantity * price + commission
+        elif side == "sell" and quantity > 0:
+            sold = min(quantity, state["quantity"])
+            profit_loss = sold * price - commission - sold * average_cost
+            durable = _durable_profit_loss(row)
+            if durable is not None:
+                profit_loss = durable
+            state["quantity"] -= sold
+            state["cost"] = max(0.0, state["cost"] - sold * average_cost)
+            if state["quantity"] <= 1e-9:
+                state["quantity"], state["cost"] = 0.0, 0.0
+            state["realized"] += profit_loss
+        row["average_cost"] = average_cost if side == "sell" else None
+        row["average_cost_after"] = state["cost"] / state["quantity"] if state["quantity"] > 0 else 0.0
+        row["remaining_quantity"] = state["quantity"]
+        row["profit_loss"] = profit_loss
+        row["cumulative_realized_pnl"] = state["realized"]
+        enriched.append(row)
+    return enriched
+
+
+def _apply_order_profit_loss(
+    orders: list[dict[str, object]], ledger: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    pnl_by_key: dict[tuple[str, str, str], float] = {}
+    for fill in ledger:
+        if str(fill.get("side") or "").lower() != "sell" or fill.get("profit_loss") is None:
+            continue
+        key = (str(fill.get("timestamp") or ""), str(fill.get("symbol") or ""), "sell")
+        pnl_by_key[key] = pnl_by_key.get(key, 0.0) + float(fill["profit_loss"])
+    result = []
+    for original in orders:
+        row = dict(original)
+        if str(row.get("side") or "").lower() == "sell":
+            row["profit_loss"] = pnl_by_key.get((str(row.get("timestamp") or ""), str(row.get("symbol") or ""), "sell"))
+        result.append(row)
+    return result
+
+
+def _daily_equity_bars(curve: list[dict[str, object]]) -> list[dict[str, object]]:
+    if not curve:
+        return []
+    frame = pd.DataFrame(curve)
+    frame["timestamp"] = pd.to_datetime(frame["timestamp"])
+    frame["equity"] = pd.to_numeric(frame["equity"], errors="coerce")
+    frame = frame.dropna(subset=["timestamp", "equity"]).sort_values("timestamp", kind="stable")
+    bars: list[dict[str, object]] = []
+    for day, group in frame.groupby(frame["timestamp"].dt.strftime("%Y-%m-%d"), sort=True):
+        opening, closing = float(group.iloc[0]["equity"]), float(group.iloc[-1]["equity"])
+        bars.append({
+            "trade_date": day, "open": opening, "high": float(group["equity"].max()),
+            "low": float(group["equity"].min()), "close": closing,
+            "change": closing - opening, "return": (closing / opening - 1.0) if opening else 0.0,
+        })
+    return bars
+
+
+def _daily_close_prices(
+    repo: DuckDBRepository, symbols: list[str], snapshot_timestamps: list[str],
+) -> dict[tuple[str, str], float]:
+    clean_symbols = sorted({symbol for symbol in symbols if symbol})
+    cutoffs: dict[str, pd.Timestamp] = {}
+    for value in snapshot_timestamps:
+        if not value:
+            continue
+        timestamp = pd.Timestamp(value)
+        day = timestamp.strftime("%Y-%m-%d")
+        cutoffs[day] = max(cutoffs.get(day, timestamp), timestamp)
+    clean_dates = sorted(cutoffs)
+    if not clean_symbols or not clean_dates:
+        return {}
+    bars = repo.load_minute_bars(clean_symbols, clean_dates[0], clean_dates[-1])
+    if bars.empty:
+        return {}
+    bars = bars.copy()
+    bars["datetime"] = pd.to_datetime(bars["datetime"])
+    bars["trade_date"] = pd.to_datetime(bars["trade_date"]).dt.strftime("%Y-%m-%d")
+    bars = bars[bars.apply(lambda row: row["datetime"] <= cutoffs.get(row["trade_date"], row["datetime"]), axis=1)]
+    latest = bars.sort_values(["symbol", "trade_date", "datetime"], kind="stable").groupby(
+        ["symbol", "trade_date"], as_index=False,
+    ).tail(1)
+    return {(str(row.trade_date), str(row.symbol)): float(row.close) for row in latest.itertuples(index=False)}
+
+
+def _daily_position_history(
+    position_rows: list[dict[str, object]], ledger: list[dict[str, object]],
+    prices: dict[tuple[str, str], float], symbol_names: dict[str, str],
+) -> list[dict[str, object]]:
+    if not position_rows:
+        return []
+    frame = pd.DataFrame(position_rows)
+    frame["timestamp"] = pd.to_datetime(frame["timestamp"])
+    frame["quantity"] = pd.to_numeric(frame["quantity"], errors="coerce").fillna(0.0)
+    frame["trade_date"] = frame["timestamp"].dt.strftime("%Y-%m-%d")
+    latest_times = frame.groupby("trade_date")["timestamp"].max()
+    previous: dict[str, float] = {}
+    history: list[dict[str, object]] = []
+    for day in sorted(latest_times.index):
+        snapshot = frame[(frame["trade_date"] == day) & (frame["timestamp"] == latest_times[day])]
+        current = {str(row.symbol): float(row.quantity) for row in snapshot.itertuples(index=False)}
+        holdings: list[dict[str, object]] = []
+        for symbol in sorted(set(previous) | set(current)):
+            quantity, prior = current.get(symbol, 0.0), previous.get(symbol, 0.0)
+            changes = quantity - prior
+            symbol_fills = [row for row in ledger if str(row.get("symbol") or "") == symbol and str(row.get("timestamp") or "")[:10] <= day]
+            day_sells = [row for row in symbol_fills if str(row.get("timestamp") or "")[:10] == day and str(row.get("side") or "").lower() == "sell"]
+            last_fill = symbol_fills[-1] if symbol_fills else {}
+            average_cost = float(last_fill.get("average_cost_after") or 0)
+            realized_day = sum(float(row.get("profit_loss") or 0) for row in day_sells)
+            realized_total = sum(float(row.get("profit_loss") or 0) for row in symbol_fills if str(row.get("side") or "").lower() == "sell")
+            price = prices.get((day, symbol))
+            market_value = quantity * price if price is not None else None
+            unrealized = quantity * (price - average_cost) if price is not None and quantity > 0 else 0.0
+            action = "持有"
+            if prior == 0 and quantity > 0: action = "新建"
+            elif prior > 0 and quantity == 0: action = "清仓"
+            elif changes > 0: action = "增持"
+            elif changes < 0: action = "减持"
+            holdings.append({
+                "symbol": symbol, "display_name": symbol_names.get(symbol.split(".")[0], symbol),
+                "quantity": quantity, "previous_quantity": prior, "quantity_change": changes,
+                "action": action, "close": price, "market_value": market_value,
+                "average_cost": average_cost, "realized_pnl": realized_day,
+                "cumulative_realized_pnl": realized_total, "unrealized_pnl": unrealized,
+                "total_pnl": realized_total + unrealized,
+            })
+        history.append({"trade_date": day, "timestamp": pd.Timestamp(latest_times[day]).isoformat(), "holdings": holdings})
+        previous = current
+    return history
 
 
 def _latest_position_records(repo: DuckDBRepository, account_id: str) -> list[dict[str, object]]:
