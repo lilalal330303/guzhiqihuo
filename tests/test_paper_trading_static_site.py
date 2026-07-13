@@ -1,4 +1,8 @@
 from pathlib import Path
+import threading
+from urllib.request import urlopen
+
+from reports.serve_paper_trading_site import create_server
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,3 +61,31 @@ def test_order_rows_expose_expandable_audit_detail_and_accessible_focus_styles()
     assert "<details" in source
     assert ":focus-visible" in styles
     assert "@media" in styles
+
+
+def test_local_site_server_serves_the_snapshot_over_http():
+    server = create_server(port=0, open_browser=False)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        address, port = server.server_address
+        with urlopen(f"http://{address}:{port}/paper-trading/data/snapshot.json") as response:
+            assert response.status == 200
+            assert response.headers.get_content_type() == "application/json"
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
+
+
+def test_chart_keeps_each_equity_value_paired_with_its_original_timestamp():
+    source = _read("app.js")
+    assert "const pointsData = curve" in source
+    assert "pointsData[index].row.timestamp" in source
+    assert "pointsData[nearest].row.timestamp" in source
+
+
+def test_static_site_error_guidance_explains_how_to_start_the_local_server():
+    source = _read("app.js")
+    assert "serve_paper_trading_site.py" in source
+    assert "http://127.0.0.1:8765/paper-trading/" in source

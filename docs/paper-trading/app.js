@@ -13,7 +13,7 @@
     })
     .then((snapshot) => renderApp(snapshot))
     .catch((error) => {
-      app.innerHTML = `<main class="main"><section class="error"><h1>无法加载模拟盘快照</h1><p>${escapeHtml(error.message)}</p><p>请在本地运行快照导出后重试；GitHub Pages 仅展示最近一次发布的审计快照。</p></section></main>`;
+      app.innerHTML = `<main class="main"><section class="error"><h1>无法加载模拟盘审计快照</h1><p>${escapeHtml(error.message)}</p><p>本地请不要直接打开 HTML 文件：在项目目录执行 <code>.venv\\Scripts\\python.exe reports/serve_paper_trading_site.py</code>，再访问 <code>http://127.0.0.1:8765/paper-trading/</code>。</p><p>GitHub Pages 会展示最近一次发布的只读审计快照。</p></section></main>`;
     });
 
   function renderApp(snapshot) {
@@ -116,7 +116,8 @@
   function renderEquityChart(container, curve, label) {
     container.innerHTML = "";
     if (!Array.isArray(curve) || !curve.length) { container.innerHTML = `<div class="empty">暂无权益快照，图表会在审计数据写入后显示。</div>`; return; }
-    const values = curve.map((row) => numeric(row.equity ?? row.total_equity ?? row.value)).filter(Number.isFinite);
+    const pointsData = curve.map((row) => ({ row, value: numeric(row.equity ?? row.total_equity ?? row.value) })).filter((point) => Number.isFinite(point.value));
+    const values = pointsData.map((point) => point.value);
     if (!values.length) { container.innerHTML = `<div class="empty">权益快照缺少可绘制数值。</div>`; return; }
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.classList.add("equity-chart"); svg.setAttribute("viewBox", "0 0 760 300"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `${label}权益走势`);
@@ -128,12 +129,12 @@
     add("line", { x1: left, y1: top, x2: left, y2: bottom, class: "axis" }); add("line", { x1: left, y1: bottom, x2: left + width, y2: bottom, class: "axis" });
     for (let i = 0; i < 4; i += 1) { const value = min + range * (i / 3); const yy = y(value); add("line", { x1: left, y1: yy, x2: left + width, y2: yy, class: "axis", opacity: ".45" }); add("text", { x: 4, y: yy + 4, class: "axis-label" }, compactMoney(value)); }
     const tickIndices = [...new Set([0, Math.floor((values.length - 1) / 2), values.length - 1])];
-    tickIndices.forEach((index) => add("text", { x: x(index), y: bottom + 25, "text-anchor": "middle", class: "axis-label" }, formatShortTime(curve[index].timestamp || curve[index].trade_date)));
+    tickIndices.forEach((index) => add("text", { x: x(index), y: bottom + 25, "text-anchor": "middle", class: "axis-label" }, formatShortTime(pointsData[index].row.timestamp || pointsData[index].row.trade_date)));
     const points = values.map((value, index) => `${x(index)},${y(value)}`).join(" ");
     add("polygon", { points: `${left},${bottom} ${points} ${left + width},${bottom}`, class: "series-area" }); add("polyline", { points, class: "series" });
     const focus = add("circle", { cx: x(0), cy: y(values[0]), r: 4, class: "point", opacity: "0" });
     const tooltip = document.createElement("div"); tooltip.className = "chart-tooltip"; container.appendChild(svg); container.appendChild(tooltip);
-    const updateTooltip = (event) => { const rect = svg.getBoundingClientRect(); const px = (event.clientX - rect.left) / rect.width * 760; const nearest = Math.max(0, Math.min(values.length - 1, Math.round((px - left) / width * (values.length - 1)))); focus.setAttribute("cx", x(nearest)); focus.setAttribute("cy", y(values[nearest])); focus.setAttribute("opacity", "1"); tooltip.style.display = "block"; tooltip.style.left = `${Math.min(container.clientWidth - 150, Math.max(5, event.clientX - rect.left + 10))}px`; tooltip.style.top = `${Math.max(4, event.clientY - rect.top - 44)}px`; tooltip.textContent = `${formatShortTime(curve[nearest].timestamp || curve[nearest].trade_date)} · ${formatMoney(values[nearest])}`; };
+    const updateTooltip = (event) => { const rect = svg.getBoundingClientRect(); const px = (event.clientX - rect.left) / rect.width * 760; const nearest = Math.max(0, Math.min(values.length - 1, Math.round((px - left) / width * (values.length - 1)))); focus.setAttribute("cx", x(nearest)); focus.setAttribute("cy", y(values[nearest])); focus.setAttribute("opacity", "1"); tooltip.style.display = "block"; tooltip.style.left = `${Math.min(container.clientWidth - 150, Math.max(5, event.clientX - rect.left + 10))}px`; tooltip.style.top = `${Math.max(4, event.clientY - rect.top - 44)}px`; tooltip.textContent = `${formatShortTime(pointsData[nearest].row.timestamp || pointsData[nearest].row.trade_date)} · ${formatMoney(values[nearest])}`; };
     svg.addEventListener("pointermove", updateTooltip); svg.addEventListener("pointerleave", () => { tooltip.style.display = "none"; focus.setAttribute("opacity", "0"); });
   }
 
