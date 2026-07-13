@@ -165,12 +165,33 @@
 
   function eventMessage(row) {
     if (String(row.status).toLowerCase() === "rejected") return `未执行：${rejectionReason(row)}`;
-    return row.message || row.reason || row.event || row.exception_type || row.status_display || row.status || "已记录审计事件";
+    const raw = row.message || row.reason || row.event || row.exception_type || row.status_display || row.status;
+    return translateAuditText(raw) || "已记录审计事件";
   }
-  function rejectionReason(row) { return row.reason || row.reject_reason || row.message || "订单未通过执行条件或容量校验，未产生成交。"; }
+  function rejectionReason(row) {
+    const raw = row.reason || row.reject_reason || row.message;
+    const reasons = {
+      insufficient_cash: "可用资金不足",
+      participation_cap: "超过单分钟容量上限",
+      capacity_limit: "超过成交容量上限",
+      invalid_price: "行情价格无效",
+      suspended: "标的停牌",
+    };
+    return reasons[String(raw || "").toLowerCase()] || raw || "订单未通过执行条件或容量校验，未产生成交。";
+  }
   function symbolCell(row) { return `<b>${escapeHtml(row.display_name || row.symbol || "—")}</b><small class="code">${escapeHtml(row.symbol || "")}</small>`; }
   function sideCell(row) { return escapeHtml(row.side_display || ({ buy: "买入", sell: "卖出" }[String(row.side).toLowerCase()] || row.side || "—")); }
-  function statusCell(row) { const rejected = String(row.status).toLowerCase() === "rejected"; return `<span class="status${rejected ? " rejected" : ""}">${escapeHtml(row.status_display || (rejected ? "已拒绝（未执行）" : row.status || "—"))}</span>${rejected ? `<small class="status-note">未执行：${escapeHtml(rejectionReason(row))}</small>` : ""}`; }
+  function statusCell(row) { const rejected = String(row.status).toLowerCase() === "rejected"; const label = rejected ? "已拒绝（未执行）" : translateAuditText(row.status_display || row.status) || "—"; return `<span class="status${rejected ? " rejected" : ""}">${escapeHtml(label)}</span>${rejected ? `<small class="status-note">未执行：${escapeHtml(rejectionReason(row))}</small>` : ""}`; }
+  function translateAuditText(value) {
+    const raw = String(value || "");
+    const labels = {
+      filled: "已成交", partial: "部分成交", pending: "待执行", submitted: "已提交",
+      cancelled: "已撤销", canceled: "已撤销", rejected: "已拒绝（未执行）",
+      intent_missing: "当前时点无待执行交易意图", recovered_no_action: "恢复审计：无需执行",
+      audit: "已记录审计事件", signal: "已生成策略信号", order: "已生成订单",
+    };
+    return labels[raw.toLowerCase()] || raw;
+  }
   function profitCell(row) { return row.profit_loss === null || row.profit_loss === undefined ? "—" : `<span class="${numeric(row.profit_loss) >= 0 ? "positive" : "negative"}">${money(row.profit_loss)}</span>`; }
   function details(row) { return `<details class="audit-detail"><summary>展开</summary>${escapeHtml(JSON.stringify(row, null, 2))}</details>`; }
   function empty(message) { return `<div class="empty">${escapeHtml(message)}</div>`; }

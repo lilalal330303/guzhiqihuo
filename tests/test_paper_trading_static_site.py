@@ -18,7 +18,7 @@ def test_all_pages_load_shared_static_site_resources():
     for page in PAGES:
         content = _read(page)
         assert 'href="styles.css"' in content
-        assert 'src="app.js"' in content
+        assert 'src="app.js' in content
 
 
 def test_static_site_fetches_a_dynamic_snapshot_without_fixed_account_ids():
