@@ -104,3 +104,22 @@ def test_export_cli_exposes_an_output_option():
 
     assert result.returncode == 0
     assert "--output" in result.stdout
+
+
+def test_snapshot_exposes_market_data_as_of_and_combines_holdings_by_symbol(tmp_path, monkeypatch):
+    repo = DuckDBRepository(tmp_path / "market.duckdb")
+    accounts = (PaperAccount("alpha", "alpha_strategy", 1_000), PaperAccount("beta", "beta_strategy", 1_000))
+    for account in accounts:
+        _seed_audit(repo, account)
+    monkeypatch.setattr(
+        "quant_lab.app.paper_trading_view_model.assess_readiness",
+        lambda _: pd.DataFrame([{"account_id": account.account_id, "reason": None} for account in accounts]),
+    )
+
+    snapshot = site_export.build_site_snapshot(repo, accounts=accounts)
+
+    assert snapshot["market_data_as_of"] == "2026-07-13T14:40:00"
+    assert snapshot["combined_holdings"] == [{
+        "symbol": "510300.SH", "quantity": 200.0, "market_value": 400.0,
+        "strategy_count": 2, "strategies": ["alpha", "beta"],
+    }]

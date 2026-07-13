@@ -25,7 +25,7 @@
     app.innerHTML = shell(snapshot, accounts) + `<main id="content" class="main" tabindex="-1"><div id="view"></div></main>`;
     const view = document.getElementById("view");
     if (page === "strategy") renderStrategy(view, accounts, snapshot);
-    else if (page === "positions") renderPositions(view, accounts);
+    else if (page === "positions") renderPositions(view, accounts, snapshot);
     else if (page === "orders") renderOrders(view, accounts);
     else if (page === "logs") renderLogs(view, accounts);
     else renderOverview(view, accounts, snapshot);
@@ -78,9 +78,24 @@
     }));
   }
 
-  function renderPositions(root, accounts) {
+  function renderPositions(root, accounts, snapshot) {
+    const combined = Array.isArray(snapshot.combined_holdings) ? snapshot.combined_holdings : [];
     root.innerHTML = globalHead("持仓汇总", "按策略查看当前可审计持仓。", accounts);
-    wireFilter(root, accounts, "positions", (rows) => tableMarkup(rows, ["account", "symbol", "quantity", "market_value", "timestamp"]));
+    const results = root.querySelector("#global-results");
+    const count = root.querySelector("#result-count");
+    const select = root.querySelector("#strategy-filter");
+    const render = () => {
+      if (!select.value) {
+        count.textContent = `${combined.length} 个合并标的`;
+        results.innerHTML = tableMarkup(combined, ["symbol", "quantity", "market_value", "strategy_count", "strategies"]);
+        return;
+      }
+      const account = accounts.filter((item) => item.id === select.value);
+      const rows = account.flatMap((item) => withAccount(item, item.positions));
+      count.textContent = `${rows.length} 条结果`;
+      results.innerHTML = tableMarkup(rows, ["account", "symbol", "quantity", "market_value", "timestamp"]);
+    };
+    select.addEventListener("change", render); render();
   }
 
   function renderOrders(root, accounts) {
@@ -138,7 +153,7 @@
     svg.addEventListener("pointermove", updateTooltip); svg.addEventListener("pointerleave", () => { tooltip.style.display = "none"; focus.setAttribute("opacity", "0"); });
   }
 
-  function pageHead(title, description, snapshot) { return `<div class="page-head"><div><div class="eyebrow">本地模拟盘</div><h1>${escapeHtml(title)}</h1><p class="snapshot-note">${escapeHtml(description)}</p></div><div class="snapshot-note">数据源：${escapeHtml(snapshot.source || "本地审计")}</div></div>`; }
+  function pageHead(title, description, snapshot) { const asOf = snapshot.market_data_as_of ? formatTime(snapshot.market_data_as_of) : "暂无可用行情时点"; return `<div class="page-head"><div><div class="eyebrow">本地模拟盘</div><h1>${escapeHtml(title)}</h1><p class="snapshot-note">${escapeHtml(description)}</p></div><div class="snapshot-note">行情数据截至：${escapeHtml(asOf)}<br>快照导出时间：${escapeHtml(formatTime(snapshot.generated_at))}</div></div>`; }
   function kpis(items) { return `<section class="kpis">${items.map(([name, value]) => `<div class="kpi"><span>${name}</span><b>${value}</b></div>`).join("")}</section>`; }
   function aggregateMetrics(accounts) { return accounts.reduce((all, account) => { const m = account.metrics || {}; all.equity += numeric(m.equity); all.cash += numeric(m.cash); all.positions += numeric(m.position_count); all.orders += (account.orders || []).length; all.fills += (account.fills || []).length; return all; }, { equity: 0, cash: 0, positions: 0, orders: 0, fills: 0 }); }
   function flatten(accounts, key) { return accounts.flatMap((account) => withAccount(account, account[key])); }
@@ -153,7 +168,7 @@
   function numeric(value) { const n = Number(value); return Number.isFinite(n) ? n : 0; }
   function formatTime(value) { const date = value ? new Date(value) : null; return date && !Number.isNaN(date.valueOf()) ? date.toLocaleString("zh-CN", { hour12: false }) : (value || "—"); }
   function formatShortTime(value) { const date = value ? new Date(value) : null; return date && !Number.isNaN(date.valueOf()) ? `${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")} ${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}` : (value || "—"); }
-  function labelFor(key) { return ({ account: "策略", symbol: "标的", quantity: "数量", market_value: "市值", timestamp: "时间", side: "方向", price: "价格", exception_type: "异常类型", message: "消息" })[key] || key; }
+  function labelFor(key) { return ({ account: "策略", symbol: "标的", quantity: "数量", market_value: "市值", timestamp: "时间", side: "方向", price: "价格", exception_type: "异常类型", message: "消息", strategy_count: "策略数", strategies: "归属策略" })[key] || key; }
   function formatCell(value, key) { if (value === null || value === undefined || value === "") return "—"; if (key === "timestamp") return escapeHtml(formatTime(value)); if (["market_value", "price"].includes(key)) return escapeHtml(formatMoney(value)); return escapeHtml(typeof value === "object" ? JSON.stringify(value) : String(value)); }
   function escapeHtml(value) { return String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]); }
   function escapeAttr(value) { return escapeHtml(value); }

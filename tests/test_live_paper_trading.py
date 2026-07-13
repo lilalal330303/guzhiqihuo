@@ -1,9 +1,49 @@
 from __future__ import annotations
 
 import pandas as pd
+import importlib.util
+from pathlib import Path
 
 from quant_lab.data.repository import DuckDBRepository
 from quant_lab.research.live_paper_trading import advance_live_paper_trading
+
+
+def _live_script_module():
+    path = Path("reports/run_live_paper_trading.py")
+    spec = importlib.util.spec_from_file_location("run_live_paper_trading", path)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_tencent_fallback_normalizes_the_requested_etf_minute(monkeypatch):
+    module = _live_script_module()
+
+    class Response:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"data": {"sh510300": {"data": {"data": [
+                ["202607131311", "3.80", "3.81", "3.82", "3.79", "1200", "4560"],
+            ]}}}}
+
+    monkeypatch.setattr(module.requests, "get", lambda *args, **kwargs: Response())
+    bars = module._tencent_fallback("510300.SH", pd.Timestamp("2026-07-13 13:11"))
+
+    assert bars.to_dict("records") == [{
+        "symbol": "510300.SH", "trade_date": pd.Timestamp("2026-07-13"), "minute": 1311,
+        "datetime": pd.Timestamp("2026-07-13 13:11"), "open": 3.8, "high": 3.82,
+        "low": 3.79, "close": 3.81, "volume": 1200.0, "amount": 4560.0,
+    }]
+
+
+def test_tencent_fallback_returns_empty_frame_when_provider_payload_is_invalid(monkeypatch):
+    module = _live_script_module()
+    monkeypatch.setattr(module.requests, "get", lambda *args, **kwargs: (_ for _ in ()).throw(OSError("offline")))
+
+    assert module._tencent_fallback("510300.SH", pd.Timestamp("2026-07-13 13:11")).empty
 
 
 def test_live_runner_skips_weekends_without_calling_quote_provider(tmp_path):

@@ -89,3 +89,12 @@ def test_static_site_error_guidance_explains_how_to_start_the_local_server():
     source = _read("app.js")
     assert "serve_paper_trading_site.py" in source
     assert "http://127.0.0.1:8765/paper-trading/" in source
+
+
+def test_static_site_surfaces_data_as_of_combined_holdings_and_fixed_rail():
+    source = _read("app.js")
+    styles = _read("styles.css")
+    assert "market_data_as_of" in source
+    assert "combined_holdings" in source
+    assert "position:sticky" in styles
+    assert "text-overflow:ellipsis" in styles

@@ -33,10 +33,13 @@ def build_site_snapshot(
         panel.account_id: panel
         for panel in build_command_center_snapshot(repo, account_list).account_panels
     }
+    account_snapshots = [_account_snapshot(repo, account, panels[account.account_id], limit) for account in account_list]
     return {
         "source": "local_paper_trading_audit",
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "accounts": [_account_snapshot(repo, account, panels[account.account_id], limit) for account in account_list],
+        "market_data_as_of": _latest_market_timestamp(account_snapshots),
+        "combined_holdings": _combine_holdings(account_snapshots),
+        "accounts": account_snapshots,
     }
 
 
@@ -92,6 +95,43 @@ def _account_snapshot(repo: DuckDBRepository, account: PaperAccount, panel: Any,
 def _records(frame: pd.DataFrame, limit: int) -> list[dict[str, object]]:
     """Convert durable audit frames to browser-safe records, retaining newest rows."""
     return [_json_value(record) for record in frame.tail(limit).to_dict(orient="records")]
+
+
+def _latest_market_timestamp(accounts: list[dict[str, object]]) -> str | None:
+    """Use durable equity/position timestamps, never the export clock, as data-as-of."""
+    timestamps: list[pd.Timestamp] = []
+    for account in accounts:
+        for key in ("equity_curve", "positions"):
+            for row in account.get(key, []):
+                value = row.get("timestamp") if isinstance(row, dict) else None
+                if value:
+                    parsed = pd.Timestamp(value)
+                    if not pd.isna(parsed):
+                        timestamps.append(parsed)
+    return max(timestamps).isoformat() if timestamps else None
+
+
+def _combine_holdings(accounts: list[dict[str, object]]) -> list[dict[str, object]]:
+    """Aggregate current account snapshots by symbol for the portfolio view."""
+    combined: dict[str, dict[str, object]] = {}
+    for account in accounts:
+        strategy = str(account.get("id") or account.get("strategy_id") or "")
+        for row in account.get("positions", []):
+            if not isinstance(row, dict):
+                continue
+            symbol = str(row.get("symbol") or "")
+            quantity = float(row.get("quantity") or 0)
+            if not symbol or quantity <= 0:
+                continue
+            item = combined.setdefault(symbol, {"symbol": symbol, "quantity": 0.0, "market_value": 0.0, "strategies": []})
+            item["quantity"] = float(item["quantity"]) + quantity
+            item["market_value"] = float(item["market_value"]) + float(row.get("market_value") or 0)
+            if strategy and strategy not in item["strategies"]:
+                item["strategies"].append(strategy)
+    return [
+        {**item, "strategy_count": len(item["strategies"])}
+        for _, item in sorted(combined.items())
+    ]
 
 
 def _json_value(value: Any) -> Any:
