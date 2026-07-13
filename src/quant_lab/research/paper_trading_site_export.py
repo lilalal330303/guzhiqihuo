@@ -20,6 +20,22 @@ from quant_lab.paper.models import PaperAccount
 from quant_lab.research.paper_trading import DEFAULT_PAPER_ACCOUNTS
 
 
+STRATEGY_DISPLAY_NAMES = {
+    "v7k_wufu_qixing": "福星ETF",
+    "wufu_v12d": "五福ETF",
+}
+
+ORDER_STATUS_DISPLAY_NAMES = {
+    "filled": "已成交",
+    "rejected": "已拒绝（未执行）",
+    "pending": "待处理",
+    "submitted": "已提交",
+    "cancelled": "已撤销",
+}
+
+SIDE_DISPLAY_NAMES = {"buy": "买入", "sell": "卖出"}
+
+
 def build_site_snapshot(
     repo: DuckDBRepository,
     accounts: Iterable[PaperAccount] = DEFAULT_PAPER_ACCOUNTS,
@@ -65,11 +81,21 @@ def export_site_snapshot(
 
 
 def _account_snapshot(repo: DuckDBRepository, account: PaperAccount, panel: Any, limit: int) -> dict[str, object]:
+    symbol_names = _symbol_names(repo)
+    positions = _enrich_records(
+        _records(decode_payload_frame(repo.load_paper_positions(panel.account_id)), limit), symbol_names,
+    )
+    orders = _enrich_records(
+        _records(decode_payload_frame(repo.load_paper_orders(panel.account_id)), limit), symbol_names,
+    )
+    fills = _enrich_records(
+        _records(decode_payload_frame(repo.load_paper_fills(panel.account_id)), limit), symbol_names,
+    )
     return {
         "id": panel.account_id,
         "strategy_id": panel.strategy_id,
         "display": {
-            "name": panel.display_name,
+            "name": STRATEGY_DISPLAY_NAMES.get(panel.account_id, panel.display_name),
             "initial_cash": panel.initial_cash,
         },
         "metrics": {
@@ -84,12 +110,60 @@ def _account_snapshot(repo: DuckDBRepository, account: PaperAccount, panel: Any,
             "readiness_reason": panel.readiness_reason,
         },
         "equity_curve": _records(repo.load_paper_equity(panel.account_id), limit),
-        "positions": _records(decode_payload_frame(repo.load_paper_positions(panel.account_id)), limit),
-        "orders": _records(decode_payload_frame(repo.load_paper_orders(panel.account_id)), limit),
-        "fills": _records(decode_payload_frame(repo.load_paper_fills(panel.account_id)), limit),
+        "positions": positions,
+        "orders": orders,
+        "fills": fills,
         "timeline": _records(build_execution_timeline(repo, panel.account_id, panel.strategy_id), limit),
         "exceptions": _records(decode_payload_frame(repo.load_paper_exceptions(panel.account_id)), limit),
     }
+
+
+def _symbol_names(repo: DuckDBRepository) -> dict[str, str]:
+    """Resolve durable ETF names by normalized code; missing names remain auditable codes."""
+    metadata = repo.load_etf_theme_metadata()
+    if metadata.empty:
+        metadata = repo.load_latest_etf_names()
+    if metadata.empty:
+        return {}
+    return {
+        str(row.symbol).split(".")[0]: str(row.name)
+        for row in metadata.itertuples(index=False)
+        if getattr(row, "name", None)
+    }
+
+
+def _enrich_records(rows: list[dict[str, object]], symbol_names: dict[str, str]) -> list[dict[str, object]]:
+    """Add display-only labels while preserving the raw audit identifiers and values."""
+    enriched: list[dict[str, object]] = []
+    for original in rows:
+        row = dict(original)
+        symbol = str(row.get("symbol") or "")
+        row["display_name"] = symbol_names.get(symbol.split(".")[0], symbol)
+        side = str(row.get("side") or "").lower()
+        if side:
+            row["side_display"] = SIDE_DISPLAY_NAMES.get(side, side)
+        status = str(row.get("status") or "").lower()
+        if status:
+            row["status_display"] = ORDER_STATUS_DISPLAY_NAMES.get(status, status)
+        if side == "sell":
+            row["profit_loss"] = _durable_profit_loss(row)
+        else:
+            row["profit_loss"] = None
+        enriched.append(row)
+    return enriched
+
+
+def _durable_profit_loss(row: dict[str, object]) -> float | None:
+    """Expose only strategy-persisted sell P/L values; never infer a cost basis in the UI."""
+    for key in ("profit_loss", "realized_pnl", "realized_profit_loss", "pnl"):
+        value = row.get(key)
+        if value is None:
+            continue
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            continue
+    return None
 
 
 def _records(frame: pd.DataFrame, limit: int) -> list[dict[str, object]]:
@@ -123,7 +197,13 @@ def _combine_holdings(accounts: list[dict[str, object]]) -> list[dict[str, objec
             quantity = float(row.get("quantity") or 0)
             if not symbol or quantity <= 0:
                 continue
-            item = combined.setdefault(symbol, {"symbol": symbol, "quantity": 0.0, "market_value": 0.0, "strategies": []})
+            item = combined.setdefault(symbol, {
+                "symbol": symbol,
+                "display_name": row.get("display_name") or symbol,
+                "quantity": 0.0,
+                "market_value": 0.0,
+                "strategies": [],
+            })
             item["quantity"] = float(item["quantity"]) + quantity
             item["market_value"] = float(item["market_value"]) + float(row.get("market_value") or 0)
             if strategy and strategy not in item["strategies"]:

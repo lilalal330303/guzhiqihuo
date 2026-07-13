@@ -47,12 +47,12 @@ def test_chart_draws_svg_axes_and_supports_pointer_tooltips():
     assert "axis" in source
 
 
-def test_global_views_have_native_strategy_filters_and_visible_result_counts():
+def test_global_views_keep_a_strategy_scope_from_the_route():
     source = _read("app.js")
     for page in ("positions", "orders", "logs"):
         assert f'page === "{page}"' in source
-    assert "<select" in source
-    assert "result-count" in source
+    assert "selectedAccountFromRoute" in source
+    assert "当前策略" in source
 
 
 def test_order_rows_expose_expandable_audit_detail_and_accessible_focus_styles():
@@ -91,10 +91,33 @@ def test_static_site_error_guidance_explains_how_to_start_the_local_server():
     assert "http://127.0.0.1:8765/paper-trading/" in source
 
 
-def test_static_site_surfaces_data_as_of_combined_holdings_and_fixed_rail():
+def test_static_site_surfaces_data_as_of_and_keeps_the_strategy_rail_fixed():
     source = _read("app.js")
     styles = _read("styles.css")
     assert "market_data_as_of" in source
-    assert "combined_holdings" in source
     assert "position:sticky" in styles
-    assert "text-overflow:ellipsis" in styles
+    assert "overflow-wrap:anywhere" in styles
+
+
+def test_static_site_uses_chinese_display_fields_and_explains_rejected_orders():
+    source = _read("app.js")
+    assert "display_name" in source
+    assert "status_display" in source
+    assert "已拒绝（未执行）" in source
+    assert "未执行：" in source
+
+
+def test_static_site_has_intraday_daily_and_five_day_equity_period_controls():
+    source = _read("app.js")
+    assert 'data-period="intraday"' in source
+    assert 'data-period="daily"' in source
+    assert 'data-period="five-day"' in source
+    assert "filterEquityCurve" in source
+
+
+def test_static_site_keeps_global_pages_strategy_scoped_by_default():
+    source = _read("app.js")
+    assert "selectedAccountFromRoute" in source
+    assert "策略账户" in source
+    assert "当前策略" in source
+    assert "profit_loss" in source

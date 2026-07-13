@@ -120,6 +120,57 @@ def test_snapshot_exposes_market_data_as_of_and_combines_holdings_by_symbol(tmp_
 
     assert snapshot["market_data_as_of"] == "2026-07-13T14:40:00"
     assert snapshot["combined_holdings"] == [{
-        "symbol": "510300.SH", "quantity": 200.0, "market_value": 400.0,
+        "symbol": "510300.SH", "display_name": "510300.SH", "quantity": 200.0, "market_value": 400.0,
         "strategy_count": 2, "strategies": ["alpha", "beta"],
     }]
+
+
+def test_snapshot_uses_chinese_strategy_and_etf_display_fields_without_replacing_audit_ids(tmp_path, monkeypatch):
+    repo = DuckDBRepository(tmp_path / "market.duckdb")
+    accounts = (
+        PaperAccount("v7k_wufu_qixing", "v7k_wufu_qixing", 1_000),
+        PaperAccount("wufu_v12d", "wufu_v12d", 1_000),
+    )
+    for account in accounts:
+        _seed_audit(repo, account)
+    repo.replace_etf_theme_metadata(
+        pd.DataFrame([{
+            "symbol": "510300", "name": "沪深300ETF", "theme_bucket": "宽基",
+            "theme_confidence": 1.0, "classification_method": "test",
+            "is_risk_excluded": False, "is_defensive": False,
+        }]),
+        source="test",
+    )
+    monkeypatch.setattr(
+        "quant_lab.app.paper_trading_view_model.assess_readiness",
+        lambda _: pd.DataFrame([{"account_id": account.account_id, "reason": None} for account in accounts]),
+    )
+
+    snapshot = site_export.build_site_snapshot(repo, accounts=accounts)
+
+    assert [item["display"]["name"] for item in snapshot["accounts"]] == ["福星ETF", "五福ETF"]
+    assert snapshot["accounts"][0]["id"] == "v7k_wufu_qixing"
+    assert snapshot["accounts"][0]["positions"][0]["display_name"] == "沪深300ETF"
+    assert snapshot["accounts"][0]["orders"][0]["display_name"] == "沪深300ETF"
+    assert snapshot["combined_holdings"][0]["display_name"] == "沪深300ETF"
+
+
+def test_snapshot_keeps_sell_profit_loss_empty_unless_durable_fill_supplies_it(tmp_path, monkeypatch):
+    repo = DuckDBRepository(tmp_path / "market.duckdb")
+    account = PaperAccount("alpha", "alpha", 1_000)
+    _seed_audit(repo, account)
+    timestamp = pd.Timestamp("2026-07-13 14:45")
+    repo.record_paper_fills(account.account_id, account.strategy_id, timestamp, [{
+        "fill_id": "sell-fill", "symbol": "510300.SH", "side": "sell", "quantity": 50,
+        "price": 2.2, "realized_pnl": 10.0,
+    }])
+    monkeypatch.setattr(
+        "quant_lab.app.paper_trading_view_model.assess_readiness",
+        lambda _: pd.DataFrame([{"account_id": "alpha", "reason": None}]),
+    )
+
+    snapshot = site_export.build_site_snapshot(repo, accounts=[account])
+
+    fills = {row["fill_id"]: row for row in snapshot["accounts"][0]["fills"]}
+    assert fills["sell-fill"]["profit_loss"] == 10.0
+    assert fills["fill-alpha"]["profit_loss"] is None
