@@ -72,6 +72,7 @@ def test_local_site_server_serves_the_snapshot_over_http():
         with urlopen(f"http://{address}:{port}/paper-trading/data/snapshot.json") as response:
             assert response.status == 200
             assert response.headers.get_content_type() == "application/json"
+            assert response.headers["Cache-Control"] == "no-store, no-cache, must-revalidate"
     finally:
         server.shutdown()
         server.server_close()

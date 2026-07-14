@@ -18,9 +18,19 @@ DOCS_ROOT = Path(__file__).resolve().parents[1] / "docs"
 LOCAL_HOST = "127.0.0.1"
 
 
+class NoCacheRequestHandler(SimpleHTTPRequestHandler):
+    """Serve mutable dashboard assets without retaining stale browser copies."""
+
+    def end_headers(self) -> None:
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
+
 def create_server(*, port: int = 8765, open_browser: bool = False) -> ThreadingHTTPServer:
     """Create a loopback HTTP server rooted at the project's docs directory."""
-    handler = functools.partial(SimpleHTTPRequestHandler, directory=str(DOCS_ROOT))
+    handler = functools.partial(NoCacheRequestHandler, directory=str(DOCS_ROOT))
     server = ThreadingHTTPServer((LOCAL_HOST, port), handler)
     if open_browser:
         host, bound_port = server.server_address
