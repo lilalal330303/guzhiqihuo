@@ -17,8 +17,9 @@ def _read(name: str) -> str:
 def test_all_pages_load_shared_static_site_resources():
     for page in PAGES:
         content = _read(page)
-        assert 'href="styles.css"' in content
-        assert 'src="app.js' in content
+        assert 'href="styles.css?v=20260714-5"' in content
+        assert 'src="app.js?v=20260714-5"' in content
+        assert "viewport-fit=cover" in content
 
 
 def test_static_site_fetches_a_dynamic_snapshot_without_fixed_account_ids():
@@ -223,3 +224,25 @@ def test_selected_strategy_tabs_keep_a_luminous_panel_and_ui_has_motion_feedback
     assert "box-shadow" in styles
     assert ".audit-filter" in styles
     assert "@keyframes viewIn" in styles
+
+
+def test_mobile_shell_uses_compact_context_bottom_navigation_and_safe_areas():
+    source = _read("app.js")
+    styles = _read("styles.css")
+    assert "mobile-context" in source
+    assert "mobile-nav" in source
+    assert "mobile-nav-link" in source
+    assert "aria-current" in source
+    assert "env(safe-area-inset-bottom)" in styles
+    assert "scroll-snap-type:x mandatory" in styles
+    assert ".mobile-context" in styles
+
+
+def test_mobile_content_preserves_touch_targets_charts_and_wide_table_access():
+    source = _read("app.js")
+    styles = _read("styles.css")
+    assert "mobile-scroll-hint" in source
+    assert "overflow-x:clip" in styles
+    assert "min-height:44px" in styles
+    assert "-webkit-overflow-scrolling:touch" in styles
+    assert "font-size:clamp(18px,6vw,25px)" in styles
