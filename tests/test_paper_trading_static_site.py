@@ -17,8 +17,8 @@ def _read(name: str) -> str:
 def test_all_pages_load_shared_static_site_resources():
     for page in PAGES:
         content = _read(page)
-        assert 'href="styles.css?v=20260714-5"' in content
-        assert 'src="app.js?v=20260714-5"' in content
+        assert 'href="styles.css?v=20260714-6"' in content
+        assert 'src="app.js?v=20260714-6"' in content
         assert "viewport-fit=cover" in content
 
 
@@ -203,10 +203,10 @@ def test_intraday_equity_only_uses_the_latest_trading_day():
     assert "renderEquityChart(chart, intradayCurve" in source
 
 
-def test_light_theme_is_default_and_can_be_toggled():
+def test_dark_theme_is_default_and_light_theme_can_be_toggled():
     source = _read("app.js")
     styles = _read("styles.css")
-    assert '|| "light"' in source
+    assert '|| "dark"' in source
     assert "paper-theme" in source
     assert "theme-toggle" in source
     assert "wireThemeToggle" in source
@@ -246,3 +246,31 @@ def test_mobile_content_preserves_touch_targets_charts_and_wide_table_access():
     assert "min-height:44px" in styles
     assert "-webkit-overflow-scrolling:touch" in styles
     assert "font-size:clamp(18px,6vw,25px)" in styles
+
+
+def test_command_center_defaults_dark_and_exposes_truthful_terminal_status():
+    source = _read("app.js")
+    assert 'savedTheme || "dark"' in source
+    assert "command-status" in source
+    assert "command-module" in source
+    assert "行情快照" in source
+    assert "实时行情" not in source
+
+
+def test_command_center_css_defines_hud_tokens_and_reduced_motion():
+    styles = _read("styles.css")
+    for token in ("--hud-glow", "--hud-grid", "--hud-surface", "--hud-edge", "--hud-scan"):
+        assert token in styles
+    assert ".command-status" in styles
+    assert ".hud-corner" in styles
+    assert "prefers-reduced-motion:reduce" in styles
+
+
+def test_command_center_hud_enhances_charts_metrics_and_audit_rows():
+    source = _read("app.js")
+    styles = _read("styles.css")
+    for marker in ("chart-crosshair-x", "chart-crosshair-y", "hud-label", "terminal-row"):
+        assert marker in source
+    assert "@keyframes hudIn" in styles
+    assert "@keyframes scanPulse" in styles
+    assert "filter:drop-shadow" in styles

@@ -7,7 +7,7 @@
   const wholeCurrency = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 0 });
   const numeric = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
   const savedTheme = (() => { try { return localStorage.getItem("paper-theme"); } catch (_) { return null; } })();
-  document.documentElement.dataset.theme = savedTheme || "light";
+  document.documentElement.dataset.theme = savedTheme || "dark";
 
   fetch("data/snapshot.json")
     .then((response) => response.ok ? response.json() : Promise.reject(new Error(`快照读取失败：${response.status}`)))
@@ -40,6 +40,7 @@
       wrapper.dataset.mobileReady = "true";
       wrapper.insertAdjacentHTML("beforebegin", '<div class="mobile-scroll-hint" aria-hidden="true">左右滑动查看完整信息 →</div>');
     });
+    root.querySelectorAll(".data-table tbody tr:not(.terminal-row)").forEach((row) => row.classList.add("terminal-row"));
   }
 
   function selectedAccountFromRoute(accounts) {
@@ -60,10 +61,12 @@
     const cards = accounts.map((item) => {
       const metrics = item.metrics || {};
       const active = item.id === current.id ? " active" : "";
-      return `<a class="account-link${active}" href="strategy.html?id=${encodeURIComponent(item.id)}"><div class="account-name">${escapeHtml(item.display?.name || item.id)}</div><div class="account-value">${wholeMoney(metrics.equity ?? item.display?.initial_cash)}</div><div class="account-meta">持仓 ${numeric(metrics.position_count)} 个 · 独立账户</div></a>`;
+      return `<a class="account-link${active}" href="strategy.html?id=${encodeURIComponent(item.id)}"><i class="hud-corner" aria-hidden="true"></i><div class="account-name">${escapeHtml(item.display?.name || item.id)}</div><div class="account-value">${wholeMoney(metrics.equity ?? item.display?.initial_cash)}</div><div class="account-meta">持仓 ${numeric(metrics.position_count)} 个 · 独立账户</div></a>`;
     }).join("");
     const currentName = escapeHtml(current.display?.name || current.id);
-    return `<header class="topbar"><div class="brand">量化研究 <small>模拟盘</small></div><div class="mobile-context">${currentName}</div><nav class="topnav" aria-label="模拟盘导航">${nav}</nav><div class="source">审计快照 · ${escapeHtml(formatTime(snapshot.generated_at))}</div><button class="theme-toggle" type="button" aria-label="切换显示主题"></button></header><nav class="mobile-nav" aria-label="移动端模拟盘导航">${mobileNav}</nav><div class="layout"><aside class="rail"><div class="rail-label">策略账户 / ${accounts.length}</div>${cards}</aside>`;
+    const currentModule = escapeHtml((navItems.find((item) => item[2] === page) || navItems[0])[1]);
+    const marketSnapshot = escapeHtml(formatTime(snapshot.market_data_as_of));
+    return `<header class="topbar"><div class="brand">量化研究 <small>模拟盘</small></div><div class="command-module"><small>COMMAND MODULE</small><b>${currentModule}</b></div><div class="mobile-context">${currentName}</div><nav class="topnav" aria-label="模拟盘导航">${nav}</nav><div class="command-status"><span class="live-dot"></span><small>行情快照</small><b>${marketSnapshot}</b></div><div class="source">审计快照 · ${escapeHtml(formatTime(snapshot.generated_at))}</div><button class="theme-toggle" type="button" aria-label="切换显示主题"></button></header><nav class="mobile-nav" aria-label="移动端模拟盘导航">${mobileNav}</nav><div class="layout"><aside class="rail"><div class="rail-label">策略账户 / ${accounts.length}</div>${cards}</aside>`;
   }
 
   function wireThemeToggle() {
@@ -147,7 +150,7 @@
     return `<div class="page-head"><div><div class="eyebrow">本地模拟盘</div><h1>${escapeHtml(title)}</h1><p class="snapshot-note">${escapeHtml(description)}</p></div><div class="snapshot-status"><span class="live-dot"></span><div>行情实际截至：<b>${escapeHtml(asOf)}</b><br>${escapeHtml(schedule.label || "盘后快照")}计划：<b>${escapeHtml(schedule.time || "15:05")}</b><br><small>快照导出：${escapeHtml(formatTime(snapshot.generated_at))}</small></div></div></div>`;
   }
 
-  function kpis(items) { return `<section class="kpis">${items.map(([name, value]) => `<div class="kpi"><span>${name}</span><b>${value}</b></div>`).join("")}</section>`; }
+  function kpis(items) { return `<section class="kpis">${items.map(([name, value]) => `<div class="kpi"><i class="hud-corner" aria-hidden="true"></i><span class="hud-label">${name}</span><b>${value}</b></div>`).join("")}</section>`; }
   function periodControls() { return `<div class="period-controls" role="group" aria-label="权益图周期"><button data-period="intraday" class="period active">日内</button><button data-period="daily" class="period">按日</button><button data-period="five-day" class="period">近5日</button></div>`; }
 
   function wireChartPeriod(root, account, label) {
@@ -301,7 +304,7 @@
 
   function timelineMarkup(rows) {
     if (!rows?.length) return empty("暂无执行活动或异常记录。");
-    return rows.map((row) => `<article class="event"><time>${escapeHtml(formatTime(row.timestamp || row.created_at))}</time>${escapeHtml(eventMessage(row))}</article>`).join("");
+    return rows.map((row) => `<article class="event terminal-row"><time>${escapeHtml(formatTime(row.timestamp || row.created_at))}</time>${escapeHtml(eventMessage(row))}</article>`).join("");
   }
 
   function eventMessage(row) {
@@ -383,9 +386,11 @@
       });
     }
     const points = values.map((value, index) => `${x(index)},${y(value)}`).join(" "); add("polygon", { points: `${left},${bottom} ${points} ${left + width},${bottom}`, class: "series-area" }); add("polyline", { points, class: "series" });
+    const crosshairX = add("line", { x1: left, y1: top, x2: left, y2: bottom, class: "chart-crosshair-x", opacity: "0" });
+    const crosshairY = add("line", { x1: left, y1: top, x2: left + width, y2: top, class: "chart-crosshair-y", opacity: "0" });
     const focus = add("circle", { cx: x(0), cy: y(values[0]), r: 4, class: "point", opacity: "0" }); const tooltip = document.createElement("div"); tooltip.className = "chart-tooltip"; container.append(svg, tooltip);
-    svg.addEventListener("pointermove", (event) => { const rect = svg.getBoundingClientRect(); const px = (event.clientX - rect.left) / rect.width * 760; const nearest = Math.max(0, Math.min(values.length - 1, Math.round((px - left) / width * (values.length - 1)))); focus.setAttribute("cx", x(nearest)); focus.setAttribute("cy", y(values[nearest])); focus.setAttribute("opacity", "1"); tooltip.style.display = "block"; tooltip.style.left = `${Math.min(container.clientWidth - 150, Math.max(5, event.clientX - rect.left + 10))}px`; tooltip.style.top = `${Math.max(4, event.clientY - rect.top - 44)}px`; tooltip.textContent = `${shortTime(pointsData[nearest].row.timestamp || pointsData[nearest].row.trade_date)} · ${money(values[nearest])}`; });
-    svg.addEventListener("pointerleave", () => { tooltip.style.display = "none"; focus.setAttribute("opacity", "0"); });
+    svg.addEventListener("pointermove", (event) => { const rect = svg.getBoundingClientRect(); const px = (event.clientX - rect.left) / rect.width * 760; const nearest = Math.max(0, Math.min(values.length - 1, Math.round((px - left) / width * (values.length - 1)))); const focusX = x(nearest), focusY = y(values[nearest]); focus.setAttribute("cx", focusX); focus.setAttribute("cy", focusY); focus.setAttribute("opacity", "1"); crosshairX.setAttribute("x1", focusX); crosshairX.setAttribute("x2", focusX); crosshairX.setAttribute("opacity", ".75"); crosshairY.setAttribute("y1", focusY); crosshairY.setAttribute("y2", focusY); crosshairY.setAttribute("opacity", ".75"); tooltip.style.display = "block"; tooltip.style.left = `${Math.min(container.clientWidth - 150, Math.max(5, event.clientX - rect.left + 10))}px`; tooltip.style.top = `${Math.max(4, event.clientY - rect.top - 44)}px`; tooltip.textContent = `${shortTime(pointsData[nearest].row.timestamp || pointsData[nearest].row.trade_date)} · ${money(values[nearest])}`; });
+    svg.addEventListener("pointerleave", () => { tooltip.style.display = "none"; focus.setAttribute("opacity", "0"); crosshairX.setAttribute("opacity", "0"); crosshairY.setAttribute("opacity", "0"); });
   }
 
   function renderDailyEquityBars(container, bars, label) {
