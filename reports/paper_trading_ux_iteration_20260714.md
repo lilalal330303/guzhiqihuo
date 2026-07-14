@@ -37,3 +37,9 @@
 - 页面源文件：`docs/paper-trading/`
 - 快照导出：`src/quant_lab/research/paper_trading_site_export.py`
 - 盘后任务：`reports/run_paper_after_close.py`
+
+## 追加迭代（第二批）
+
+1. 日内、按日及近5日权益图纵轴统一从0元起算，避免局部缩放夸大波动。
+2. 近5日权益图由5分钟K线改为最近5个交易日的日内权益曲线连续拼接，并保留交易日分隔标识。
+3. 账户权益、初始资金、可用现金、持仓市值在账户卡片、侧栏和策略详情中统一按整数元展示。

@@ -139,12 +139,12 @@ def test_position_view_supports_daily_history_and_per_symbol_profit_columns():
         assert field in source
 
 
-def test_daily_equity_uses_columns_and_five_day_equity_uses_candlesticks():
+def test_daily_equity_uses_columns_and_five_day_equity_stitches_intraday_curves():
     source = _read("app.js")
     assert "renderDailyEquityBars" in source
-    assert "renderEquityCandlesticks" in source
+    assert "renderFiveDayIntradayChart" in source
+    assert "filterLastFiveTradingDays" in source
     assert "daily_equity_bars" in source
-    assert 'class: "candle-wick"' in source
     assert 'class: "daily-bar"' in source
 
 
@@ -156,11 +156,11 @@ def test_orders_fills_activity_and_logs_have_trade_date_filters():
     assert "wireDateFilter" in source
 
 
-def test_five_day_chart_uses_concatenated_five_minute_candles_and_day_separators():
+def test_five_day_chart_uses_concatenated_intraday_points_and_day_separators():
     source = _read("app.js")
     styles = _read("styles.css")
-    assert "five_day_equity_candles" in source
-    assert "5分钟" in source
+    assert "fiveDayCurve" in source
+    assert "日内权益拼接" in source
     assert "day-separator" in source
     assert ".day-separator" in styles
 
@@ -173,6 +173,24 @@ def test_account_card_money_metrics_drop_decimal_places_and_schedule_is_visible(
     assert '["持仓市值", wholeMoney(m.position_market_value)]' in source
     assert "snapshot_schedule" in source
     assert "15:30" in source
+
+
+def test_all_named_account_money_metrics_use_integer_yuan():
+    source = _read("app.js")
+    assert "account-value\">${wholeMoney" in source
+    for expression in (
+        '["账户权益", wholeMoney(m.equity)]',
+        '["初始资金", wholeMoney(account.display?.initial_cash)]',
+        '["可用现金", wholeMoney(m.cash)]',
+        '["持仓市值", wholeMoney(m.position_market_value)]',
+    ):
+        assert expression in source
+
+
+def test_equity_chart_axes_are_zero_based():
+    source = _read("app.js")
+    assert "const floorValue = 0" in source
+    assert "const min = 0" in source
 
 
 def test_selected_strategy_tabs_keep_a_luminous_panel_and_ui_has_motion_feedback():

@@ -46,7 +46,7 @@
     const cards = accounts.map((item) => {
       const metrics = item.metrics || {};
       const active = item.id === current.id ? " active" : "";
-      return `<a class="account-link${active}" href="strategy.html?id=${encodeURIComponent(item.id)}"><div class="account-name">${escapeHtml(item.display?.name || item.id)}</div><div class="account-value">${money(metrics.equity ?? item.display?.initial_cash)}</div><div class="account-meta">持仓 ${numeric(metrics.position_count)} 个 · 独立账户</div></a>`;
+      return `<a class="account-link${active}" href="strategy.html?id=${encodeURIComponent(item.id)}"><div class="account-name">${escapeHtml(item.display?.name || item.id)}</div><div class="account-value">${wholeMoney(metrics.equity ?? item.display?.initial_cash)}</div><div class="account-meta">持仓 ${numeric(metrics.position_count)} 个 · 独立账户</div></a>`;
     }).join("");
     return `<header class="topbar"><div class="brand">量化研究 <small>模拟盘</small></div><nav class="topnav" aria-label="模拟盘导航">${nav}</nav><div class="source">审计快照 · ${escapeHtml(formatTime(snapshot.generated_at))}</div></header><div class="layout"><aside class="rail"><div class="rail-label">策略账户 / ${accounts.length}</div>${cards}</aside>`;
   }
@@ -67,7 +67,7 @@
   function renderStrategy(root, account, snapshot) {
     const m = account.metrics || {};
     root.innerHTML = pageHead(account.display?.name || account.id, "独立策略视图：总览、持仓、订单和日志均只显示当前策略。", snapshot) +
-      kpis([["账户权益", money(m.equity)], ["初始资金", money(account.display?.initial_cash)], ["可用现金", money(m.cash)], ["持仓市值", money(m.position_market_value)], ["累计收益", percent(m.total_return)]]) +
+      kpis([["账户权益", wholeMoney(m.equity)], ["初始资金", wholeMoney(account.display?.initial_cash)], ["可用现金", wholeMoney(m.cash)], ["持仓市值", wholeMoney(m.position_market_value)], ["累计收益", percent(m.total_return)]]) +
       `<section class="panel"><div class="section-title"><div><h2>权益走势</h2><p>当前策略</p></div>${periodControls()}</div><div class="chart-wrap" id="equity-chart"></div></section>` +
       `<div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-tab="positions">持仓</button><button class="tab" role="tab" aria-selected="false" data-tab="orders">订单</button><button class="tab" role="tab" aria-selected="false" data-tab="fills">成交</button><button class="tab" role="tab" aria-selected="false" data-tab="timeline">执行活动</button><button class="tab" role="tab" aria-selected="false" data-tab="logs">运行日志</button></div><section class="panel" id="tab-content"></section>`;
     wireChartPeriod(root, account, account.display?.name || account.id);
@@ -121,10 +121,10 @@
     const chart = root.querySelector("#equity-chart");
     const curve = account.equity_curve || [];
     const dailyBars = account.daily_equity_bars || [];
-    const fiveDayCandles = account.five_day_equity_candles || [];
+    const fiveDayCurve = filterLastFiveTradingDays(curve);
     const draw = (period) => {
       if (period === "daily") renderDailyEquityBars(chart, dailyBars, label);
-      else if (period === "five-day") renderEquityCandlesticks(chart, fiveDayCandles, label);
+      else if (period === "five-day") renderFiveDayIntradayChart(chart, fiveDayCurve, label);
       else renderEquityChart(chart, curve, label, period);
     };
     draw("intraday");
@@ -141,6 +141,12 @@
     records.forEach((row) => { const key = String(row.timestamp || row.trade_date || "").slice(0, 10); if (key) daily.set(key, row); });
     const rows = [...daily.values()];
     return period === "five-day" ? rows.slice(-5) : rows;
+  }
+
+  function filterLastFiveTradingDays(curve) {
+    const rows = (Array.isArray(curve) ? curve : []).filter((row) => Number.isFinite(Number(row.equity)) && tradeDate(row));
+    const dates = [...new Set(rows.map(tradeDate))].sort().slice(-5);
+    return rows.filter((row) => dates.includes(tradeDate(row))).sort((a, b) => String(a.timestamp).localeCompare(String(b.timestamp)));
   }
 
   function latestPositions(account) {
@@ -294,7 +300,11 @@
   function details(row) { return `<details class="audit-detail"><summary>展开</summary>${escapeHtml(JSON.stringify(row, null, 2))}</details>`; }
   function empty(message) { return `<div class="empty">${escapeHtml(message)}</div>`; }
 
-  function renderEquityChart(container, curve, label, period) {
+  function renderFiveDayIntradayChart(container, curve, label) {
+    renderEquityChart(container, curve, label, "近5日日内权益拼接", true);
+  }
+
+  function renderEquityChart(container, curve, label, period, showDaySeparators = false) {
     if (!container) return;
     container.innerHTML = "";
     const pointsData = curve.map((row) => ({ row, value: numeric(row.equity) })).filter((point) => Number.isFinite(point.value));
@@ -303,13 +313,25 @@
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.classList.add("equity-chart"); svg.setAttribute("viewBox", "0 0 760 300"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `${label}${period}权益走势`);
     const left = 74, top = 20, width = 650, height = 220, bottom = top + height;
-    const min = Math.min(...values), max = Math.max(...values), range = max - min || Math.max(Math.abs(max) * 0.01, 1);
+    const min = 0, max = Math.max(...values), range = max || 1;
     const x = (index) => left + (values.length === 1 ? width / 2 : index * width / (values.length - 1));
     const y = (value) => top + height - (value - min) / range * height;
     const add = (name, attrs, text) => { const node = document.createElementNS("http://www.w3.org/2000/svg", name); Object.entries(attrs || {}).forEach(([key, value]) => node.setAttribute(key, value)); if (text !== undefined) node.textContent = text; svg.appendChild(node); return node; };
     add("line", { x1: left, y1: top, x2: left, y2: bottom, class: "axis" }); add("line", { x1: left, y1: bottom, x2: left + width, y2: bottom, class: "axis" });
     for (let index = 0; index < 4; index += 1) { const value = min + range * index / 3; const yy = y(value); add("line", { x1: left, y1: yy, x2: left + width, y2: yy, class: "axis", opacity: ".45" }); add("text", { x: 4, y: yy + 4, class: "axis-label" }, compactMoney(value)); }
     [...new Set([0, Math.floor((values.length - 1) / 2), values.length - 1])].forEach((index) => add("text", { x: x(index), y: bottom + 25, "text-anchor": "middle", class: "axis-label" }, shortTime(pointsData[index].row.timestamp || pointsData[index].row.trade_date)));
+    if (showDaySeparators) {
+      let previousDay = tradeDate(pointsData[0].row);
+      add("text", { x: x(0), y: bottom + 25, "text-anchor": "start", class: "axis-label day-label" }, previousDay.slice(5));
+      pointsData.forEach((point, index) => {
+        const day = tradeDate(point.row);
+        if (day !== previousDay) {
+          add("line", { x1: x(index), y1: top, x2: x(index), y2: bottom, class: "day-separator" });
+          add("text", { x: x(index) + 3, y: bottom + 25, "text-anchor": "start", class: "axis-label day-label" }, day.slice(5));
+          previousDay = day;
+        }
+      });
+    }
     const points = values.map((value, index) => `${x(index)},${y(value)}`).join(" "); add("polygon", { points: `${left},${bottom} ${points} ${left + width},${bottom}`, class: "series-area" }); add("polyline", { points, class: "series" });
     const focus = add("circle", { cx: x(0), cy: y(values[0]), r: 4, class: "point", opacity: "0" }); const tooltip = document.createElement("div"); tooltip.className = "chart-tooltip"; container.append(svg, tooltip);
     svg.addEventListener("pointermove", (event) => { const rect = svg.getBoundingClientRect(); const px = (event.clientX - rect.left) / rect.width * 760; const nearest = Math.max(0, Math.min(values.length - 1, Math.round((px - left) / width * (values.length - 1)))); focus.setAttribute("cx", x(nearest)); focus.setAttribute("cy", y(values[nearest])); focus.setAttribute("opacity", "1"); tooltip.style.display = "block"; tooltip.style.left = `${Math.min(container.clientWidth - 150, Math.max(5, event.clientX - rect.left + 10))}px`; tooltip.style.top = `${Math.max(4, event.clientY - rect.top - 44)}px`; tooltip.textContent = `${shortTime(pointsData[nearest].row.timestamp || pointsData[nearest].row.trade_date)} · ${money(values[nearest])}`; });
@@ -324,8 +346,8 @@
     svg.classList.add("equity-chart"); svg.setAttribute("viewBox", "0 0 760 300"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `${label}按日权益柱状图`);
     const left = 74, top = 20, width = 650, height = 220, bottom = top + height;
     const values = bars.map((row) => numeric(row.close));
-    const min = Math.min(...values), max = Math.max(...values), padding = Math.max((max - min) * .15, Math.abs(max) * .005, 1);
-    const floorValue = min - padding, range = max - min + padding * 2;
+    const max = Math.max(...values);
+    const floorValue = 0, range = max || 1;
     const slot = width / bars.length, barWidth = Math.min(42, slot * .62);
     const y = (value) => top + height - (value - floorValue) / range * height;
     const add = (name, attrs, text) => { const node = document.createElementNS("http://www.w3.org/2000/svg", name); Object.entries(attrs || {}).forEach(([key, value]) => node.setAttribute(key, value)); if (text !== undefined) node.textContent = text; svg.appendChild(node); return node; };
