@@ -274,3 +274,26 @@ def test_command_center_hud_enhances_charts_metrics_and_audit_rows():
     assert "@keyframes hudIn" in styles
     assert "@keyframes scanPulse" in styles
     assert "filter:drop-shadow" in styles
+
+
+def test_titanium_light_theme_covers_the_full_command_center_surface():
+    styles = _read("styles.css")
+    for token in ("--light-metal", "--light-edge", "--light-glow", "--light-ink"):
+        assert token in styles
+    for selector in (
+        '[data-theme="light"] body',
+        '[data-theme="light"] .topbar',
+        '[data-theme="light"] .rail',
+        '[data-theme="light"] .account-link',
+        '[data-theme="light"] .kpi',
+        '[data-theme="light"] .panel',
+        '[data-theme="light"] .strategy-card',
+        '[data-theme="light"] .data-table',
+        '[data-theme="light"] .event.terminal-row',
+        '[data-theme="light"] .chart-tooltip',
+        '[data-theme="light"] .period',
+        '[data-theme="light"] .tab',
+        '[data-theme="light"] .mobile-nav',
+    ):
+        assert selector in styles
+    assert "titaniumSheen" in styles
