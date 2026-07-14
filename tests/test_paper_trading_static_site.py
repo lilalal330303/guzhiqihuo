@@ -17,8 +17,8 @@ def _read(name: str) -> str:
 def test_all_pages_load_shared_static_site_resources():
     for page in PAGES:
         content = _read(page)
-        assert 'href="styles.css?v=20260714-5"' in content
-        assert 'src="app.js?v=20260714-5"' in content
+        assert 'href="styles.css?v=20260714-6"' in content
+        assert 'src="app.js?v=20260714-6"' in content
         assert "viewport-fit=cover" in content
 
 
