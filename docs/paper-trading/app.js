@@ -7,7 +7,7 @@
   const wholeCurrency = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 0 });
   const numeric = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
   const savedTheme = (() => { try { return localStorage.getItem("paper-theme"); } catch (_) { return null; } })();
-  document.documentElement.dataset.theme = savedTheme || "light";
+  document.documentElement.dataset.theme = savedTheme || "dark";
 
   fetch("data/snapshot.json")
     .then((response) => response.ok ? response.json() : Promise.reject(new Error(`快照读取失败：${response.status}`)))
@@ -60,10 +60,12 @@
     const cards = accounts.map((item) => {
       const metrics = item.metrics || {};
       const active = item.id === current.id ? " active" : "";
-      return `<a class="account-link${active}" href="strategy.html?id=${encodeURIComponent(item.id)}"><div class="account-name">${escapeHtml(item.display?.name || item.id)}</div><div class="account-value">${wholeMoney(metrics.equity ?? item.display?.initial_cash)}</div><div class="account-meta">持仓 ${numeric(metrics.position_count)} 个 · 独立账户</div></a>`;
+      return `<a class="account-link${active}" href="strategy.html?id=${encodeURIComponent(item.id)}"><i class="hud-corner" aria-hidden="true"></i><div class="account-name">${escapeHtml(item.display?.name || item.id)}</div><div class="account-value">${wholeMoney(metrics.equity ?? item.display?.initial_cash)}</div><div class="account-meta">持仓 ${numeric(metrics.position_count)} 个 · 独立账户</div></a>`;
     }).join("");
     const currentName = escapeHtml(current.display?.name || current.id);
-    return `<header class="topbar"><div class="brand">量化研究 <small>模拟盘</small></div><div class="mobile-context">${currentName}</div><nav class="topnav" aria-label="模拟盘导航">${nav}</nav><div class="source">审计快照 · ${escapeHtml(formatTime(snapshot.generated_at))}</div><button class="theme-toggle" type="button" aria-label="切换显示主题"></button></header><nav class="mobile-nav" aria-label="移动端模拟盘导航">${mobileNav}</nav><div class="layout"><aside class="rail"><div class="rail-label">策略账户 / ${accounts.length}</div>${cards}</aside>`;
+    const currentModule = escapeHtml((navItems.find((item) => item[2] === page) || navItems[0])[1]);
+    const marketSnapshot = escapeHtml(formatTime(snapshot.market_data_as_of));
+    return `<header class="topbar"><div class="brand">量化研究 <small>模拟盘</small></div><div class="command-module"><small>COMMAND MODULE</small><b>${currentModule}</b></div><div class="mobile-context">${currentName}</div><nav class="topnav" aria-label="模拟盘导航">${nav}</nav><div class="command-status"><span class="live-dot"></span><small>行情快照</small><b>${marketSnapshot}</b></div><div class="source">审计快照 · ${escapeHtml(formatTime(snapshot.generated_at))}</div><button class="theme-toggle" type="button" aria-label="切换显示主题"></button></header><nav class="mobile-nav" aria-label="移动端模拟盘导航">${mobileNav}</nav><div class="layout"><aside class="rail"><div class="rail-label">策略账户 / ${accounts.length}</div>${cards}</aside>`;
   }
 
   function wireThemeToggle() {
