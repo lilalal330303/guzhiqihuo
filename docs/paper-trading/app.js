@@ -31,6 +31,15 @@
     else if (page === "orders") renderOrders(view, account, snapshot);
     else if (page === "logs") renderLogs(view, account, snapshot);
     else renderOverview(view, accounts, account, snapshot);
+    decorateMobileTables(app);
+    new MutationObserver(() => decorateMobileTables(app)).observe(view, { childList: true, subtree: true });
+  }
+
+  function decorateMobileTables(root) {
+    root.querySelectorAll(".table-wrap:not([data-mobile-ready])").forEach((wrapper) => {
+      wrapper.dataset.mobileReady = "true";
+      wrapper.insertAdjacentHTML("beforebegin", '<div class="mobile-scroll-hint" aria-hidden="true">左右滑动查看完整信息 →</div>');
+    });
   }
 
   function selectedAccountFromRoute(accounts) {
@@ -40,18 +49,21 @@
 
   function shell(snapshot, accounts, current) {
     const currentId = encodeURIComponent(current.id);
-    const nav = [
-      ["index.html", "策略总览", "overview"],
-      [`positions.html?id=${currentId}`, "持仓", "positions"],
-      [`orders.html?id=${currentId}`, "订单与成交", "orders"],
-      [`logs.html?id=${currentId}`, "运行日志", "logs"],
-    ].map(([href, label, key]) => `<a href="${href}" class="${page === key ? "active" : ""}">${label}</a>`).join("");
+    const navItems = [
+      ["index.html", "策略总览", "overview", "⌂"],
+      [`positions.html?id=${currentId}`, "持仓", "positions", "▤"],
+      [`orders.html?id=${currentId}`, "订单", "orders", "⇄"],
+      [`logs.html?id=${currentId}`, "日志", "logs", "≡"],
+    ];
+    const nav = navItems.map(([href, label, key]) => `<a href="${href}" class="${page === key ? "active" : ""}">${key === "orders" ? "订单与成交" : key === "logs" ? "运行日志" : label}</a>`).join("");
+    const mobileNav = navItems.map(([href, label, key, icon]) => `<a class="mobile-nav-link" href="${href}" ${page === key ? 'aria-current="page"' : ""}><span aria-hidden="true">${icon}</span><b>${label}</b></a>`).join("");
     const cards = accounts.map((item) => {
       const metrics = item.metrics || {};
       const active = item.id === current.id ? " active" : "";
       return `<a class="account-link${active}" href="strategy.html?id=${encodeURIComponent(item.id)}"><div class="account-name">${escapeHtml(item.display?.name || item.id)}</div><div class="account-value">${wholeMoney(metrics.equity ?? item.display?.initial_cash)}</div><div class="account-meta">持仓 ${numeric(metrics.position_count)} 个 · 独立账户</div></a>`;
     }).join("");
-    return `<header class="topbar"><div class="brand">量化研究 <small>模拟盘</small></div><nav class="topnav" aria-label="模拟盘导航">${nav}</nav><div class="source">审计快照 · ${escapeHtml(formatTime(snapshot.generated_at))}</div><button class="theme-toggle" type="button" aria-label="切换显示主题"></button></header><div class="layout"><aside class="rail"><div class="rail-label">策略账户 / ${accounts.length}</div>${cards}</aside>`;
+    const currentName = escapeHtml(current.display?.name || current.id);
+    return `<header class="topbar"><div class="brand">量化研究 <small>模拟盘</small></div><div class="mobile-context">${currentName}</div><nav class="topnav" aria-label="模拟盘导航">${nav}</nav><div class="source">审计快照 · ${escapeHtml(formatTime(snapshot.generated_at))}</div><button class="theme-toggle" type="button" aria-label="切换显示主题"></button></header><nav class="mobile-nav" aria-label="移动端模拟盘导航">${mobileNav}</nav><div class="layout"><aside class="rail"><div class="rail-label">策略账户 / ${accounts.length}</div>${cards}</aside>`;
   }
 
   function wireThemeToggle() {
