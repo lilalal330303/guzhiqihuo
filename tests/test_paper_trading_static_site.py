@@ -264,3 +264,13 @@ def test_command_center_css_defines_hud_tokens_and_reduced_motion():
     assert ".command-status" in styles
     assert ".hud-corner" in styles
     assert "prefers-reduced-motion:reduce" in styles
+
+
+def test_command_center_hud_enhances_charts_metrics_and_audit_rows():
+    source = _read("app.js")
+    styles = _read("styles.css")
+    for marker in ("chart-crosshair-x", "chart-crosshair-y", "hud-label", "terminal-row"):
+        assert marker in source
+    assert "@keyframes hudIn" in styles
+    assert "@keyframes scanPulse" in styles
+    assert "filter:drop-shadow" in styles
