@@ -28,6 +28,7 @@
 - 成功后同交易日后续触发自动跳过；失败时后续触发自动重试。
 - 电脑休眠或错过触发后，恢复时自动补运行并允许唤醒电脑。
 - 周末自动跳过。
+- Git发布任务：`QuantLab_PaperTrading_Publish_1605`，每天16:05和16:20仅同步模拟盘快照到master及GitHub Pages main分支。
 
 ## 交付文件
 
@@ -36,3 +37,4 @@
 - 状态：`reports/paper_after_close_status.json`
 - 页面快照：`docs/paper-trading/data/snapshot.json`
 - 测试：`tests/test_paper_after_close.py`
+- Git发布入口：`reports/publish_paper_snapshot.ps1`
