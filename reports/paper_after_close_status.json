@@ -1,0 +1,10 @@
+{
+  "status": "completed",
+  "trade_date": "2026-07-14",
+  "symbols": 129,
+  "minute_rows": 30960,
+  "daily_rows": 129,
+  "events": 232,
+  "completed_at": "2026-07-14T15:29:24.691695+08:00",
+  "snapshot": "C:\\Users\\16052\\Documents\\量化研究\\docs\\paper-trading\\data\\snapshot.json"
+}
