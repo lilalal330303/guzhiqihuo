@@ -296,7 +296,7 @@ def test_snapshot_declares_after_close_refresh_schedule(tmp_path, monkeypatch):
     snapshot = site_export.build_site_snapshot(repo, accounts=[account])
 
     assert snapshot["snapshot_schedule"] == {
-        "label": "盘后快照", "time": "15:30", "timezone": "Asia/Shanghai",
+        "label": "盘后快照", "time": "15:05", "timezone": "Asia/Shanghai",
     }
 
 

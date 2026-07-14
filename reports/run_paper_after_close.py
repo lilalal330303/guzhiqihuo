@@ -1,4 +1,4 @@
-"""Export the local paper-trading operating snapshot at the 15:30 after-close checkpoint."""
+"""Export the local paper-trading operating snapshot at the 15:05 after-close checkpoint."""
 from __future__ import annotations
 
 import argparse
@@ -18,13 +18,13 @@ from quant_lab.research.paper_trading_site_export import export_site_snapshot
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--force", action="store_true", help="Allow a manual export before 15:30")
+    parser.add_argument("--force", action="store_true", help="Allow a manual export before 15:05")
     parser.add_argument("--trade-date", help="Trade date to complete (default: current Shanghai date)")
     parser.add_argument("--output", type=Path, default=ROOT / "docs" / "paper-trading" / "data" / "snapshot.json")
     args = parser.parse_args()
     now = datetime.now(ZoneInfo("Asia/Shanghai"))
-    if not args.force and (now.weekday() >= 5 or (now.hour, now.minute) < (15, 30)):
-        print(f"跳过：当前不是交易日15:30后的盘后快照窗口（{now:%Y-%m-%d %H:%M}）")
+    if not args.force and (now.weekday() >= 5 or (now.hour, now.minute) < (15, 5)):
+        print(f"跳过：当前不是交易日15:05后的盘后快照窗口（{now:%Y-%m-%d %H:%M}）")
         return 0
     trade_date = args.trade_date or now.strftime("%Y-%m-%d")
     status_path = ROOT / "reports" / "paper_after_close_status.json"

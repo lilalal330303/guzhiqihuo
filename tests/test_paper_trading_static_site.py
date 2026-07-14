@@ -172,7 +172,7 @@ def test_account_card_money_metrics_drop_decimal_places_and_schedule_is_visible(
     assert '["可用现金", wholeMoney(m.cash)]' in source
     assert '["持仓市值", wholeMoney(m.position_market_value)]' in source
     assert "snapshot_schedule" in source
-    assert "15:30" in source
+    assert "15:05" in source
 
 
 def test_all_named_account_money_metrics_use_integer_yuan():
@@ -180,17 +180,40 @@ def test_all_named_account_money_metrics_use_integer_yuan():
     assert "account-value\">${wholeMoney" in source
     for expression in (
         '["账户权益", wholeMoney(m.equity)]',
-        '["初始资金", wholeMoney(account.display?.initial_cash)]',
         '["可用现金", wholeMoney(m.cash)]',
         '["持仓市值", wholeMoney(m.position_market_value)]',
     ):
         assert expression in source
 
 
-def test_equity_chart_axes_are_zero_based():
+def test_equity_chart_axes_use_an_adaptive_padded_domain():
     source = _read("app.js")
-    assert "const floorValue = 0" in source
-    assert "const min = 0" in source
+    assert "function paddedDomain" in source
+    assert "paddedDomain(values)" in source
+    assert "const floorValue = 0" not in source
+    assert "const min = 0" not in source
+
+
+def test_intraday_equity_only_uses_the_latest_trading_day():
+    source = _read("app.js")
+    assert "function filterLatestTradingDay" in source
+    assert "const intradayCurve = filterLatestTradingDay(curve)" in source
+    assert "renderEquityChart(chart, intradayCurve" in source
+
+
+def test_light_theme_is_default_and_can_be_toggled():
+    source = _read("app.js")
+    styles = _read("styles.css")
+    assert '|| "light"' in source
+    assert "paper-theme" in source
+    assert "theme-toggle" in source
+    assert "wireThemeToggle" in source
+    assert '[data-theme="light"]' in styles
+
+
+def test_strategy_summary_does_not_show_initial_cash():
+    source = _read("app.js")
+    assert "initial_cash)]" not in source
 
 
 def test_selected_strategy_tabs_keep_a_luminous_panel_and_ui_has_motion_feedback():

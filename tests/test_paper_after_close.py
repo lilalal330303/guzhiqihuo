@@ -1,7 +1,14 @@
 import pandas as pd
 import pytest
+from pathlib import Path
 
 from quant_lab.research.paper_after_close import aggregate_daily_bars, already_completed, fatal_replay_results, validate_close_window
+
+
+def test_after_close_cli_uses_the_five_minute_post_close_checkpoint():
+    source = (Path(__file__).resolve().parents[1] / "reports" / "run_paper_after_close.py").read_text(encoding="utf-8")
+    assert "15:05" in source
+    assert "(15, 5)" in source
 
 
 def test_aggregate_daily_bars_builds_truthful_ohlcv_from_minutes():

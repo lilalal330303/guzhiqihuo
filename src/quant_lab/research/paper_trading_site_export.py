@@ -57,7 +57,7 @@ def build_site_snapshot(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "market_data_as_of": market_data_as_of,
         "snapshot_schedule": {
-            "label": "盘后快照", "time": "15:30", "timezone": "Asia/Shanghai",
+            "label": "盘后快照", "time": "15:05", "timezone": "Asia/Shanghai",
         },
         "combined_holdings": _combine_holdings(account_snapshots),
         "accounts": account_snapshots,

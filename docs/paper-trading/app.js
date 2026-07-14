@@ -6,6 +6,8 @@
   const currency = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 2 });
   const wholeCurrency = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 0 });
   const numeric = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
+  const savedTheme = (() => { try { return localStorage.getItem("paper-theme"); } catch (_) { return null; } })();
+  document.documentElement.dataset.theme = savedTheme || "light";
 
   fetch("data/snapshot.json")
     .then((response) => response.ok ? response.json() : Promise.reject(new Error(`快照读取失败：${response.status}`)))
@@ -22,6 +24,7 @@
     }
     const account = selectedAccountFromRoute(accounts);
     app.innerHTML = shell(snapshot, accounts, account) + `<main id="content" class="main" tabindex="-1"><div id="view"></div></main>`;
+    wireThemeToggle();
     const view = document.getElementById("view");
     if (page === "strategy") renderStrategy(view, account, snapshot);
     else if (page === "positions") renderPositions(view, account, snapshot);
@@ -48,7 +51,25 @@
       const active = item.id === current.id ? " active" : "";
       return `<a class="account-link${active}" href="strategy.html?id=${encodeURIComponent(item.id)}"><div class="account-name">${escapeHtml(item.display?.name || item.id)}</div><div class="account-value">${wholeMoney(metrics.equity ?? item.display?.initial_cash)}</div><div class="account-meta">持仓 ${numeric(metrics.position_count)} 个 · 独立账户</div></a>`;
     }).join("");
-    return `<header class="topbar"><div class="brand">量化研究 <small>模拟盘</small></div><nav class="topnav" aria-label="模拟盘导航">${nav}</nav><div class="source">审计快照 · ${escapeHtml(formatTime(snapshot.generated_at))}</div></header><div class="layout"><aside class="rail"><div class="rail-label">策略账户 / ${accounts.length}</div>${cards}</aside>`;
+    return `<header class="topbar"><div class="brand">量化研究 <small>模拟盘</small></div><nav class="topnav" aria-label="模拟盘导航">${nav}</nav><div class="source">审计快照 · ${escapeHtml(formatTime(snapshot.generated_at))}</div><button class="theme-toggle" type="button" aria-label="切换显示主题"></button></header><div class="layout"><aside class="rail"><div class="rail-label">策略账户 / ${accounts.length}</div>${cards}</aside>`;
+  }
+
+  function wireThemeToggle() {
+    const button = document.querySelector(".theme-toggle");
+    if (!button) return;
+    const sync = () => {
+      const dark = document.documentElement.dataset.theme === "dark";
+      button.textContent = dark ? "☀ 亮色" : "☾ 深色";
+      button.setAttribute("aria-pressed", String(dark));
+      button.title = dark ? "切换为亮色主题" : "切换为深色主题";
+    };
+    sync();
+    button.addEventListener("click", () => {
+      const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = theme;
+      try { localStorage.setItem("paper-theme", theme); } catch (_) { /* local file privacy mode */ }
+      sync();
+    });
   }
 
   function renderOverview(root, accounts, current, snapshot) {
@@ -67,7 +88,7 @@
   function renderStrategy(root, account, snapshot) {
     const m = account.metrics || {};
     root.innerHTML = pageHead(account.display?.name || account.id, "独立策略视图：总览、持仓、订单和日志均只显示当前策略。", snapshot) +
-      kpis([["账户权益", wholeMoney(m.equity)], ["初始资金", wholeMoney(account.display?.initial_cash)], ["可用现金", wholeMoney(m.cash)], ["持仓市值", wholeMoney(m.position_market_value)], ["累计收益", percent(m.total_return)]]) +
+      kpis([["账户权益", wholeMoney(m.equity)], ["可用现金", wholeMoney(m.cash)], ["持仓市值", wholeMoney(m.position_market_value)], ["累计收益", percent(m.total_return)]]) +
       `<section class="panel"><div class="section-title"><div><h2>权益走势</h2><p>当前策略</p></div>${periodControls()}</div><div class="chart-wrap" id="equity-chart"></div></section>` +
       `<div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-tab="positions">持仓</button><button class="tab" role="tab" aria-selected="false" data-tab="orders">订单</button><button class="tab" role="tab" aria-selected="false" data-tab="fills">成交</button><button class="tab" role="tab" aria-selected="false" data-tab="timeline">执行活动</button><button class="tab" role="tab" aria-selected="false" data-tab="logs">运行日志</button></div><section class="panel" id="tab-content"></section>`;
     wireChartPeriod(root, account, account.display?.name || account.id);
@@ -110,8 +131,8 @@
 
   function pageHead(title, description, snapshot) {
     const asOf = snapshot.market_data_as_of ? formatTime(snapshot.market_data_as_of) : "暂无可用行情时点";
-    const schedule = snapshot.snapshot_schedule || { label: "盘后快照", time: "15:30" };
-    return `<div class="page-head"><div><div class="eyebrow">本地模拟盘</div><h1>${escapeHtml(title)}</h1><p class="snapshot-note">${escapeHtml(description)}</p></div><div class="snapshot-status"><span class="live-dot"></span><div>行情实际截至：<b>${escapeHtml(asOf)}</b><br>${escapeHtml(schedule.label || "盘后快照")}计划：<b>${escapeHtml(schedule.time || "15:30")}</b><br><small>快照导出：${escapeHtml(formatTime(snapshot.generated_at))}</small></div></div></div>`;
+    const schedule = snapshot.snapshot_schedule || { label: "盘后快照", time: "15:05" };
+    return `<div class="page-head"><div><div class="eyebrow">本地模拟盘</div><h1>${escapeHtml(title)}</h1><p class="snapshot-note">${escapeHtml(description)}</p></div><div class="snapshot-status"><span class="live-dot"></span><div>行情实际截至：<b>${escapeHtml(asOf)}</b><br>${escapeHtml(schedule.label || "盘后快照")}计划：<b>${escapeHtml(schedule.time || "15:05")}</b><br><small>快照导出：${escapeHtml(formatTime(snapshot.generated_at))}</small></div></div></div>`;
   }
 
   function kpis(items) { return `<section class="kpis">${items.map(([name, value]) => `<div class="kpi"><span>${name}</span><b>${value}</b></div>`).join("")}</section>`; }
@@ -122,10 +143,11 @@
     const curve = account.equity_curve || [];
     const dailyBars = account.daily_equity_bars || [];
     const fiveDayCurve = filterLastFiveTradingDays(curve);
+    const intradayCurve = filterLatestTradingDay(curve);
     const draw = (period) => {
       if (period === "daily") renderDailyEquityBars(chart, dailyBars, label);
       else if (period === "five-day") renderFiveDayIntradayChart(chart, fiveDayCurve, label);
-      else renderEquityChart(chart, curve, label, period);
+      else renderEquityChart(chart, intradayCurve, label, period);
     };
     draw("intraday");
     root.querySelectorAll(".period").forEach((button) => button.addEventListener("click", () => {
@@ -141,6 +163,13 @@
     records.forEach((row) => { const key = String(row.timestamp || row.trade_date || "").slice(0, 10); if (key) daily.set(key, row); });
     const rows = [...daily.values()];
     return period === "five-day" ? rows.slice(-5) : rows;
+  }
+
+  function filterLatestTradingDay(curve) {
+    const records = (Array.isArray(curve) ? curve : []).filter((row) => Number.isFinite(Number(row.equity)));
+    const dates = [...new Set(records.map(tradeDate).filter(Boolean))].sort();
+    const latest = dates[dates.length - 1];
+    return latest ? records.filter((row) => tradeDate(row) === latest) : records;
   }
 
   function filterLastFiveTradingDays(curve) {
@@ -304,6 +333,15 @@
     renderEquityChart(container, curve, label, "近5日日内权益拼接", true);
   }
 
+  function paddedDomain(values) {
+    const clean = values.map(Number).filter(Number.isFinite);
+    if (!clean.length) return { min: 0, max: 1, range: 1 };
+    const low = Math.min(...clean), high = Math.max(...clean);
+    const padding = Math.max((high - low) * .12, Math.abs(high) * .002, 1);
+    const min = low - padding, max = high + padding;
+    return { min, max, range: Math.max(max - min, 1) };
+  }
+
   function renderEquityChart(container, curve, label, period, showDaySeparators = false) {
     if (!container) return;
     container.innerHTML = "";
@@ -313,7 +351,7 @@
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.classList.add("equity-chart"); svg.setAttribute("viewBox", "0 0 760 300"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `${label}${period}权益走势`);
     const left = 74, top = 20, width = 650, height = 220, bottom = top + height;
-    const min = 0, max = Math.max(...values), range = max || 1;
+    const { min, range } = paddedDomain(values);
     const x = (index) => left + (values.length === 1 ? width / 2 : index * width / (values.length - 1));
     const y = (value) => top + height - (value - min) / range * height;
     const add = (name, attrs, text) => { const node = document.createElementNS("http://www.w3.org/2000/svg", name); Object.entries(attrs || {}).forEach(([key, value]) => node.setAttribute(key, value)); if (text !== undefined) node.textContent = text; svg.appendChild(node); return node; };
@@ -346,8 +384,7 @@
     svg.classList.add("equity-chart"); svg.setAttribute("viewBox", "0 0 760 300"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `${label}按日权益柱状图`);
     const left = 74, top = 20, width = 650, height = 220, bottom = top + height;
     const values = bars.map((row) => numeric(row.close));
-    const max = Math.max(...values);
-    const floorValue = 0, range = max || 1;
+    const { min: floorValue, range } = paddedDomain(values);
     const slot = width / bars.length, barWidth = Math.min(42, slot * .62);
     const y = (value) => top + height - (value - floorValue) / range * height;
     const add = (name, attrs, text) => { const node = document.createElementNS("http://www.w3.org/2000/svg", name); Object.entries(attrs || {}).forEach(([key, value]) => node.setAttribute(key, value)); if (text !== undefined) node.textContent = text; svg.appendChild(node); return node; };

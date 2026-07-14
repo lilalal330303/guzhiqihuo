@@ -31,3 +31,30 @@ button,.account-link{transition:transform .18s,border-color .18s,background .18s
 @keyframes viewIn{from{opacity:.45;transform:translateY(5px)}to{opacity:1;transform:none}}@keyframes pulse{50%{box-shadow:0 0 0 8px #48e1d408,0 0 18px var(--cyan)}}
 @media(max-width:680px){.snapshot-status{text-align:left;margin-top:12px}.audit-filter{align-items:stretch}.audit-filter select{width:100%}.audit-split section{padding:10px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* Daylight-first theme. Dark remains available from the persistent header switch. */
+.theme-toggle{border:1px solid var(--line);border-radius:999px;padding:8px 12px;background:var(--panel);color:var(--text);cursor:pointer;white-space:nowrap;font-weight:700}
+.theme-toggle:hover{border-color:var(--blue);box-shadow:0 0 0 3px #50a7ff18;transform:translateY(-1px)}
+[data-theme="light"]{--bg:#eef4fb;--panel:#fff;--panel-2:#f7faff;--line:#cfdae8;--text:#17263a;--muted:#60738a;--blue:#1677e8;--cyan:#079eac;--green:#07865d;--red:#d9485f;--glow:#1677e824;--shadow:0 16px 42px #35577f18}
+[data-theme="light"] body{background:radial-gradient(circle at 88% 0,#d7eaff 0,transparent 32%),var(--bg);color:var(--text)}
+[data-theme="light"] body::before{background-image:linear-gradient(#286da40a 1px,transparent 1px),linear-gradient(90deg,#286da40a 1px,transparent 1px)}
+[data-theme="light"] .topbar{background:#ffffffed;border-color:#d7e1ed;box-shadow:0 8px 28px #35577f17}
+[data-theme="light"] .brand small{background:#eaf4ff;border-color:#8bc2ff;color:#0967ce}
+[data-theme="light"] .topnav a:hover,[data-theme="light"] .topnav a.active{color:#095fae;background:#e8f3ff}
+[data-theme="light"] .rail{background:#f7faffeb;border-color:#d7e1ed}
+[data-theme="light"] .account-link,[data-theme="light"] .kpi,[data-theme="light"] .panel,[data-theme="light"] .strategy-card,[data-theme="light"] .tabs + .panel{background:linear-gradient(145deg,#fff,#f8fbff);box-shadow:0 10px 30px #31547a12;color:var(--text)}
+[data-theme="light"] .account-link:hover,[data-theme="light"] .strategy-card:hover{box-shadow:0 16px 38px #31547a20,0 0 0 1px #1677e824}
+[data-theme="light"] .scope-label,[data-theme="light"] .event{background:#edf6ff;color:#263f59}
+[data-theme="light"] .snapshot-status{background:#f7fbff;border-color:#c9daeb;color:#445f79;box-shadow:inset 0 1px #fff}
+[data-theme="light"] .snapshot-status b{color:#173e68}[data-theme="light"] .snapshot-status small{color:#71859a}
+[data-theme="light"] .period{background:#f7faff;color:#60738a}[data-theme="light"] .period.active,[data-theme="light"] .period:hover{background:#e1f0ff;color:#095fae}
+[data-theme="light"] .tabs{background:#f4f8fd;border-color:#cfdae8;box-shadow:inset 0 1px #fff}
+[data-theme="light"] .tab:hover{color:#095fae;background:#e8f3ff}[data-theme="light"] .tab[aria-selected="true"]{color:#075fae;background:#dceeff;border-color:#7ab8f5;box-shadow:0 5px 15px #1677e81b,inset 0 1px #fff}
+[data-theme="light"] .audit-filter,[data-theme="light"] .history-toolbar{background:linear-gradient(90deg,#eef6ff,#f8fbff);border-color:#c9daeb}
+[data-theme="light"] .audit-filter label,[data-theme="light"] .history-toolbar label{color:#25445f}
+[data-theme="light"] .audit-filter select,[data-theme="light"] .history-date{background:#fff;color:#263f59;border-color:#b9cadc}
+[data-theme="light"] .audit-split section{background:#fbfdff;border-color:#d7e1ed}[data-theme="light"] .audit-split h3{color:#385671}
+[data-theme="light"] .data-table thead{background:#eef5fc}[data-theme="light"] .data-table th{color:#536c84}[data-theme="light"] .data-table td{color:#253c53;border-color:#dce5ef}[data-theme="light"] .data-table tbody tr:nth-child(even){background:#f7faff}[data-theme="light"] .data-table tbody tr:hover{background:#eaf4ff}
+[data-theme="light"] .axis{stroke:#9db1c5}[data-theme="light"] .axis-label{fill:#587087}[data-theme="light"] .series-area{fill:#1677e818}[data-theme="light"] .point{stroke:#fff}
+[data-theme="light"] .chart-tooltip{background:#fff;border-color:#6aaff2;color:#193851;box-shadow:0 8px 24px #31547a24}
+[data-theme="light"] .event:hover{background:#e2f1ff}[data-theme="light"] .empty{background:#fbfdff}
