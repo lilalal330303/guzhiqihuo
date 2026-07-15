@@ -53,7 +53,7 @@ from quant_lab.research.small_cap_experiment import (
 from quant_lab.strategies.small_cap import SmallCapParams
 
 
-SCHEMA_VERSION = "fixed11-gradual-v3.1"
+SCHEMA_VERSION = "fixed11-gradual-v3.2"
 DEFAULT_OUTPUT = ROOT / "reports" / "small_cap_fixed11_gradual_next_stage"
 DEFAULT_TARGETS = ROOT / "reports" / "small_cap_strict_daily" / "optimized_source_bugs_targets.csv"
 BASELINE_CANDIDATES = (
@@ -756,6 +756,19 @@ def completion_gate(manifest: Mapping[str, Any], output: str | Path) -> bool:
     )
     if not all(checks):
         return False
+    crash_audit = manifest.get("crash_mechanism_audit", {})
+    if not isinstance(crash_audit, Mapping) or len(crash_audit) != 6:
+        return False
+    for evidence in crash_audit.values():
+        try:
+            ratio = float(evidence["crash_trigger_ratio"])
+            passed = evidence["passed"]
+        except (KeyError, TypeError, ValueError):
+            return False
+        if not math.isfinite(ratio) or not isinstance(passed, bool):
+            return False
+        if passed != bool(0.05 <= ratio <= 0.20):
+            return False
     root = Path(output)
     try:
         for name in ROOT_ARTIFACTS:
@@ -769,6 +782,24 @@ def completion_gate(manifest: Mapping[str, Any], output: str | Path) -> bool:
                 return False
     except (OSError, UnicodeError, json.JSONDecodeError, pd.errors.ParserError,
             pd.errors.EmptyDataError, TypeError, ValueError):
+        return False
+    try:
+        route_scores = pd.read_csv(root / "route_scores.csv", encoding="utf-8-sig")
+        required = {"candidate", "crash_trigger_ratio", "crash_mechanism_passed"}
+        if not required.issubset(route_scores.columns):
+            return False
+        for candidate, evidence in crash_audit.items():
+            rows = route_scores.loc[route_scores["candidate"].eq(candidate)]
+            if len(rows) != 1:
+                return False
+            ratio = float(rows.iloc[0]["crash_trigger_ratio"])
+            raw_passed = rows.iloc[0]["crash_mechanism_passed"]
+            passed = raw_passed if isinstance(raw_passed, bool) else str(raw_passed).lower() == "true"
+            if not math.isclose(ratio, float(evidence["crash_trigger_ratio"]), abs_tol=1e-12):
+                return False
+            if passed != evidence["passed"]:
+                return False
+    except (OSError, ValueError, TypeError, pd.errors.ParserError, pd.errors.EmptyDataError):
         return False
     return True
 

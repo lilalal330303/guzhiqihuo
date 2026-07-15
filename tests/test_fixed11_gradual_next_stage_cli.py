@@ -347,6 +347,10 @@ def test_completion_gate_requires_all_stages_nonempty_artifacts_and_evidence(tmp
         "normal_test_call_count": 40,
         "cost_evidence_complete": True,
         "stress_evidence_complete": True,
+        "crash_mechanism_audit": {
+            f"crash_{index}": {"crash_trigger_ratio": 0.10, "passed": True}
+            for index in range(6)
+        },
     }
     for name in cli.ROOT_ARTIFACTS:
         path = tmp_path / name
@@ -354,10 +358,16 @@ def test_completion_gate_requires_all_stages_nonempty_artifacts_and_evidence(tmp
             write_json(path, manifest)
         elif name.endswith(".json"):
             write_json(path, {"value": 1})
+        elif name == "route_scores.csv":
+            write_csv(pd.DataFrame([{
+                "candidate": f"crash_{index}", "crash_trigger_ratio": 0.10,
+                "crash_mechanism_passed": True,
+            } for index in range(6)]), path)
         else:
             write_csv(pd.DataFrame([{"value": 1}]), path)
 
     assert completion_gate(manifest, tmp_path)
+    assert not completion_gate({**manifest, "crash_mechanism_audit": {}}, tmp_path)
     assert not completion_gate({**manifest, "cost_evidence_complete": False}, tmp_path)
     write_csv(pd.DataFrame(), tmp_path / "stress_results.csv")
     assert not completion_gate(manifest, tmp_path)
@@ -462,6 +472,7 @@ def test_global_experiment_fingerprint_covers_all_root_inputs() -> None:
     assert original != global_experiment_fingerprint(**{
         **kwargs, "baseline_costs": CostModel(minimum_commission=6.0),
     })
+    assert original != global_experiment_fingerprint(**{**kwargs, "schema_version": "v-next"})
 
 
 def test_crash_trigger_ratio_gate_includes_five_and_twenty_percent_boundaries(
