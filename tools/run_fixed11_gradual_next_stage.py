@@ -39,6 +39,7 @@ from quant_lab.research.optimized_v3_runner import (
     ExperimentResult,
     run_candidate,
 )
+from quant_lab.research.optimized_v3_overlays import build_crash_exposure_budget
 from quant_lab.research.optimized_v3_walkforward import (
     ROUTES,
     default_folds,
@@ -76,6 +77,7 @@ SCORE_COLUMNS = (
     "account_reconciliation_error", "mean_exposure_budget", "defensive_budget_days",
     "target_hash", "candidate_hash",
 )
+ROUTE_SCORE_COLUMNS = (*SCORE_COLUMNS, "crash_trigger_ratio", "crash_mechanism_passed")
 EQUITY_COLUMNS = ("trade_date", "cash", "market_value", "equity")
 TRADES_COLUMNS = (
     "trade_date", "symbol", "side", "quantity", "raw_price", "fill_price",
@@ -369,6 +371,43 @@ def build_candidate_catalog(
     if not frame["name"].is_unique or not frame["parameter_hash"].is_unique:
         raise ValueError("candidate catalog contains duplicate names or parameter hashes")
     return frame
+
+
+def audit_crash_mechanisms(
+    candidates: Sequence[ExperimentCandidate], index_bars: pd.DataFrame,
+) -> pd.DataFrame:
+    rows = []
+    for candidate in candidates:
+        overlay = candidate.crash_overlay
+        if overlay is None:
+            continue
+        budget = build_crash_exposure_budget(
+            index_bars,
+            drawdown_threshold=overlay.drawdown_threshold,
+            defensive_budget=overlay.defensive_budget,
+            recovery_confirmation_days=overlay.recovery_confirmation_days,
+            lookback=overlay.lookback,
+        )
+        if budget.empty or "defensive" not in budget:
+            raise ValueError(f"crash mechanism audit missing diagnostic rows: {candidate.name}")
+        ratio = float(budget["defensive"].astype(bool).mean())
+        rows.append({
+            "candidate": candidate.name,
+            "crash_trigger_ratio": ratio,
+            "crash_mechanism_passed": bool(0.05 <= ratio <= 0.20),
+        })
+    return pd.DataFrame(rows, columns=[
+        "candidate", "crash_trigger_ratio", "crash_mechanism_passed",
+    ])
+
+
+def filter_route_candidates_for_walkforward(
+    candidates: Sequence[ExperimentCandidate], crash_audit: pd.DataFrame,
+) -> list[ExperimentCandidate]:
+    failed = set(crash_audit.loc[
+        ~crash_audit["crash_mechanism_passed"].astype(bool), "candidate"
+    ]) if not crash_audit.empty else set()
+    return [candidate for candidate in candidates if candidate.name not in failed]
 
 
 def build_run_manifest(output: str | Path = DEFAULT_OUTPUT, execute: bool = False) -> dict[str, Any]:
@@ -935,6 +974,10 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
             missing_stable_rows.append({"rejected_for_route": "defensive_profit", "candidate": "",
                                         "reason": "no_stable_core", "phase": "core_ranking"})
         route_candidates = build_route_candidates(ranked_return, ranked_defensive)
+        crash_audit = audit_crash_mechanisms(route_candidates, inputs.index_bars)
+        walkforward_route_candidates = filter_route_candidates_for_walkforward(
+            route_candidates, crash_audit
+        )
         write_csv(build_candidate_catalog(ranked_return, ranked_defensive), output / "candidate_catalog.csv",
                   ["name", "route", "family", "parameter_hash", "parameters_json"])
         if "routes" in requested or args.stage in ("walkforward", "stress"):
@@ -945,17 +988,35 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                 route_rows.append(score)
                 print(f"routes {index}/{len(route_candidates)}: {candidate.name}", flush=True)
             route_scores = pd.DataFrame(route_rows)
-            write_csv(route_scores, output / "route_scores.csv", SCORE_COLUMNS)
+            route_scores = route_scores.merge(crash_audit, on="candidate", how="left",
+                                              validate="one_to_one")
+            write_csv(route_scores, output / "route_scores.csv", ROUTE_SCORE_COLUMNS)
             append_rejected(output, pd.concat([
                 rejected, pd.DataFrame(missing_stable_rows)
             ], ignore_index=True, sort=False))
+            failed_crash = crash_audit.loc[~crash_audit["crash_mechanism_passed"]].copy()
+            if not failed_crash.empty:
+                append_rejected(output, failed_crash.assign(
+                    rejected_for_route="defensive", phase="route_mechanism",
+                    reason="crash_trigger_ratio_out_of_range",
+                ))
+            manifest["crash_mechanism_audit"] = {
+                row.candidate: {
+                    "crash_trigger_ratio": float(row.crash_trigger_ratio),
+                    "passed": bool(row.crash_mechanism_passed),
+                }
+                for row in crash_audit.itertuples(index=False)
+            }
+            manifest["crash_mechanism_qualified_count"] = int(
+                crash_audit["crash_mechanism_passed"].sum()
+            )
             manifest["route_full_sample_call_count"] = len(route_scores)
             manifest["full_sample_candidate_count"] = len(core_scores) + len(route_scores)
             manifest["stage_status"]["routes"] = "complete"
             write_json(manifest_path, manifest)
 
         if any(stage in requested for stage in ("walkforward", "stress")):
-            universe = [ExperimentCandidate.anchor(), *route_candidates]
+            universe = [ExperimentCandidate.anchor(), *walkforward_route_candidates]
             folds = default_folds(pd.Timestamp(args.end))
             wf = run_walk_forward(universe, folds, _walkforward_runner(
                 inputs, target_hashes, args.initial_cash, costs, output=output,

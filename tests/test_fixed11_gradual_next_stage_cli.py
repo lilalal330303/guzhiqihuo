@@ -14,11 +14,13 @@ from tools.run_fixed11_gradual_next_stage import (
     build_candidate_catalog,
     build_route_candidates,
     build_run_manifest,
+    audit_crash_mechanisms,
     candidate_run_hash,
     compare_equity_curves,
     completion_gate,
     combined_policy_max_drawdown,
     cost_stress_models,
+    filter_route_candidates_for_walkforward,
     database_snapshot,
     global_experiment_fingerprint,
     rank_core_variants,
@@ -460,6 +462,45 @@ def test_global_experiment_fingerprint_covers_all_root_inputs() -> None:
     assert original != global_experiment_fingerprint(**{
         **kwargs, "baseline_costs": CostModel(minimum_commission=6.0),
     })
+
+
+def test_crash_trigger_ratio_gate_includes_five_and_twenty_percent_boundaries(
+    monkeypatch,
+) -> None:
+    candidates = [item for item in build_route_candidates() if item.crash_overlay is not None][:2]
+    ratios = iter((0.05, 0.20))
+
+    def fake_budget(*args, **kwargs):
+        ratio = next(ratios)
+        total = 20
+        defensive_days = round(ratio * total)
+        return pd.DataFrame({
+            "trade_date": pd.date_range("2024-01-02", periods=total, freq="B"),
+            "defensive": [True] * defensive_days + [False] * (total - defensive_days),
+            "exposure_budget": [1.0] * total,
+        })
+
+    monkeypatch.setattr(cli, "build_crash_exposure_budget", fake_budget)
+    audit = audit_crash_mechanisms(candidates, pd.DataFrame({"trade_date": [], "close": []}))
+
+    assert audit["crash_trigger_ratio"].tolist() == [0.05, 0.20]
+    assert audit["crash_mechanism_passed"].tolist() == [True, True]
+
+
+def test_walkforward_filter_excludes_only_failed_crash_mechanisms() -> None:
+    candidates = build_route_candidates()
+    crash = [item for item in candidates if item.crash_overlay is not None]
+    audit = pd.DataFrame({
+        "candidate": [item.name for item in crash],
+        "crash_trigger_ratio": [0.21, 0.19, 0.10, 0.10, 0.10, 0.10],
+        "crash_mechanism_passed": [False, True, True, True, True, True],
+    })
+
+    filtered = filter_route_candidates_for_walkforward(candidates, audit)
+
+    assert crash[0].name not in {item.name for item in filtered}
+    assert crash[1].name in {item.name for item in filtered}
+    assert all(item in filtered for item in candidates if item.crash_overlay is None)
 
 
 def test_combined_policy_drawdown_uses_intraperiod_equity_not_only_fold_endpoints(
