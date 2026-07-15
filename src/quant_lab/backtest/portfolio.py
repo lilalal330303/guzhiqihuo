@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 
 import pandas as pd
 
@@ -29,6 +30,8 @@ class DailyRiskConfig:
     atr_multiplier: float = 2.0
     enable_cost_protection: bool = True
     repair_cost_protection: bool = False
+    profit_activation: float = 0.30
+    profit_floor: float = 0.10
     enable_market_stop: bool = True
     market_stop: float = 0.05
     enable_divergence: bool = True
@@ -36,6 +39,12 @@ class DailyRiskConfig:
     crowding_danger: float = 0.48
     enable_cooldown: bool = True
     cooldown_days: int = 2
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.profit_activation) or not math.isfinite(self.profit_floor):
+            raise ValueError("profit protection thresholds must be finite")
+        if not 0 <= self.profit_floor < self.profit_activation:
+            raise ValueError("profit_floor must satisfy 0 <= profit_floor < profit_activation")
 
 
 @dataclass(frozen=True)
@@ -320,14 +329,14 @@ def run_portfolio_backtest(
                 )
                 profit_ratio = close / avg_cost - 1.0 if avg_cost else 0.0
                 peak_profit_ratio[symbol] = max(peak_profit_ratio.get(symbol, profit_ratio), profit_ratio)
-                if risk.enable_cost_protection and risk.repair_cost_protection:
-                    peak = peak_profit_ratio[symbol]
-                    if (peak >= 0.30 and profit_ratio < 0.10) or (peak >= 0.15 and profit_ratio < 0.0):
-                        pending_forced_sells.setdefault(symbol, "cost_protection")
-                        continue
                 if risk.enable_fixed_stop and close < avg_cost * (1.0 - risk.fixed_stop_loss):
                     pending_forced_sells.setdefault(symbol, "fixed_stop")
                     continue
+                if risk.enable_cost_protection and risk.repair_cost_protection:
+                    peak = peak_profit_ratio[symbol]
+                    if peak >= risk.profit_activation and profit_ratio < risk.profit_floor:
+                        pending_forced_sells.setdefault(symbol, "cost_protection")
+                        continue
                 history = price_history.get(symbol, [])
                 if risk.enable_atr and len(history) >= risk.atr_period + 1:
                     previous = history[-(risk.atr_period + 1):]
@@ -346,7 +355,7 @@ def run_portfolio_backtest(
             if risk.enable_market_stop and market_stop_values.get(trade_date, 0.0) <= -risk.market_stop:
                 for symbol, quantity in holdings.items():
                     if quantity > 0 and symbol != "511880":
-                        pending_forced_sells[symbol] = "market_stop"
+                        pending_forced_sells.setdefault(symbol, "market_stop")
             if risk.enable_divergence and trade_date in divergence_dates:
                 divergence_hold_until = day_index + 9
                 for symbol, quantity in holdings.items():
@@ -354,11 +363,11 @@ def run_portfolio_backtest(
                         continue
                     row = day.loc[symbol]
                     if float(row["close"]) < float(row.get("high_limit", float("inf"))):
-                        pending_forced_sells[symbol] = "macd_divergence"
+                        pending_forced_sells.setdefault(symbol, "macd_divergence")
             if risk.enable_crowding_daily and crowding_values.get(trade_date, 0.0) >= risk.crowding_danger:
                 for symbol, quantity in holdings.items():
                     if quantity > 0 and symbol != "511880":
-                        pending_forced_sells[symbol] = "crowding_clear"
+                        pending_forced_sells.setdefault(symbol, "crowding_clear")
         market_value = sum(qty * float(day.loc[symbol, "close"]) for symbol, qty in holdings.items() if symbol in day.index)
         equity_rows.append({"trade_date": pd.Timestamp(trade_date), "cash": cash,
                             "market_value": market_value, "equity": cash + market_value})

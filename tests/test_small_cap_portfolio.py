@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from quant_lab.backtest.portfolio import (
     DailyRiskConfig,
@@ -249,6 +250,100 @@ def test_repaired_cost_protection_remembers_prior_profit_band():
     sell = result.trades.loc[result.trades["side"].eq("sell")].iloc[0]
     assert sell["trade_date"] == pd.Timestamp("2024-01-05")
     assert sell["reason"] == "cost_protection"
+
+
+def _profit_protection_bars(peak_close: float, trigger_close: float) -> pd.DataFrame:
+    dates = pd.to_datetime([
+        "2024-01-02", "2024-01-03", "2024-01-04", "2024-01-05", "2024-01-08"
+    ])
+    return pd.DataFrame({
+        "symbol": ["000001"] * len(dates),
+        "trade_date": dates,
+        "open": [10.0, 10.0, peak_close, trigger_close, trigger_close],
+        "close": [10.0, peak_close, trigger_close, trigger_close, trigger_close],
+        "high": [10.1, peak_close + 0.1, peak_close + 0.1, trigger_close + 0.1, trigger_close + 0.1],
+        "low": [9.9, 9.9, trigger_close - 0.1, trigger_close - 0.1, trigger_close - 0.1],
+        "high_limit": [20.0] * len(dates),
+        "low_limit": [1.0] * len(dates),
+        "paused": [False] * len(dates),
+        "is_st": [False] * len(dates),
+    })
+
+
+def _single_symbol_target() -> pd.DataFrame:
+    return pd.DataFrame({
+        "signal_date": pd.to_datetime(["2024-01-02"]),
+        "symbol": ["000001"],
+        "target_weight": [1.0],
+    })
+
+
+def _isolated_risk(**overrides) -> DailyRiskConfig:
+    values = {
+        "enable_atr": False,
+        "enable_market_stop": False,
+        "enable_divergence": False,
+        "enable_crowding_daily": False,
+    }
+    values.update(overrides)
+    return DailyRiskConfig(**values)
+
+
+def test_configurable_profit_protection_uses_t_close_and_next_open():
+    result = run_portfolio_backtest(
+        _profit_protection_bars(12.2, 10.4),
+        _single_symbol_target(),
+        initial_cash=10_000.0,
+        risk=_isolated_risk(
+            enable_fixed_stop=False,
+            repair_cost_protection=True,
+            profit_activation=0.20,
+            profit_floor=0.05,
+        ),
+    )
+
+    sell = result.trades.loc[result.trades["side"].eq("sell")].iloc[0]
+    assert sell["trade_date"] == pd.Timestamp("2024-01-05")
+    assert sell["reason"] == "cost_protection"
+
+
+def test_fixed_stop_has_priority_when_profit_protection_also_triggers():
+    result = run_portfolio_backtest(
+        _profit_protection_bars(13.2, 8.9),
+        _single_symbol_target(),
+        initial_cash=10_000.0,
+        risk=_isolated_risk(repair_cost_protection=True),
+    )
+
+    sell = result.trades.loc[result.trades["side"].eq("sell")].iloc[0]
+    assert sell["trade_date"] == pd.Timestamp("2024-01-05")
+    assert sell["reason"] == "fixed_stop"
+
+
+def test_default_repair_flag_does_not_enable_cost_protection():
+    result = run_portfolio_backtest(
+        _profit_protection_bars(13.2, 10.5),
+        _single_symbol_target(),
+        initial_cash=10_000.0,
+        risk=_isolated_risk(enable_fixed_stop=False),
+    )
+
+    assert result.trades.loc[result.trades["side"].eq("sell")].empty
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"profit_activation": float("nan")},
+        {"profit_floor": float("inf")},
+        {"profit_floor": -0.01},
+        {"profit_floor": 0.30},
+        {"profit_activation": 0.0},
+    ],
+)
+def test_profit_protection_parameters_are_validated(kwargs):
+    with pytest.raises(ValueError):
+        DailyRiskConfig(**kwargs)
 
 
 def test_joinquant_buy_new_only_does_not_resize_existing_target():
