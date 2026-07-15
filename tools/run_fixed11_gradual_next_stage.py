@@ -55,6 +55,7 @@ from quant_lab.strategies.small_cap import SmallCapParams
 
 
 SCHEMA_VERSION = "fixed11-gradual-v3.3"
+STRESS_EVIDENCE_SCHEMA = "diagnostic-v1"
 DEFAULT_OUTPUT = ROOT / "reports" / "small_cap_fixed11_gradual_next_stage"
 DEFAULT_TARGETS = ROOT / "reports" / "small_cap_strict_daily" / "optimized_source_bugs_targets.csv"
 BASELINE_CANDIDATES = (
@@ -193,8 +194,9 @@ def candidate_run_hash(
     *, candidate: ExperimentCandidate, source_target_hash: str, start: str, end: str,
     initial_cash: float, costs: CostModel, input_data_fingerprint: str,
     schema_version: str = SCHEMA_VERSION,
+    evidence_schema: str = "",
 ) -> str:
-    return _sha256_json({
+    payload = {
         "route": candidate.route,
         "family": candidate_family(candidate),
         "parameters": candidate,
@@ -205,7 +207,106 @@ def candidate_run_hash(
         "initial_cash": float(initial_cash),
         "cost_model": costs,
         "schema_version": schema_version,
-    })
+    }
+    if evidence_schema:
+        payload["evidence_schema"] = str(evidence_schema)
+    return _sha256_json(payload)
+
+
+def select_diagnostic_leaders(route_scores: pd.DataFrame) -> dict[str, dict[str, Any]]:
+    """Select one deterministic in-sample diagnostic leader per route.
+
+    These leaders exist only to measure costs and stress when a route has no
+    complete five-fold policy.  They must never be treated as gate-qualified.
+    """
+    required = {
+        "candidate", "route", "calmar", "sharpe", "max_underwater_calendar_days",
+        "total_return", "max_drawdown",
+    }
+    missing = required.difference(route_scores.columns)
+    if missing:
+        raise ValueError(f"route scores missing diagnostic columns: {sorted(missing)}")
+    leaders: dict[str, dict[str, Any]] = {}
+    sort_contracts = {
+        "balanced": (["calmar", "sharpe", "max_underwater_calendar_days", "candidate"],
+                     [False, False, True, True]),
+        "return": (["total_return", "calmar", "candidate"], [False, False, True]),
+        "defensive": (["max_drawdown", "calmar", "candidate"], [False, False, True]),
+    }
+    for route in ROUTES:
+        frame = route_scores.loc[route_scores["route"].eq(route)].copy()
+        if route == "defensive" and "crash_mechanism_passed" in frame:
+            mechanism = frame["crash_mechanism_passed"].astype("boolean")
+            frame = frame.loc[~(mechanism.notna() & ~mechanism.fillna(True))].copy()
+        if frame.empty:
+            raise RuntimeError(f"no diagnostic leader available for route {route}")
+        columns, ascending = sort_contracts[route]
+        leader = frame.sort_values(columns, ascending=ascending, kind="stable").iloc[0]
+        leaders[route] = {
+            "candidate": str(leader["candidate"]),
+            "diagnostic_only": True,
+            "qualified_for_gate": False,
+            "selection_basis": "full_sample_in_sample",
+        }
+    return leaders
+
+
+def evaluate_stress_evidence(
+    stress_rows: pd.DataFrame,
+    policy_counts: Mapping[str, int],
+    gate_rows: Sequence[Mapping[str, Any]],
+    *,
+    cost_model_count: int,
+) -> tuple[bool, bool]:
+    """Audit formal or diagnostic evidence without promoting diagnostics."""
+    gates = {str(row.get("route")): row for row in gate_rows}
+    cost_complete = True
+    stress_complete = True
+    for route in ROUTES:
+        count = int(policy_counts.get(route, 0))
+        route_rows = stress_rows.loc[stress_rows.get("route", pd.Series(dtype=str)).eq(route)]
+        costs = route_rows.loc[route_rows.get("evidence_type", pd.Series(dtype=str)).eq("cost")]
+        windows = route_rows.loc[
+            route_rows.get("evidence_type", pd.Series(dtype=str)).eq("stress_window")
+        ]
+        if count == 5:
+            cost_complete &= len(costs) == 5 * 2 * cost_model_count
+            stress_complete &= len(windows) == 2 * 2
+            continue
+        gate = gates.get(route, {})
+        reasons = gate.get("reasons", ())
+        has_missing_gate = (not bool(gate.get("passed"))) and "missing_policy_fold" in str(reasons)
+        flags_ok = True
+        diagnostic_rows = pd.concat([costs, windows], ignore_index=True)
+        if diagnostic_rows.empty:
+            flags_ok = False
+        else:
+            flags_ok = bool(
+                diagnostic_rows.get("diagnostic_only", pd.Series(False, index=diagnostic_rows.index))
+                .astype("boolean").fillna(False).all()
+                and (~diagnostic_rows.get(
+                    "qualified_for_gate", pd.Series(True, index=diagnostic_rows.index)
+                ).astype("boolean").fillna(True)).all()
+                and diagnostic_rows.get(
+                    "selection_basis", pd.Series("", index=diagnostic_rows.index)
+                ).eq("full_sample_in_sample").all()
+            )
+        candidate_names = costs.loc[costs.get("series", pd.Series(dtype=str)).eq("candidate"),
+                                    "candidate"].dropna().unique()
+        leader_ok = len(candidate_names) == 1
+        cost_shape = (
+            len(costs) == 2 * cost_model_count
+            and costs.get("cost_label", pd.Series(dtype=str)).nunique() == cost_model_count
+            and set(costs.get("series", pd.Series(dtype=str))) == {"candidate", "anchor"}
+        )
+        stress_shape = (
+            len(windows) == 2 * 2
+            and set(windows.get("window", pd.Series(dtype=str))) == {"2024_q1", "2026_ytd"}
+            and set(windows.get("series", pd.Series(dtype=str))) == {"candidate", "anchor"}
+        )
+        cost_complete &= bool(has_missing_gate and flags_ok and leader_ok and cost_shape)
+        stress_complete &= bool(has_missing_gate and flags_ok and stress_shape)
+    return bool(cost_complete), bool(stress_complete)
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -435,6 +536,7 @@ def filter_route_candidates_for_walkforward(
 def build_run_manifest(output: str | Path = DEFAULT_OUTPUT, execute: bool = False) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
+        "stress_evidence_schema": STRESS_EVIDENCE_SCHEMA,
         "output": str(Path(output)),
         "execute": bool(execute),
         "core_one_factor_count": len(core_one_factor_variants()),
@@ -613,12 +715,14 @@ def _run_full_candidate(
     config: SmallCapExperimentConfig, output: Path, costs: CostModel, resume: bool,
     input_data_fingerprint: str,
     run_context: Mapping[str, Any] | None = None,
+    evidence_schema: str = "",
 ) -> dict[str, Any]:
     target_hash = _candidate_target_hash(candidate, target_hashes)
     run_hash = candidate_run_hash(candidate=candidate, source_target_hash=target_hash,
                                   start=config.start_date, end=config.end_date,
                                   initial_cash=config.initial_cash, costs=costs,
-                                  input_data_fingerprint=input_data_fingerprint)
+                                  input_data_fingerprint=input_data_fingerprint,
+                                  evidence_schema=evidence_schema)
     run_dir = output / "candidates" / _safe_name(candidate.name) / run_hash[:16]
     if resume and should_resume(run_dir, run_hash, target_hash=target_hash):
         return _read_score(run_dir)
@@ -628,6 +732,8 @@ def _run_full_candidate(
         "experiment_fingerprint": input_data_fingerprint,
         **dict(run_context or {}),
     }
+    if evidence_schema:
+        context["evidence_schema"] = evidence_schema
     return persist_candidate_result(output, result, target_hash, run_hash, cost_model=costs,
                                     run_context=context)
 
@@ -767,6 +873,7 @@ def completion_gate(manifest: Mapping[str, Any], output: str | Path) -> bool:
         int(manifest.get("normal_test_call_count", 46)) <= 45,
         bool(manifest.get("cost_evidence_complete")),
         bool(manifest.get("stress_evidence_complete")),
+        manifest.get("stress_evidence_schema") == STRESS_EVIDENCE_SCHEMA,
     )
     if not all(checks):
         return False
@@ -892,6 +999,7 @@ def rebuild_annual_returns(
 def _walkforward_runner(
     inputs: ExperimentInputs, target_hashes: Mapping[str, str], initial_cash: float,
     costs: CostModel, *, output: Path, resume: bool, input_data_fingerprint: str,
+    evidence_schema: str = "",
 ):
     def runner(*, candidate: ExperimentCandidate, start: pd.Timestamp, end: pd.Timestamp,
                phase: str, fold: str) -> dict[str, Any]:
@@ -902,6 +1010,7 @@ def _walkforward_runner(
         score = _run_full_candidate(
             candidate, period, target_hashes, config, output, costs, resume,
             input_data_fingerprint, run_context={"phase": phase, "fold": fold},
+            evidence_schema=evidence_schema,
         )
         return {key: score[key] for key in (
             "total_return", "annualized_return", "max_drawdown", "sharpe", "calmar",
@@ -1119,12 +1228,71 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
             cost_rows: list[dict[str, Any]] = []
             stress_gate_by_route: dict[str, pd.DataFrame] = {}
             policy_counts = policy.groupby("route").size().to_dict() if not policy.empty else {}
+            diagnostic_leaders = select_diagnostic_leaders(route_scores)
             for route in ROUTES:
                 route_policy = policy.loc[policy["route"].eq(route)].copy()
                 if len(route_policy) != 5:
-                    stress_rows.append({"evidence_type": "missing_policy", "route": route,
-                                        "status": "no_stable_training_policy",
-                                        "policy_fold_count": len(route_policy)})
+                    leader_info = diagnostic_leaders[route]
+                    leader = by_name[leader_info["candidate"]]
+                    diagnostic_fields = {
+                        "diagnostic_only": True,
+                        "qualified_for_gate": False,
+                        "selection_basis": "full_sample_in_sample",
+                    }
+                    stress_rows.append({
+                        "evidence_type": "missing_policy", "route": route,
+                        "status": "no_stable_training_policy",
+                        "policy_fold_count": len(route_policy),
+                        "candidate": leader.name, **diagnostic_fields,
+                    })
+                    for cost_label, cost_model in model_matrix.items():
+                        runner = _walkforward_runner(
+                            inputs, target_hashes, args.initial_cash, cost_model,
+                            output=output, resume=args.resume,
+                            input_data_fingerprint=experiment_fingerprint,
+                            evidence_schema=STRESS_EVIDENCE_SCHEMA,
+                        )
+                        for series, candidate in (
+                            ("candidate", leader), ("anchor", ExperimentCandidate.anchor()),
+                        ):
+                            score = runner(
+                                candidate=candidate, start=pd.Timestamp(args.start),
+                                end=pd.Timestamp(args.end),
+                                phase=f"diagnostic_cost_{cost_label}", fold="full_sample",
+                            )
+                            row = {
+                                "evidence_type": "cost", "route": route,
+                                "fold": "full_sample", "series": series,
+                                "candidate": candidate.name, "cost_label": cost_label,
+                                **diagnostic_fields,
+                                **{key: score[key] for key in (
+                                    "total_return", "annualized_return", "max_drawdown",
+                                    "sharpe", "calmar", "max_underwater_calendar_days",
+                                )},
+                            }
+                            cost_rows.append(row)
+                            stress_rows.append(row)
+                    for window, start, end in (
+                        ("2024_q1", "2024-01-01", "2024-03-31"),
+                        ("2026_ytd", "2026-01-01", args.end),
+                    ):
+                        runner = _walkforward_runner(
+                            inputs, target_hashes, args.initial_cash, costs, output=output,
+                            resume=args.resume, input_data_fingerprint=experiment_fingerprint,
+                            evidence_schema=STRESS_EVIDENCE_SCHEMA,
+                        )
+                        for series, candidate in (
+                            ("candidate", leader), ("anchor", ExperimentCandidate.anchor()),
+                        ):
+                            score = runner(
+                                candidate=candidate, start=pd.Timestamp(start),
+                                end=pd.Timestamp(end), phase="diagnostic_stress", fold=window,
+                            )
+                            stress_rows.append({
+                                "evidence_type": "stress_window", "route": route,
+                                "window": window, "fold": window, "series": series,
+                                "candidate": candidate.name, **diagnostic_fields, **score,
+                            })
                     continue
                 for policy_row in route_policy.itertuples(index=False):
                     fold = fold_by_name[policy_row.fold]
@@ -1133,6 +1301,7 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                             inputs, target_hashes, args.initial_cash, cost_model,
                             output=output, resume=args.resume,
                             input_data_fingerprint=experiment_fingerprint,
+                            evidence_schema=STRESS_EVIDENCE_SCHEMA,
                         )
                         for series, candidate in (
                             ("candidate", by_name[policy_row.candidate]),
@@ -1165,6 +1334,7 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                     runner = _walkforward_runner(
                         inputs, target_hashes, args.initial_cash, costs, output=output,
                         resume=args.resume, input_data_fingerprint=experiment_fingerprint,
+                        evidence_schema=STRESS_EVIDENCE_SCHEMA,
                     )
                     results = {}
                     for series, candidate in (
@@ -1188,10 +1358,18 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                 stress_gate_by_route[route] = pd.DataFrame(window_rows)
 
             return_policy = policy.loc[policy["route"].eq("return")].copy()
+            route_decisions: dict[str, dict[str, Any]] = {}
             for route in ROUTES:
                 route_policy = policy.loc[policy["route"].eq(route)].copy()
                 if len(route_policy) != 5:
-                    gate_rows.append(asdict(next(item for item in wf.gate_results if item.route == route)))
+                    gate_row = asdict(next(item for item in wf.gate_results if item.route == route))
+                    gate_rows.append(gate_row)
+                    route_decisions[route] = {
+                        "passed": False, "qualified_for_gate": False,
+                        "policy_fold_count": len(route_policy),
+                        "reasons": gate_row.get("reasons", ()),
+                        **diagnostic_leaders[route],
+                    }
                     continue
                 if route == "return":
                     route_policy["combined_max_drawdown"] = combined_policy_max_drawdown(
@@ -1212,7 +1390,16 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                     )
                 else:
                     gate = evaluate_route_gates(route, route_policy, anchor_tests)
-                gate_rows.append(asdict(gate))
+                gate_row = asdict(gate)
+                gate_rows.append(gate_row)
+                route_decisions[route] = {
+                    "passed": bool(gate.passed), "qualified_for_gate": True,
+                    "policy_fold_count": len(route_policy),
+                    "selected_candidate": gate.selected_candidate,
+                    "reasons": gate.reasons,
+                    "diagnostic_only": False,
+                    "selection_basis": "walkforward_training",
+                }
             write_csv(pd.DataFrame(stress_rows), output / "stress_results.csv")
             write_csv(pd.DataFrame(gate_rows), output / "route_gate_results.csv")
             gate_rejections = [{
@@ -1221,19 +1408,19 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                 "reason": ";".join(row.get("reasons", ())),
             } for row in gate_rows if not row.get("passed")]
             append_rejected(output, pd.DataFrame(gate_rejections))
-            eligible_route_count = sum(policy_counts.get(route, 0) == 5 for route in ROUTES)
             manifest["cost_models"] = {name: _jsonable(model)
                                        for name, model in model_matrix.items()}
-            manifest["cost_evidence_complete"] = bool(
-                all(policy_counts.get(route, 0) in (0, 5) for route in ROUTES)
-                and len(cost_rows) == eligible_route_count * 5 * 2 * len(model_matrix)
+            cost_complete, stress_complete = evaluate_stress_evidence(
+                pd.DataFrame(stress_rows), policy_counts, gate_rows,
+                cost_model_count=len(model_matrix),
             )
-            stress_window_rows = [row for row in stress_rows
-                                  if row.get("evidence_type") == "stress_window"]
-            manifest["stress_evidence_complete"] = bool(
-                all(policy_counts.get(route, 0) in (0, 5) for route in ROUTES)
-                and len(stress_window_rows) == eligible_route_count * 2 * 2
+            manifest["stress_evidence_schema"] = STRESS_EVIDENCE_SCHEMA
+            manifest["cost_evidence_complete"] = cost_complete
+            manifest["stress_evidence_complete"] = stress_complete
+            manifest["qualified_route_count"] = sum(
+                bool(row.get("passed")) for row in gate_rows
             )
+            manifest["route_decisions"] = route_decisions
             manifest["stage_status"]["stress"] = "complete"
 
     write_csv(rebuild_annual_returns(output, experiment_fingerprint=experiment_fingerprint),

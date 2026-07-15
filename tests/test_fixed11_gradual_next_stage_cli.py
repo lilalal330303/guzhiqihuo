@@ -28,6 +28,8 @@ from tools.run_fixed11_gradual_next_stage import (
     rebuild_annual_returns,
     resume_manifest_for_snapshot,
     scale_cost_model,
+    select_diagnostic_leaders,
+    evaluate_stress_evidence,
     should_resume,
     write_csv,
     write_json,
@@ -43,6 +45,7 @@ def test_dry_run_manifest_lists_approved_counts(tmp_path: Path) -> None:
     assert manifest["stock_profile_count"] == 3
     assert manifest["crash_overlay_count"] == 6
     assert manifest["profit_protection_count"] == 4
+    assert manifest["stress_evidence_schema"] == cli.STRESS_EVIDENCE_SCHEMA
 
 
 def test_catalog_names_and_parameter_hashes_are_unique() -> None:
@@ -74,6 +77,85 @@ def test_candidate_hash_is_canonical_and_sensitive_to_every_contract_field() -> 
     assert first != candidate_run_hash(**{**kwargs, "source_target_hash": "target-b"})
     assert first != candidate_run_hash(**{**kwargs, "input_data_fingerprint": "db-b"})
     assert first != candidate_run_hash(**{**kwargs, "costs": scale_cost_model(costs, 2.0)})
+    assert first != candidate_run_hash(**{**kwargs, "evidence_schema": "diagnostic-v1"})
+
+
+def test_diagnostic_leaders_are_full_sample_only_and_never_gate_qualified() -> None:
+    scores = pd.DataFrame([
+        {"candidate": "b1", "route": "balanced", "calmar": 2.0, "sharpe": 1.0,
+         "max_underwater_calendar_days": 50, "total_return": 1.0,
+         "max_drawdown": -0.20},
+        {"candidate": "b2", "route": "balanced", "calmar": 2.0, "sharpe": 1.2,
+         "max_underwater_calendar_days": 70, "total_return": 0.9,
+         "max_drawdown": -0.21},
+        {"candidate": "r1", "route": "return", "calmar": 2.0, "sharpe": 1.0,
+         "max_underwater_calendar_days": 50, "total_return": 1.4,
+         "max_drawdown": -0.25},
+        {"candidate": "r2", "route": "return", "calmar": 3.0, "sharpe": 1.0,
+         "max_underwater_calendar_days": 50, "total_return": 1.3,
+         "max_drawdown": -0.20},
+        {"candidate": "failed_crash", "route": "defensive", "calmar": 9.0,
+         "sharpe": 2.0, "max_underwater_calendar_days": 10,
+         "total_return": 2.0, "max_drawdown": -0.05,
+         "crash_mechanism_passed": False},
+        {"candidate": "d1", "route": "defensive", "calmar": 1.5,
+         "sharpe": 1.0, "max_underwater_calendar_days": 80,
+         "total_return": 0.8, "max_drawdown": -0.15,
+         "crash_mechanism_passed": True},
+        {"candidate": "d2", "route": "defensive", "calmar": 2.0,
+         "sharpe": 1.0, "max_underwater_calendar_days": 70,
+         "total_return": 0.9, "max_drawdown": -0.20},
+    ])
+
+    leaders = select_diagnostic_leaders(scores)
+
+    assert {route: item["candidate"] for route, item in leaders.items()} == {
+        "balanced": "b2", "return": "r1", "defensive": "d1",
+    }
+    assert all(item["diagnostic_only"] is True for item in leaders.values())
+    assert all(item["qualified_for_gate"] is False for item in leaders.values())
+    assert all(item["selection_basis"] == "full_sample_in_sample"
+               for item in leaders.values())
+
+
+def test_incomplete_policy_diagnostic_evidence_requires_exact_counts_and_missing_gate() -> None:
+    rows = []
+    for route in cli.ROUTES:
+        for cost_label in cli.cost_stress_models(CostModel()):
+            for series in ("candidate", "anchor"):
+                rows.append({
+                    "evidence_type": "cost", "route": route,
+                    "series": series, "candidate": f"{route}_leader",
+                    "cost_label": cost_label, "diagnostic_only": True,
+                    "qualified_for_gate": False,
+                    "selection_basis": "full_sample_in_sample",
+                })
+        for window in ("2024_q1", "2026_ytd"):
+            for series in ("candidate", "anchor"):
+                rows.append({
+                    "evidence_type": "stress_window", "route": route,
+                    "series": series, "candidate": f"{route}_leader",
+                    "window": window, "diagnostic_only": True,
+                    "qualified_for_gate": False,
+                    "selection_basis": "full_sample_in_sample",
+                })
+    gates = [{"route": route, "passed": False,
+              "reasons": ("missing_policy_fold",)} for route in cli.ROUTES]
+
+    cost_ok, stress_ok = evaluate_stress_evidence(
+        pd.DataFrame(rows), {route: 4 for route in cli.ROUTES}, gates,
+        cost_model_count=7,
+    )
+
+    assert cost_ok and stress_ok
+    assert len([row for row in rows if row["evidence_type"] == "cost"]) == 42
+    assert len([row for row in rows if row["evidence_type"] == "stress_window"]) == 12
+    assert all(row["passed"] is False for row in gates)
+    assert all(row["reasons"] == ("missing_policy_fold",) for row in gates)
+    broken = pd.DataFrame(rows[:-1])
+    assert evaluate_stress_evidence(
+        broken, {route: 4 for route in cli.ROUTES}, gates, cost_model_count=7,
+    ) == (True, False)
 
 
 def test_resume_requires_exact_hash_audit_and_complete_artifacts(tmp_path: Path) -> None:
@@ -348,6 +430,7 @@ def test_completion_gate_requires_all_stages_nonempty_artifacts_and_evidence(tmp
         "normal_test_call_count": 40,
         "cost_evidence_complete": True,
         "stress_evidence_complete": True,
+        "stress_evidence_schema": cli.STRESS_EVIDENCE_SCHEMA,
         "crash_mechanism_audit": {
             f"crash_{index}": {"crash_trigger_ratio": 0.10, "passed": True}
             for index in range(6)
@@ -370,6 +453,7 @@ def test_completion_gate_requires_all_stages_nonempty_artifacts_and_evidence(tmp
     assert completion_gate(manifest, tmp_path)
     assert not completion_gate({**manifest, "crash_mechanism_audit": {}}, tmp_path)
     assert not completion_gate({**manifest, "cost_evidence_complete": False}, tmp_path)
+    assert not completion_gate({**manifest, "stress_evidence_schema": "old"}, tmp_path)
     write_csv(pd.DataFrame(), tmp_path / "stress_results.csv")
     assert not completion_gate(manifest, tmp_path)
 
@@ -380,9 +464,10 @@ def test_walkforward_runner_routes_period_calls_through_persistent_resume_path(
     captured = {}
 
     def fake_run(candidate, inputs, target_hashes, config, output, costs, resume,
-                 input_data_fingerprint, run_context=None):
+                 input_data_fingerprint, run_context=None, evidence_schema=""):
         captured.update({"output": output, "resume": resume,
-                         "fingerprint": input_data_fingerprint, "context": run_context})
+                         "fingerprint": input_data_fingerprint, "context": run_context,
+                         "evidence_schema": evidence_schema})
         return {
             "total_return": 0.1, "annualized_return": 0.2, "max_drawdown": -0.1,
             "sharpe": 1.0, "calmar": 2.0, "max_underwater_calendar_days": 10,
@@ -407,7 +492,7 @@ def test_walkforward_runner_routes_period_calls_through_persistent_resume_path(
     assert score["observation_date"] == pd.Timestamp("2024-01-02")
     assert captured == {
         "output": tmp_path, "resume": True, "fingerprint": "db-hash",
-        "context": {"phase": "test", "fold": "fold_2024"},
+        "context": {"phase": "test", "fold": "fold_2024"}, "evidence_schema": "",
     }
 
 
