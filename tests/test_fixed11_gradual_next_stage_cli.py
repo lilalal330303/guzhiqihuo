@@ -503,6 +503,23 @@ def test_walkforward_filter_excludes_only_failed_crash_mechanisms() -> None:
     assert all(item in filtered for item in candidates if item.crash_overlay is None)
 
 
+def test_crash_trigger_ratio_excludes_indicator_warmup_dates(monkeypatch) -> None:
+    candidate = next(item for item in build_route_candidates() if item.crash_overlay is not None)
+    dates = pd.date_range("2019-12-16", periods=30, freq="B")
+
+    monkeypatch.setattr(cli, "build_crash_exposure_budget", lambda *args, **kwargs: pd.DataFrame({
+        "trade_date": dates,
+        "defensive": [True] * 10 + [True] + [False] * 19,
+        "exposure_budget": [1.0] * 30,
+    }))
+    audit = audit_crash_mechanisms(
+        [candidate], pd.DataFrame(), start="2019-12-30", end=str(dates[-1].date())
+    )
+
+    # The first 10 warm-up rows are outside the 20-row evidence interval.
+    assert audit.loc[0, "crash_trigger_ratio"] == 0.05
+
+
 def test_combined_policy_drawdown_uses_intraperiod_equity_not_only_fold_endpoints(
     tmp_path: Path,
 ) -> None:

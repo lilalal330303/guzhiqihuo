@@ -375,6 +375,7 @@ def build_candidate_catalog(
 
 def audit_crash_mechanisms(
     candidates: Sequence[ExperimentCandidate], index_bars: pd.DataFrame,
+    *, start: str | pd.Timestamp | None = None, end: str | pd.Timestamp | None = None,
 ) -> pd.DataFrame:
     rows = []
     for candidate in candidates:
@@ -390,6 +391,16 @@ def audit_crash_mechanisms(
         )
         if budget.empty or "defensive" not in budget:
             raise ValueError(f"crash mechanism audit missing diagnostic rows: {candidate.name}")
+        if start is not None or end is not None:
+            dates = pd.to_datetime(budget["trade_date"])
+            mask = pd.Series(True, index=budget.index)
+            if start is not None:
+                mask &= dates.ge(pd.Timestamp(start))
+            if end is not None:
+                mask &= dates.le(pd.Timestamp(end))
+            budget = budget.loc[mask]
+            if budget.empty:
+                raise ValueError(f"crash mechanism audit interval is empty: {candidate.name}")
         ratio = float(budget["defensive"].astype(bool).mean())
         rows.append({
             "candidate": candidate.name,
@@ -974,7 +985,9 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
             missing_stable_rows.append({"rejected_for_route": "defensive_profit", "candidate": "",
                                         "reason": "no_stable_core", "phase": "core_ranking"})
         route_candidates = build_route_candidates(ranked_return, ranked_defensive)
-        crash_audit = audit_crash_mechanisms(route_candidates, inputs.index_bars)
+        crash_audit = audit_crash_mechanisms(
+            route_candidates, inputs.index_bars, start=args.start, end=args.end,
+        )
         walkforward_route_candidates = filter_route_candidates_for_walkforward(
             route_candidates, crash_audit
         )
