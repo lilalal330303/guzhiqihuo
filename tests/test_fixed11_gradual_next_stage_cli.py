@@ -343,10 +343,13 @@ def test_annual_returns_rebuild_includes_full_and_period_runs(tmp_path: Path) ->
         write_csv(pd.DataFrame({"trade_date": dates, "equity": equities}), run_dir / "equity.csv")
         write_json(run_dir / "audit.json", {
             "candidate_hash": run_hash, "score": {"candidate": "candidate", "route": "return"},
-            "run_context": {"phase": phase, "fold": "fold_2024" if phase == "test" else ""},
+            "run_context": {"phase": phase, "fold": "fold_2024" if phase == "test" else "",
+                            "input_data_fingerprint": "current" if run_hash == "b" else "old"},
         })
 
     annual = rebuild_annual_returns(tmp_path)
 
     assert set(annual["phase"]) == {"full_sample", "test"}
     assert annual.set_index("year")["return"].to_dict() == {2023: 0.1, 2024: 0.2}
+    current = rebuild_annual_returns(tmp_path, input_data_fingerprint="current")
+    assert current["year"].tolist() == [2024]

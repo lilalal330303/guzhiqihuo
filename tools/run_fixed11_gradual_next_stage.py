@@ -497,8 +497,9 @@ def _run_full_candidate(
     if resume and should_resume(run_dir, run_hash):
         return _read_score(run_dir)
     result = run_candidate(inputs, candidate, config, costs=costs)
+    context = {"input_data_fingerprint": input_data_fingerprint, **dict(run_context or {})}
     return persist_candidate_result(output, result, target_hash, run_hash, cost_model=costs,
-                                    run_context=run_context)
+                                    run_context=context)
 
 
 def _core_vector(core: Any) -> tuple[Any, ...]:
@@ -684,7 +685,9 @@ def _append_annual(output: Path, candidate: str, result_dir: Path) -> pd.DataFra
     return annual[["candidate", "year", "return"]]
 
 
-def rebuild_annual_returns(output: str | Path) -> pd.DataFrame:
+def rebuild_annual_returns(
+    output: str | Path, *, input_data_fingerprint: str | None = None,
+) -> pd.DataFrame:
     rows: list[pd.DataFrame] = []
     for audit_path in sorted(Path(output).glob("candidates/*/*/audit.json")):
         try:
@@ -695,12 +698,15 @@ def rebuild_annual_returns(output: str | Path) -> pd.DataFrame:
             continue
         if curve.empty:
             continue
+        context = audit.get("run_context", {})
+        if (input_data_fingerprint is not None
+                and context.get("input_data_fingerprint") != input_data_fingerprint):
+            continue
         curve["trade_date"] = pd.to_datetime(curve["trade_date"])
         curve["year"] = curve["trade_date"].dt.year
         annual = curve.groupby("year")["equity"].agg(["first", "last"]).reset_index()
         annual["return"] = (annual["last"] / annual["first"] - 1.0).round(12)
         score = audit.get("score", {})
-        context = audit.get("run_context", {})
         annual.insert(0, "run_hash", audit.get("candidate_hash"))
         annual.insert(0, "fold", context.get("fold", ""))
         annual.insert(0, "phase", context.get("phase", "full_sample"))
@@ -995,14 +1001,17 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
             )
             manifest["stage_status"]["stress"] = "complete"
 
-    write_csv(rebuild_annual_returns(output), output / "annual_returns.csv",
+    write_csv(rebuild_annual_returns(output, input_data_fingerprint=db_before["sha256"]),
+              output / "annual_returns.csv",
               ["candidate", "route", "phase", "fold", "run_hash", "year", "return"])
     all_scores = pd.concat([_existing_or_empty(output / "core_scores.csv"),
                             _existing_or_empty(output / "route_scores.csv")], ignore_index=True)
     audit_rows = []
     for audit_path in output.glob("candidates/*/*/audit.json"):
         try:
-            audit_rows.append(json.loads(audit_path.read_text(encoding="utf-8-sig")))
+            audit = json.loads(audit_path.read_text(encoding="utf-8-sig"))
+            if audit.get("run_context", {}).get("input_data_fingerprint") == db_before["sha256"]:
+                audit_rows.append(audit)
         except (OSError, UnicodeError, json.JSONDecodeError):
             continue
     if audit_rows:
