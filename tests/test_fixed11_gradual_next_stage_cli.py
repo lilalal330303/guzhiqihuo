@@ -20,6 +20,7 @@ from tools.run_fixed11_gradual_next_stage import (
     combined_policy_max_drawdown,
     cost_stress_models,
     database_snapshot,
+    global_experiment_fingerprint,
     rank_core_variants,
     rebuild_annual_returns,
     resume_manifest_for_snapshot,
@@ -75,9 +76,13 @@ def test_candidate_hash_is_canonical_and_sensitive_to_every_contract_field() -> 
 def test_resume_requires_exact_hash_audit_and_complete_artifacts(tmp_path: Path) -> None:
     run_dir = tmp_path / "candidate"
     run_dir.mkdir()
-    for name in ("equity.csv", "trades.csv", "rejections.csv", "positions.csv",
-                 "exposure_budget.csv"):
-        write_csv(pd.DataFrame([{"value": 1}]), run_dir / name)
+    write_csv(pd.DataFrame([{"trade_date": "2024-01-02", "equity": 100.0,
+                             "cash": 100.0, "market_value": 0.0}]), run_dir / "equity.csv")
+    write_csv(pd.DataFrame([{"trade_date": "2024-01-02", "exposure_budget": 1.0}]),
+              run_dir / "exposure_budget.csv")
+    write_csv(pd.DataFrame(columns=cli.TRADES_COLUMNS), run_dir / "trades.csv")
+    write_csv(pd.DataFrame(columns=cli.REJECTIONS_COLUMNS), run_dir / "rejections.csv")
+    write_csv(pd.DataFrame(columns=cli.POSITIONS_COLUMNS), run_dir / "positions.csv")
     write_json(run_dir / "parameters.json", {"name": "candidate"})
     (run_dir / "target_hash.txt").write_text("target", encoding="ascii")
     (run_dir / "run_hash.txt").write_text("abc", encoding="ascii")
@@ -284,7 +289,12 @@ def test_resume_rejects_header_only_equity_and_mismatched_run_hash(tmp_path: Pat
     run_dir = tmp_path / "candidate"
     run_dir.mkdir()
     for name in ("trades.csv", "rejections.csv", "positions.csv"):
-        write_csv(pd.DataFrame(columns=["value"]), run_dir / name)
+        columns = {
+            "trades.csv": cli.TRADES_COLUMNS,
+            "rejections.csv": cli.REJECTIONS_COLUMNS,
+            "positions.csv": cli.POSITIONS_COLUMNS,
+        }[name]
+        write_csv(pd.DataFrame(columns=columns), run_dir / name)
     write_csv(pd.DataFrame(columns=["trade_date", "equity"]), run_dir / "equity.csv")
     write_csv(pd.DataFrame([{"trade_date": "2024-01-02", "exposure_budget": 1.0}]),
               run_dir / "exposure_budget.csv")
@@ -297,8 +307,13 @@ def test_resume_rejects_header_only_equity_and_mismatched_run_hash(tmp_path: Pat
     })
 
     assert not should_resume(run_dir, "abc", target_hash="target")
-    write_csv(pd.DataFrame([{"trade_date": "2024-01-02", "equity": 100.0}]),
+    write_csv(pd.DataFrame([{"value": 1}]), run_dir / "equity.csv")
+    (run_dir / "run_hash.txt").write_text("abc", encoding="ascii")
+    assert not should_resume(run_dir, "abc", target_hash="target")
+    write_csv(pd.DataFrame([{"trade_date": "2024-01-02", "equity": 100.0,
+                             "cash": 100.0, "market_value": 0.0}]),
               run_dir / "equity.csv")
+    (run_dir / "run_hash.txt").write_text("wrong", encoding="ascii")
     assert not should_resume(run_dir, "abc", target_hash="target")
     (run_dir / "run_hash.txt").write_text("abc", encoding="ascii")
     assert should_resume(run_dir, "abc", target_hash="target")
@@ -408,7 +423,8 @@ def test_cross_snapshot_resume_resets_all_stage_evidence() -> None:
     base = cli.build_run_manifest("out", execute=True)
     prior = {
         **base,
-        "database_snapshot_before": {"sha256": "old"},
+        "database_snapshot_before": {"sha256": "same-db"},
+        "experiment_fingerprint": "old-experiment",
         "stage_status": {stage: "complete" for stage in base["stage_status"]},
         "cost_evidence_complete": True,
         "stress_evidence_complete": True,
@@ -417,7 +433,7 @@ def test_cross_snapshot_resume_resets_all_stage_evidence() -> None:
         "passed": True,
     }
 
-    resumed, reset = resume_manifest_for_snapshot(base, prior, "new")
+    resumed, reset = resume_manifest_for_snapshot(base, prior, "new-experiment")
 
     assert reset
     assert set(resumed["stage_status"].values()) == {"pending"}
@@ -426,6 +442,24 @@ def test_cross_snapshot_resume_resets_all_stage_evidence() -> None:
     assert "full_sample_candidate_count" not in resumed
     assert "normal_test_call_count" not in resumed
     assert resumed["passed"] is False
+
+
+def test_global_experiment_fingerprint_covers_all_root_inputs() -> None:
+    kwargs = dict(
+        database_sha256="db", start="2020-01-01", end="2026-07-06",
+        initial_cash=1_000_000.0, target_hashes={"anchor": "a", "profile": "b"},
+        baseline_costs=CostModel(),
+    )
+    original = global_experiment_fingerprint(**kwargs)
+
+    assert original != global_experiment_fingerprint(**{**kwargs, "database_sha256": "changed"})
+    assert original != global_experiment_fingerprint(**{**kwargs, "start": "2021-01-01"})
+    assert original != global_experiment_fingerprint(**{**kwargs, "end": "2025-12-31"})
+    assert original != global_experiment_fingerprint(**{**kwargs, "initial_cash": 2_000_000.0})
+    assert original != global_experiment_fingerprint(**{**kwargs, "target_hashes": {"anchor": "x"}})
+    assert original != global_experiment_fingerprint(**{
+        **kwargs, "baseline_costs": CostModel(minimum_commission=6.0),
+    })
 
 
 def test_combined_policy_drawdown_uses_intraperiod_equity_not_only_fold_endpoints(

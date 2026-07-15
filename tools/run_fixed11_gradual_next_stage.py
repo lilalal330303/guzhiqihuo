@@ -76,6 +76,14 @@ SCORE_COLUMNS = (
     "account_reconciliation_error", "mean_exposure_budget", "defensive_budget_days",
     "target_hash", "candidate_hash",
 )
+EQUITY_COLUMNS = ("trade_date", "cash", "market_value", "equity")
+TRADES_COLUMNS = (
+    "trade_date", "symbol", "side", "quantity", "raw_price", "fill_price",
+    "amount", "fee", "return_pct", "reason",
+)
+REJECTIONS_COLUMNS = ("trade_date", "symbol", "reason")
+POSITIONS_COLUMNS = ("trade_date", "symbol", "quantity")
+EXPOSURE_COLUMNS = ("trade_date", "exposure_budget")
 
 
 def _jsonable(value: Any) -> Any:
@@ -129,6 +137,19 @@ def scale_cost_model(costs: CostModel, multiplier: float) -> CostModel:
         sell_stamp_tax=costs.sell_stamp_tax * multiplier,
         fixed_slippage=costs.fixed_slippage * multiplier,
     )
+
+
+def global_experiment_fingerprint(
+    *, database_sha256: str, start: str, end: str, initial_cash: float,
+    target_hashes: Mapping[str, str], baseline_costs: CostModel,
+    schema_version: str = SCHEMA_VERSION,
+) -> str:
+    return _sha256_json({
+        "schema_version": schema_version,
+        "database_sha256": database_sha256,
+        "start": str(start), "end": str(end), "initial_cash": float(initial_cash),
+        "target_hashes": dict(target_hashes), "baseline_cost_model": baseline_costs,
+    })
 
 
 def cost_stress_models(costs: CostModel) -> dict[str, CostModel]:
@@ -229,7 +250,20 @@ def should_resume(
                 stored_target_hash = (run_dir / "target_hash.txt").read_text(encoding="ascii").strip()
                 stored_run_hash = (run_dir / "run_hash.txt").read_text(encoding="ascii").strip()
                 audit_target_hash = str(audit.get("score", {}).get("target_hash", ""))
+                schemas = {
+                    "equity.csv": set(EQUITY_COLUMNS),
+                    "trades.csv": set(TRADES_COLUMNS),
+                    "rejections.csv": set(REJECTIONS_COLUMNS),
+                    "positions.csv": set(POSITIONS_COLUMNS),
+                    "exposure_budget.csv": set(EXPOSURE_COLUMNS),
+                }
+                schema_valid = all(
+                    required.issubset(parsed_frames[name].columns)
+                    for name, required in schemas.items()
+                )
                 complete = bool(
+                    schema_valid
+                    and
                     not parsed_frames["equity.csv"].empty
                     and not parsed_frames["exposure_budget.csv"].empty
                     and stored_run_hash == candidate_hash
@@ -357,16 +391,16 @@ def build_run_manifest(output: str | Path = DEFAULT_OUTPUT, execute: bool = Fals
 
 
 def resume_manifest_for_snapshot(
-    base: Mapping[str, Any], prior: Mapping[str, Any], current_db_sha256: str,
+    base: Mapping[str, Any], prior: Mapping[str, Any], current_experiment_fingerprint: str,
 ) -> tuple[dict[str, Any], bool]:
-    previous_sha = prior.get("database_snapshot_before", {}).get("sha256")
-    if previous_sha == current_db_sha256:
+    previous_fingerprint = prior.get("experiment_fingerprint")
+    if previous_fingerprint == current_experiment_fingerprint:
         return {**dict(base), **dict(prior)}, False
     reset = json.loads(json.dumps(_jsonable(base), ensure_ascii=False))
     reset.update({
         "passed": False,
         "cross_snapshot_reset": True,
-        "previous_database_sha256": previous_sha,
+        "previous_experiment_fingerprint": previous_fingerprint,
     })
     return reset, True
 
@@ -438,11 +472,12 @@ def persist_candidate_result(
     context = {"phase": "full_sample", "fold": "", **dict(run_context or {})}
     run_dir = output / "candidates" / _safe_name(result.candidate.name) / run_hash[:16]
     curve = result.experiment.backtest.equity_curve
-    write_csv(curve, run_dir / "equity.csv")
-    write_csv(result.experiment.backtest.trades, run_dir / "trades.csv")
-    write_csv(result.experiment.backtest.rejections, run_dir / "rejections.csv")
-    write_csv(result.experiment.backtest.positions, run_dir / "positions.csv")
-    write_csv(result.exposure_budget, run_dir / "exposure_budget.csv")
+    write_csv(curve, run_dir / "equity.csv", EQUITY_COLUMNS)
+    write_csv(result.experiment.backtest.trades, run_dir / "trades.csv", TRADES_COLUMNS)
+    write_csv(result.experiment.backtest.rejections, run_dir / "rejections.csv",
+              REJECTIONS_COLUMNS)
+    write_csv(result.experiment.backtest.positions, run_dir / "positions.csv", POSITIONS_COLUMNS)
+    write_csv(result.exposure_budget, run_dir / "exposure_budget.csv", EXPOSURE_COLUMNS)
     write_json(run_dir / "parameters.json", {
         "candidate": result.candidate, "cost_model": cost_model,
         "schema_version": SCHEMA_VERSION, "run_context": context,
@@ -524,7 +559,11 @@ def _run_full_candidate(
     if resume and should_resume(run_dir, run_hash, target_hash=target_hash):
         return _read_score(run_dir)
     result = run_candidate(inputs, candidate, config, costs=costs)
-    context = {"input_data_fingerprint": input_data_fingerprint, **dict(run_context or {})}
+    context = {
+        "input_data_fingerprint": input_data_fingerprint,
+        "experiment_fingerprint": input_data_fingerprint,
+        **dict(run_context or {}),
+    }
     return persist_candidate_result(output, result, target_hash, run_hash, cost_model=costs,
                                     run_context=context)
 
@@ -720,6 +759,7 @@ def _append_annual(output: Path, candidate: str, result_dir: Path) -> pd.DataFra
 
 def rebuild_annual_returns(
     output: str | Path, *, input_data_fingerprint: str | None = None,
+    experiment_fingerprint: str | None = None,
 ) -> pd.DataFrame:
     rows: list[pd.DataFrame] = []
     for audit_path in sorted(Path(output).glob("candidates/*/*/audit.json")):
@@ -732,7 +772,10 @@ def rebuild_annual_returns(
         if curve.empty:
             continue
         context = audit.get("run_context", {})
-        if (input_data_fingerprint is not None
+        if (experiment_fingerprint is not None
+                and context.get("experiment_fingerprint") != experiment_fingerprint):
+            continue
+        if (experiment_fingerprint is None and input_data_fingerprint is not None
                 and context.get("input_data_fingerprint") != input_data_fingerprint):
             continue
         curve["trade_date"] = pd.to_datetime(curve["trade_date"])
@@ -810,12 +853,21 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
     manifest_path = output / "run_manifest.json"
     DuckDBRepository(Path(args.db)).initialize()
     db_before = database_snapshot(args.db)
+    inputs, target_hashes, snapshots = _load_context(
+        Path(args.db), args.start, args.end, args.initial_cash
+    )
+    costs = CostModel()
+    experiment_fingerprint = global_experiment_fingerprint(
+        database_sha256=db_before["sha256"], start=args.start, end=args.end,
+        initial_cash=args.initial_cash, target_hashes=target_hashes,
+        baseline_costs=costs,
+    )
     manifest = build_run_manifest(output, execute=True)
     if args.resume and manifest_path.exists():
         try:
             prior = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
             manifest, cross_snapshot_reset = resume_manifest_for_snapshot(
-                manifest, prior, db_before["sha256"]
+                manifest, prior, experiment_fingerprint
             )
             if cross_snapshot_reset:
                 _reset_snapshot_root_artifacts(output)
@@ -824,8 +876,8 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
     manifest.update({"requested_start": args.start, "requested_end": args.end,
                      "initial_cash": args.initial_cash, "db": str(Path(args.db).resolve())})
     manifest["database_snapshot_before"] = db_before
+    manifest["experiment_fingerprint"] = experiment_fingerprint
     write_json(manifest_path, manifest)
-    inputs, target_hashes, snapshots = _load_context(Path(args.db), args.start, args.end, args.initial_cash)
     manifest["input_date_coverage"] = {
         "bars_start": str(pd.to_datetime(inputs.bars["trade_date"]).min().date()),
         "bars_end": str(pd.to_datetime(inputs.bars["trade_date"]).max().date()),
@@ -838,7 +890,6 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                    for name, value in target_hashes.items()]
     write_csv(pd.DataFrame(target_rows), output / "target_manifest.csv",
               ["target_name", "target_hash", "row_count"])
-    costs = CostModel()
     config = SmallCapExperimentConfig(start_date=args.start, end_date=args.end,
                                       initial_cash=args.initial_cash)
     requested = {args.stage} if args.stage != "all" else {"core", "routes", "walkforward", "stress"}
@@ -848,7 +899,7 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
         annual = []
         for index, candidate in enumerate(_core_candidates(), start=1):
             score = _run_full_candidate(candidate, inputs, target_hashes, config, output, costs,
-                                        args.resume, db_before["sha256"])
+                                        args.resume, experiment_fingerprint)
             rows.append(score)
             run_dir = output / "candidates" / _safe_name(candidate.name) / score["candidate_hash"][:16]
             annual.append(_append_annual(output, candidate.name, run_dir))
@@ -890,7 +941,7 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
             route_rows = []
             for index, candidate in enumerate(route_candidates, start=1):
                 score = _run_full_candidate(candidate, inputs, target_hashes, config, output, costs,
-                                            args.resume, db_before["sha256"])
+                                            args.resume, experiment_fingerprint)
                 route_rows.append(score)
                 print(f"routes {index}/{len(route_candidates)}: {candidate.name}", flush=True)
             route_scores = pd.DataFrame(route_rows)
@@ -908,7 +959,7 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
             folds = default_folds(pd.Timestamp(args.end))
             wf = run_walk_forward(universe, folds, _walkforward_runner(
                 inputs, target_hashes, args.initial_cash, costs, output=output,
-                resume=args.resume, input_data_fingerprint=db_before["sha256"],
+                resume=args.resume, input_data_fingerprint=experiment_fingerprint,
             ))
             write_csv(wf.training_scores, output / "walkforward_training.csv")
             test_frame = wf.test_scores.copy()
@@ -961,7 +1012,7 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                         runner = _walkforward_runner(
                             inputs, target_hashes, args.initial_cash, cost_model,
                             output=output, resume=args.resume,
-                            input_data_fingerprint=db_before["sha256"],
+                            input_data_fingerprint=experiment_fingerprint,
                         )
                         for series, candidate in (
                             ("candidate", by_name[policy_row.candidate]),
@@ -993,7 +1044,7 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                     ].item()
                     runner = _walkforward_runner(
                         inputs, target_hashes, args.initial_cash, costs, output=output,
-                        resume=args.resume, input_data_fingerprint=db_before["sha256"],
+                        resume=args.resume, input_data_fingerprint=experiment_fingerprint,
                     )
                     results = {}
                     for series, candidate in (
@@ -1065,7 +1116,7 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
             )
             manifest["stage_status"]["stress"] = "complete"
 
-    write_csv(rebuild_annual_returns(output, input_data_fingerprint=db_before["sha256"]),
+    write_csv(rebuild_annual_returns(output, experiment_fingerprint=experiment_fingerprint),
               output / "annual_returns.csv",
               ["candidate", "route", "phase", "fold", "run_hash", "year", "return"])
     all_scores = pd.concat([_existing_or_empty(output / "core_scores.csv"),
@@ -1074,7 +1125,7 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
     for audit_path in output.glob("candidates/*/*/audit.json"):
         try:
             audit = json.loads(audit_path.read_text(encoding="utf-8-sig"))
-            if audit.get("run_context", {}).get("input_data_fingerprint") == db_before["sha256"]:
+            if audit.get("run_context", {}).get("experiment_fingerprint") == experiment_fingerprint:
                 audit_rows.append(audit)
         except (OSError, UnicodeError, json.JSONDecodeError):
             continue
