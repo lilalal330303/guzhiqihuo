@@ -279,6 +279,25 @@ def evaluate_stress_evidence(
         gate = gates.get(route, {})
         reasons = gate.get("reasons", ())
         has_missing_gate = (not bool(gate.get("passed"))) and "missing_policy_fold" in str(reasons)
+        unavailable = route_rows.loc[
+            route_rows.get("evidence_type", pd.Series(dtype=str)).eq("diagnostic_unavailable")
+        ]
+        marker_ok = False
+        if len(unavailable) == 1:
+            marker = unavailable.iloc[0]
+            marker_ok = bool(
+                marker.get("reason") == "no_route_candidate"
+                and marker.get("diagnostic_reason") == "no_route_candidate"
+                and bool(marker.get("diagnostic_only"))
+                and not bool(marker.get("qualified_for_gate"))
+                and not bool(marker.get("diagnostic_available"))
+                and (pd.isna(marker.get("candidate")) or marker.get("candidate") == "")
+                and (pd.isna(marker.get("selection_basis"))
+                     or marker.get("selection_basis") == "diagnostic_unavailable")
+            )
+        anchor_only = marker_ok
+        expected_basis = "diagnostic_unavailable" if anchor_only else "full_sample_in_sample"
+        expected_available = not anchor_only
         flags_ok = True
         diagnostic_rows = pd.concat([costs, windows], ignore_index=True)
         if diagnostic_rows.empty:
@@ -292,15 +311,11 @@ def evaluate_stress_evidence(
                 ).astype("boolean").fillna(True)).all()
                 and diagnostic_rows.get(
                     "selection_basis", pd.Series("", index=diagnostic_rows.index)
-                ).eq("full_sample_in_sample").all()
+                ).eq(expected_basis).all()
+                and diagnostic_rows.get(
+                    "diagnostic_available", pd.Series(False, index=diagnostic_rows.index)
+                ).astype("boolean").fillna(False).eq(expected_available).all()
             )
-        unavailable = route_rows.loc[
-            route_rows.get("evidence_type", pd.Series(dtype=str)).eq("diagnostic_unavailable")
-        ]
-        anchor_only = (
-            len(unavailable) == 1
-            and unavailable.get("reason", pd.Series(dtype=str)).eq("no_route_candidate").all()
-        )
         candidate_names = costs.loc[
             costs.get("series", pd.Series(dtype=str)).eq("candidate"), "candidate"
         ].dropna().unique()
@@ -317,9 +332,49 @@ def evaluate_stress_evidence(
             and set(windows.get("window", pd.Series(dtype=str))) == {"2024_q1", "2026_ytd"}
             and set(windows.get("series", pd.Series(dtype=str))) == expected_series
         )
-        cost_complete &= bool(has_missing_gate and flags_ok and leader_ok and cost_shape)
-        stress_complete &= bool(has_missing_gate and flags_ok and stress_shape)
+        marker_contract = marker_ok if len(unavailable) else True
+        cost_complete &= bool(
+            has_missing_gate and marker_contract and flags_ok and leader_ok and cost_shape
+        )
+        stress_complete &= bool(has_missing_gate and marker_contract and flags_ok and stress_shape)
     return bool(cost_complete), bool(stress_complete)
+
+
+def route_decisions_valid(manifest: Mapping[str, Any]) -> bool:
+    decisions = manifest.get("route_decisions")
+    if not isinstance(decisions, Mapping) or any(route not in decisions for route in ROUTES):
+        return False
+    passed_count = 0
+    for route in ROUTES:
+        decision = decisions[route]
+        if not isinstance(decision, Mapping):
+            return False
+        passed = decision.get("passed")
+        qualified = decision.get("qualified_for_gate")
+        diagnostic = decision.get("diagnostic_only")
+        if not all(isinstance(value, bool) for value in (passed, qualified, diagnostic)):
+            return False
+        passed_count += int(passed)
+        if passed and not qualified:
+            return False
+        if diagnostic:
+            available = decision.get("diagnostic_available")
+            if not isinstance(available, bool) or passed or qualified:
+                return False
+            if available:
+                if (not decision.get("candidate")
+                        or decision.get("selection_basis") != "full_sample_in_sample"):
+                    return False
+            else:
+                if (decision.get("candidate") not in (None, "")
+                        or decision.get("diagnostic_reason") != "no_route_candidate"
+                        or decision.get("selection_basis") not in (
+                            None, "diagnostic_unavailable",
+                        )):
+                    return False
+        elif not qualified:
+            return False
+    return int(manifest.get("qualified_route_count", -1)) == passed_count
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -887,6 +942,7 @@ def completion_gate(manifest: Mapping[str, Any], output: str | Path) -> bool:
         bool(manifest.get("cost_evidence_complete")),
         bool(manifest.get("stress_evidence_complete")),
         manifest.get("stress_evidence_schema") == STRESS_EVIDENCE_SCHEMA,
+        route_decisions_valid(manifest),
     )
     if not all(checks):
         return False
@@ -1246,13 +1302,14 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                 route_policy = policy.loc[policy["route"].eq(route)].copy()
                 if len(route_policy) != 5:
                     leader_info = diagnostic_leaders[route]
-                    diagnostic_fields = {
-                        "diagnostic_only": True,
-                        "qualified_for_gate": False,
-                        "selection_basis": "full_sample_in_sample",
-                    }
                     leader = by_name[leader_info["candidate"]] if leader_info else None
                     if leader is None:
+                        diagnostic_fields = {
+                            "diagnostic_only": True, "qualified_for_gate": False,
+                            "diagnostic_available": False,
+                            "diagnostic_reason": "no_route_candidate",
+                            "selection_basis": "diagnostic_unavailable",
+                        }
                         stress_rows.append({
                             "evidence_type": "diagnostic_unavailable", "route": route,
                             "reason": "no_route_candidate", "policy_fold_count": len(route_policy),
@@ -1260,6 +1317,11 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                         })
                         diagnostic_series = (("anchor", ExperimentCandidate.anchor()),)
                     else:
+                        diagnostic_fields = {
+                            "diagnostic_only": True, "qualified_for_gate": False,
+                            "diagnostic_available": True, "diagnostic_reason": None,
+                            "selection_basis": "full_sample_in_sample",
+                        }
                         stress_rows.append({
                             "evidence_type": "missing_policy", "route": route,
                             "status": "no_stable_training_policy",
@@ -1391,7 +1453,9 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                         "reasons": gate_row.get("reasons", ()),
                         "candidate": leader_info["candidate"] if leader_info else None,
                         "diagnostic_only": True,
-                        "selection_basis": "full_sample_in_sample",
+                        "selection_basis": (
+                            "full_sample_in_sample" if leader_info else "diagnostic_unavailable"
+                        ),
                         "diagnostic_available": leader_info is not None,
                         "diagnostic_reason": None if leader_info else "no_route_candidate",
                     }

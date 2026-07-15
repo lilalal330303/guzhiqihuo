@@ -150,21 +150,27 @@ def test_all_absent_diagnostic_routes_are_anchor_only_and_audit_complete() -> No
         rows.append({
             "evidence_type": "diagnostic_unavailable", "route": route,
             "reason": "no_route_candidate", "diagnostic_only": True,
-            "qualified_for_gate": False,
+            "qualified_for_gate": False, "diagnostic_available": False,
+            "diagnostic_reason": "no_route_candidate", "candidate": "",
+            "selection_basis": "diagnostic_unavailable",
         })
         for cost_label in cli.cost_stress_models(CostModel()):
             rows.append({
                 "evidence_type": "cost", "route": route, "series": "anchor",
                 "candidate": "fixed11_gradual", "cost_label": cost_label,
                 "diagnostic_only": True, "qualified_for_gate": False,
-                "selection_basis": "full_sample_in_sample",
+                "diagnostic_available": False,
+                "diagnostic_reason": "no_route_candidate",
+                "selection_basis": "diagnostic_unavailable",
             })
         for window in ("2024_q1", "2026_ytd"):
             rows.append({
                 "evidence_type": "stress_window", "route": route, "series": "anchor",
                 "candidate": "fixed11_gradual", "window": window,
                 "diagnostic_only": True, "qualified_for_gate": False,
-                "selection_basis": "full_sample_in_sample",
+                "diagnostic_available": False,
+                "diagnostic_reason": "no_route_candidate",
+                "selection_basis": "diagnostic_unavailable",
             })
     gates = [{"route": route, "passed": False,
               "reasons": ("missing_policy_fold",)} for route in cli.ROUTES]
@@ -172,6 +178,12 @@ def test_all_absent_diagnostic_routes_are_anchor_only_and_audit_complete() -> No
     assert evaluate_stress_evidence(
         pd.DataFrame(rows), {}, gates, cost_model_count=7,
     ) == (True, True)
+    tampered = pd.DataFrame(rows)
+    tampered.loc[tampered["evidence_type"].eq("diagnostic_unavailable"),
+                 "diagnostic_only"] = False
+    assert evaluate_stress_evidence(
+        tampered, {}, gates, cost_model_count=7,
+    ) == (False, False)
 
 
 def test_incomplete_policy_diagnostic_evidence_requires_exact_counts_and_missing_gate() -> None:
@@ -184,6 +196,7 @@ def test_incomplete_policy_diagnostic_evidence_requires_exact_counts_and_missing
                     "series": series, "candidate": f"{route}_leader",
                     "cost_label": cost_label, "diagnostic_only": True,
                     "qualified_for_gate": False,
+                    "diagnostic_available": True,
                     "selection_basis": "full_sample_in_sample",
                 })
         for window in ("2024_q1", "2026_ytd"):
@@ -193,6 +206,7 @@ def test_incomplete_policy_diagnostic_evidence_requires_exact_counts_and_missing
                     "series": series, "candidate": f"{route}_leader",
                     "window": window, "diagnostic_only": True,
                     "qualified_for_gate": False,
+                    "diagnostic_available": True,
                     "selection_basis": "full_sample_in_sample",
                 })
     gates = [{"route": route, "passed": False,
@@ -487,6 +501,16 @@ def test_completion_gate_requires_all_stages_nonempty_artifacts_and_evidence(tmp
         "cost_evidence_complete": True,
         "stress_evidence_complete": True,
         "stress_evidence_schema": cli.STRESS_EVIDENCE_SCHEMA,
+        "qualified_route_count": 0,
+        "route_decisions": {
+            route: {
+                "passed": False, "qualified_for_gate": False,
+                "diagnostic_only": True, "diagnostic_available": True,
+                "candidate": f"{route}_leader",
+                "selection_basis": "full_sample_in_sample",
+            }
+            for route in cli.ROUTES
+        },
         "crash_mechanism_audit": {
             f"crash_{index}": {"crash_trigger_ratio": 0.10, "passed": True}
             for index in range(6)
@@ -510,6 +534,16 @@ def test_completion_gate_requires_all_stages_nonempty_artifacts_and_evidence(tmp
     assert not completion_gate({**manifest, "crash_mechanism_audit": {}}, tmp_path)
     assert not completion_gate({**manifest, "cost_evidence_complete": False}, tmp_path)
     assert not completion_gate({**manifest, "stress_evidence_schema": "old"}, tmp_path)
+    absent = json.loads(json.dumps(manifest))
+    absent["route_decisions"]["return"] = {
+        "passed": False, "qualified_for_gate": False,
+        "diagnostic_only": True, "diagnostic_available": False,
+        "candidate": None, "diagnostic_reason": "no_route_candidate",
+        "selection_basis": "diagnostic_unavailable",
+    }
+    assert completion_gate(absent, tmp_path)
+    absent["route_decisions"]["return"]["candidate"] = "invented"
+    assert not completion_gate(absent, tmp_path)
     write_csv(pd.DataFrame(), tmp_path / "stress_results.csv")
     assert not completion_gate(manifest, tmp_path)
 
