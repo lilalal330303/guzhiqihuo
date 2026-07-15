@@ -508,6 +508,8 @@ def test_completion_gate_requires_all_stages_nonempty_artifacts_and_evidence(tmp
                 "diagnostic_only": True, "diagnostic_available": True,
                 "candidate": f"{route}_leader",
                 "selection_basis": "full_sample_in_sample",
+                "diagnostic_reason": None, "policy_fold_count": 4,
+                "reasons": ["missing_policy_fold"],
             }
             for route in cli.ROUTES
         },
@@ -540,10 +542,30 @@ def test_completion_gate_requires_all_stages_nonempty_artifacts_and_evidence(tmp
         "diagnostic_only": True, "diagnostic_available": False,
         "candidate": None, "diagnostic_reason": "no_route_candidate",
         "selection_basis": "diagnostic_unavailable",
+        "policy_fold_count": 0, "reasons": ["missing_policy_fold"],
     }
     assert completion_gate(absent, tmp_path)
     absent["route_decisions"]["return"]["candidate"] = "invented"
     assert not completion_gate(absent, tmp_path)
+    for field, value in (
+        ("candidate", None),
+        ("reasons", []),
+        ("policy_fold_count", 5),
+    ):
+        tampered = json.loads(json.dumps(manifest))
+        tampered["route_decisions"]["return"][field] = value
+        assert not completion_gate(tampered, tmp_path)
+    wrong_reason = json.loads(json.dumps(manifest))
+    wrong_reason["route_decisions"]["return"]["diagnostic_reason"] = "no_route_candidate"
+    assert not completion_gate(wrong_reason, tmp_path)
+    formal = json.loads(json.dumps(manifest))
+    formal["route_decisions"]["return"] = {
+        "passed": False, "qualified_for_gate": True, "diagnostic_only": False,
+        "policy_fold_count": 5, "reasons": ["failed_return_gate"],
+    }
+    assert completion_gate(formal, tmp_path)
+    formal["route_decisions"]["return"]["policy_fold_count"] = 4
+    assert not completion_gate(formal, tmp_path)
     write_csv(pd.DataFrame(), tmp_path / "stress_results.csv")
     assert not completion_gate(manifest, tmp_path)
 

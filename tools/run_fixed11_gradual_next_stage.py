@@ -354,16 +354,25 @@ def route_decisions_valid(manifest: Mapping[str, Any]) -> bool:
         diagnostic = decision.get("diagnostic_only")
         if not all(isinstance(value, bool) for value in (passed, qualified, diagnostic)):
             return False
+        fold_count = decision.get("policy_fold_count")
+        if not isinstance(fold_count, int) or isinstance(fold_count, bool):
+            return False
+        reasons = decision.get("reasons", ())
+        if reasons is None:
+            reasons = ()
         passed_count += int(passed)
         if passed and not qualified:
             return False
         if diagnostic:
             available = decision.get("diagnostic_available")
-            if not isinstance(available, bool) or passed or qualified:
+            if (not isinstance(available, bool) or passed or qualified
+                    or not 0 <= fold_count <= 4
+                    or "missing_policy_fold" not in str(reasons)):
                 return False
             if available:
                 if (not decision.get("candidate")
-                        or decision.get("selection_basis") != "full_sample_in_sample"):
+                        or decision.get("selection_basis") != "full_sample_in_sample"
+                        or decision.get("diagnostic_reason") not in (None, "")):
                     return False
             else:
                 if (decision.get("candidate") not in (None, "")
@@ -372,8 +381,11 @@ def route_decisions_valid(manifest: Mapping[str, Any]) -> bool:
                             None, "diagnostic_unavailable",
                         )):
                     return False
-        elif not qualified:
-            return False
+        else:
+            if not qualified or fold_count != 5:
+                return False
+            if passed and bool(reasons):
+                return False
     return int(manifest.get("qualified_route_count", -1)) == passed_count
 
 
