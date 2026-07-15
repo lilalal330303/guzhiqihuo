@@ -17,10 +17,12 @@ from tools.run_fixed11_gradual_next_stage import (
     candidate_run_hash,
     compare_equity_curves,
     completion_gate,
+    combined_policy_max_drawdown,
     cost_stress_models,
     database_snapshot,
     rank_core_variants,
     rebuild_annual_returns,
+    resume_manifest_for_snapshot,
     scale_cost_model,
     should_resume,
     write_csv,
@@ -84,9 +86,12 @@ def test_resume_requires_exact_hash_audit_and_complete_artifacts(tmp_path: Path)
         "passed": True,
         "account_reconciliation_error": 0.0,
         "minimum_cash": 0.0,
+        "score": {"target_hash": "target"},
     })
 
     assert should_resume(run_dir, "abc")
+    assert should_resume(run_dir, "abc", target_hash="target")
+    assert not should_resume(run_dir, "abc", target_hash="other")
     assert not should_resume(run_dir, "changed")
     (run_dir / "trades.csv").unlink()
     assert not should_resume(run_dir, "abc")
@@ -241,6 +246,25 @@ def test_route_core_rankings_enforce_audit_drawdown_and_anchor_improvement() -> 
     )
 
 
+def test_neighbor_plateau_may_include_audited_peers_slightly_below_anchor() -> None:
+    catalog = build_candidate_catalog()
+    core = catalog.loc[catalog["family"].eq("core"), "name"].tolist()
+    rows = [{
+        "candidate": name, "total_return": 0.50, "annualized_return": 0.10,
+        "max_drawdown": -0.20, "account_reconciliation_error": 0.0, "minimum_cash": 1.0,
+    } for name in core]
+    by_name = {row["candidate"]: row for row in rows}
+    by_name["fixed11_gradual"].update(total_return=1.0, annualized_return=0.20,
+                                      max_drawdown=-0.25)
+    by_name["one_factor_fixed_stop_loss_0p105"].update(total_return=1.05)
+    by_name["one_factor_fixed_stop_loss_0p095"].update(total_return=0.99)
+    by_name["one_factor_fixed_stop_loss_0p115"].update(total_return=0.99)
+
+    selected_return, _, _ = rank_core_variants(pd.DataFrame(rows))
+
+    assert "one_factor_fixed_stop_loss_0p105" in {item.name for item in selected_return}
+
+
 def test_resume_rejects_zero_byte_and_unparseable_artifacts(tmp_path: Path) -> None:
     run_dir = tmp_path / "candidate"
     run_dir.mkdir()
@@ -254,6 +278,30 @@ def test_resume_rejects_zero_byte_and_unparseable_artifacts(tmp_path: Path) -> N
     assert not should_resume(run_dir, "abc")
     (run_dir / "equity.csv").write_text("not,a,valid,row\n\"", encoding="utf-8")
     assert not should_resume(run_dir, "abc")
+
+
+def test_resume_rejects_header_only_equity_and_mismatched_run_hash(tmp_path: Path) -> None:
+    run_dir = tmp_path / "candidate"
+    run_dir.mkdir()
+    for name in ("trades.csv", "rejections.csv", "positions.csv"):
+        write_csv(pd.DataFrame(columns=["value"]), run_dir / name)
+    write_csv(pd.DataFrame(columns=["trade_date", "equity"]), run_dir / "equity.csv")
+    write_csv(pd.DataFrame([{"trade_date": "2024-01-02", "exposure_budget": 1.0}]),
+              run_dir / "exposure_budget.csv")
+    write_json(run_dir / "parameters.json", {"name": "candidate"})
+    (run_dir / "target_hash.txt").write_text("target", encoding="ascii")
+    (run_dir / "run_hash.txt").write_text("wrong", encoding="ascii")
+    write_json(run_dir / "audit.json", {
+        "candidate_hash": "abc", "passed": True, "account_reconciliation_error": 0.0,
+        "minimum_cash": 0.0, "score": {"target_hash": "target"},
+    })
+
+    assert not should_resume(run_dir, "abc", target_hash="target")
+    write_csv(pd.DataFrame([{"trade_date": "2024-01-02", "equity": 100.0}]),
+              run_dir / "equity.csv")
+    assert not should_resume(run_dir, "abc", target_hash="target")
+    (run_dir / "run_hash.txt").write_text("abc", encoding="ascii")
+    assert should_resume(run_dir, "abc", target_hash="target")
 
 
 def test_cost_stress_matrix_separates_fees_slippage_and_combined() -> None:
@@ -310,6 +358,7 @@ def test_walkforward_runner_routes_period_calls_through_persistent_resume_path(
         return {
             "total_return": 0.1, "annualized_return": 0.2, "max_drawdown": -0.1,
             "sharpe": 1.0, "calmar": 2.0, "max_underwater_calendar_days": 10,
+            "candidate_hash": "period-hash",
         }
 
     monkeypatch.setattr(cli, "_run_full_candidate", fake_run)
@@ -353,3 +402,48 @@ def test_annual_returns_rebuild_includes_full_and_period_runs(tmp_path: Path) ->
     assert annual.set_index("year")["return"].to_dict() == {2023: 0.1, 2024: 0.2}
     current = rebuild_annual_returns(tmp_path, input_data_fingerprint="current")
     assert current["year"].tolist() == [2024]
+
+
+def test_cross_snapshot_resume_resets_all_stage_evidence() -> None:
+    base = cli.build_run_manifest("out", execute=True)
+    prior = {
+        **base,
+        "database_snapshot_before": {"sha256": "old"},
+        "stage_status": {stage: "complete" for stage in base["stage_status"]},
+        "cost_evidence_complete": True,
+        "stress_evidence_complete": True,
+        "full_sample_candidate_count": 60,
+        "normal_test_call_count": 40,
+        "passed": True,
+    }
+
+    resumed, reset = resume_manifest_for_snapshot(base, prior, "new")
+
+    assert reset
+    assert set(resumed["stage_status"].values()) == {"pending"}
+    assert resumed.get("cost_evidence_complete") is not True
+    assert resumed.get("stress_evidence_complete") is not True
+    assert "full_sample_candidate_count" not in resumed
+    assert "normal_test_call_count" not in resumed
+    assert resumed["passed"] is False
+
+
+def test_combined_policy_drawdown_uses_intraperiod_equity_not_only_fold_endpoints(
+    tmp_path: Path,
+) -> None:
+    rows = []
+    for fold, run_hash, equities in (
+        ("fold_2022", "hash-a", [100.0, 70.0, 110.0]),
+        ("fold_2023", "hash-b", [100.0, 80.0, 120.0]),
+    ):
+        run_dir = tmp_path / "candidates" / "candidate" / run_hash[:16]
+        write_csv(pd.DataFrame({
+            "trade_date": pd.date_range("2022-01-03", periods=3, freq="B"),
+            "equity": equities,
+        }), run_dir / "equity.csv")
+        rows.append({"fold": fold, "candidate": "candidate", "candidate_hash": run_hash,
+                     "total_return": equities[-1] / 100.0 - 1.0})
+
+    drawdown = combined_policy_max_drawdown(pd.DataFrame(rows), tmp_path, initial_cash=100.0)
+
+    assert drawdown == -0.30

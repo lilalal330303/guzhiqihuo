@@ -201,7 +201,10 @@ def write_csv(frame: pd.DataFrame, path: Path, columns: Sequence[str] | None = N
     output.to_csv(path, index=False, encoding="utf-8-sig", lineterminator="\n")
 
 
-def should_resume(record_or_path: Mapping[str, Any] | str | Path, candidate_hash: str) -> bool:
+def should_resume(
+    record_or_path: Mapping[str, Any] | str | Path, candidate_hash: str,
+    *, target_hash: str | None = None,
+) -> bool:
     if isinstance(record_or_path, Mapping):
         audit = dict(record_or_path)
         complete = bool(audit.get("artifacts_complete", False))
@@ -218,12 +221,21 @@ def should_resume(record_or_path: Mapping[str, Any] | str | Path, candidate_hash
         complete = all(path.is_file() and path.stat().st_size > 0 for path in paths)
         if complete:
             try:
+                parsed_frames = {}
                 for name in ("equity.csv", "trades.csv", "rejections.csv", "positions.csv",
                              "exposure_budget.csv"):
-                    pd.read_csv(run_dir / name, encoding="utf-8-sig")
+                    parsed_frames[name] = pd.read_csv(run_dir / name, encoding="utf-8-sig")
                 json.loads((run_dir / "parameters.json").read_text(encoding="utf-8-sig"))
-                complete = bool((run_dir / "target_hash.txt").read_text(encoding="ascii").strip()
-                                and (run_dir / "run_hash.txt").read_text(encoding="ascii").strip())
+                stored_target_hash = (run_dir / "target_hash.txt").read_text(encoding="ascii").strip()
+                stored_run_hash = (run_dir / "run_hash.txt").read_text(encoding="ascii").strip()
+                audit_target_hash = str(audit.get("score", {}).get("target_hash", ""))
+                complete = bool(
+                    not parsed_frames["equity.csv"].empty
+                    and not parsed_frames["exposure_budget.csv"].empty
+                    and stored_run_hash == candidate_hash
+                    and stored_target_hash == audit_target_hash
+                    and (target_hash is None or stored_target_hash == target_hash)
+                )
             except (OSError, UnicodeError, json.JSONDecodeError, pd.errors.ParserError,
                     pd.errors.EmptyDataError):
                 complete = False
@@ -342,6 +354,21 @@ def build_run_manifest(output: str | Path = DEFAULT_OUTPUT, execute: bool = Fals
         "stage_status": {stage: "pending" for stage in ("core", "routes", "walkforward", "stress")},
         "passed": False,
     }
+
+
+def resume_manifest_for_snapshot(
+    base: Mapping[str, Any], prior: Mapping[str, Any], current_db_sha256: str,
+) -> tuple[dict[str, Any], bool]:
+    previous_sha = prior.get("database_snapshot_before", {}).get("sha256")
+    if previous_sha == current_db_sha256:
+        return {**dict(base), **dict(prior)}, False
+    reset = json.loads(json.dumps(_jsonable(base), ensure_ascii=False))
+    reset.update({
+        "passed": False,
+        "cross_snapshot_reset": True,
+        "previous_database_sha256": previous_sha,
+    })
+    return reset, True
 
 
 def _safe_name(value: str) -> str:
@@ -494,7 +521,7 @@ def _run_full_candidate(
                                   initial_cash=config.initial_cash, costs=costs,
                                   input_data_fingerprint=input_data_fingerprint)
     run_dir = output / "candidates" / _safe_name(candidate.name) / run_hash[:16]
-    if resume and should_resume(run_dir, run_hash):
+    if resume and should_resume(run_dir, run_hash, target_hash=target_hash):
         return _read_score(run_dir)
     result = run_candidate(inputs, candidate, config, costs=costs)
     context = {"input_data_fingerprint": input_data_fingerprint, **dict(run_context or {})}
@@ -542,8 +569,8 @@ def rank_core_variants(scores: pd.DataFrame) -> tuple[list[Any], list[Any], pd.D
         audited["max_drawdown"].gt(float(anchor["max_drawdown"]))
     ].copy()
     core_by_name = {item.name: item for item in core_one_factor_variants() + core_l18_variants()}
-    return_stable = _stable_core_names(return_eligible, "total_return")
-    defensive_stable = _stable_core_names(defensive_eligible, "max_drawdown")
+    return_stable = _stable_core_names(audited, "total_return")
+    defensive_stable = _stable_core_names(audited, "max_drawdown")
     return_names = return_eligible.loc[return_eligible["candidate"].isin(return_stable)].sort_values(
         ["total_return", "max_drawdown"], ascending=[False, False]
     )["candidate"].tolist()
@@ -615,6 +642,12 @@ def _ensure_root_artifacts(output: Path) -> None:
             write_json(path, {})
         else:
             write_csv(pd.DataFrame(), path)
+
+
+def _reset_snapshot_root_artifacts(output: Path) -> None:
+    for name in ROOT_ARTIFACTS:
+        if name.endswith(".csv"):
+            write_csv(pd.DataFrame(), output / name)
 
 
 def completion_gate(manifest: Mapping[str, Any], output: str | Path) -> bool:
@@ -734,7 +767,7 @@ def _walkforward_runner(
         )
         return {key: score[key] for key in (
             "total_return", "annualized_return", "max_drawdown", "sharpe", "calmar",
-            "max_underwater_calendar_days",
+            "max_underwater_calendar_days", "candidate_hash",
         )} | {"observation_date": pd.Timestamp(end)}
     return runner
 
@@ -744,19 +777,50 @@ def _combined_drawdown(returns: Iterable[float]) -> float:
     return float((wealth / wealth.cummax() - 1.0).min())
 
 
+def combined_policy_max_drawdown(
+    policy_scores: pd.DataFrame, output: str | Path, *, initial_cash: float,
+) -> float:
+    required = {"candidate", "candidate_hash", "fold"}
+    missing = sorted(required.difference(policy_scores.columns))
+    if missing:
+        raise ValueError(f"policy scores missing persisted-equity keys: {missing}")
+    wealth = 1.0
+    peak = 1.0
+    maximum_drawdown = 0.0
+    for row in policy_scores.itertuples(index=False):
+        run_dir = (Path(output) / "candidates" / _safe_name(row.candidate)
+                   / str(row.candidate_hash)[:16])
+        curve = pd.read_csv(run_dir / "equity.csv", encoding="utf-8-sig")
+        if curve.empty:
+            raise ValueError(f"empty policy equity for {row.fold}: {run_dir}")
+        curve["trade_date"] = pd.to_datetime(curve["trade_date"])
+        equities = curve.sort_values("trade_date")["equity"].astype(float)
+        previous = float(initial_cash)
+        for equity in equities:
+            wealth *= float(equity) / previous
+            previous = float(equity)
+            peak = max(peak, wealth)
+            maximum_drawdown = min(maximum_drawdown, wealth / peak - 1.0)
+    return round(float(maximum_drawdown), 12)
+
+
 def run_stages(args: argparse.Namespace) -> dict[str, Any]:
     output = Path(args.output).resolve()
     _ensure_root_artifacts(output)
     manifest_path = output / "run_manifest.json"
+    DuckDBRepository(Path(args.db)).initialize()
+    db_before = database_snapshot(args.db)
     manifest = build_run_manifest(output, execute=True)
     if args.resume and manifest_path.exists():
         try:
             prior = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
-            manifest.update(prior)
+            manifest, cross_snapshot_reset = resume_manifest_for_snapshot(
+                manifest, prior, db_before["sha256"]
+            )
+            if cross_snapshot_reset:
+                _reset_snapshot_root_artifacts(output)
         except json.JSONDecodeError:
             pass
-    DuckDBRepository(Path(args.db)).initialize()
-    db_before = database_snapshot(args.db)
     manifest.update({"requested_start": args.start, "requested_end": args.end,
                      "initial_cash": args.initial_cash, "db": str(Path(args.db).resolve())})
     manifest["database_snapshot_before"] = db_before
@@ -959,8 +1023,8 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                     gate_rows.append(asdict(next(item for item in wf.gate_results if item.route == route)))
                     continue
                 if route == "return":
-                    route_policy["combined_max_drawdown"] = _combined_drawdown(
-                        route_policy["total_return"]
+                    route_policy["combined_max_drawdown"] = combined_policy_max_drawdown(
+                        route_policy, output, initial_cash=args.initial_cash,
                     )
                     gate_costs = pd.DataFrame(cost_rows)
                     gate_costs = gate_costs.loc[
