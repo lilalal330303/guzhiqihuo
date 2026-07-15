@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, fields, is_dataclass
 
 import pandas as pd
 
-from quant_lab.research.optimized_v3_runner import ExperimentCandidate
+from quant_lab.research.optimized_v3_runner import ExperimentCandidate, neighbor_stability
 
 
 ROUTES = ("balanced", "return", "defensive")
@@ -19,6 +19,11 @@ METRIC_COLUMNS = (
     "max_underwater_calendar_days",
 )
 SCORE_COLUMNS = ("candidate", "route", *METRIC_COLUMNS)
+STABILITY_METRIC = {
+    "balanced": "calmar",
+    "return": "total_return",
+    "defensive": "max_drawdown",
+}
 
 
 @dataclass(frozen=True)
@@ -134,6 +139,71 @@ def select_training_candidates(
     return eligible.sort_values(order, ascending=ascending, kind="mergesort")["candidate"].head(limit).tolist()
 
 
+def _parameter_vector(candidate: ExperimentCandidate) -> dict[str, object]:
+    vector: dict[str, object] = {}
+    for component_name in (
+        "core", "recovery", "stock_profile", "crash_overlay", "profit_protection"
+    ):
+        component = getattr(candidate, component_name)
+        if component is None:
+            vector[component_name] = None
+            continue
+        if not is_dataclass(component):
+            vector[component_name] = component
+            continue
+        for field in fields(component):
+            if field.name != "name":
+                vector[f"{component_name}.{field.name}"] = getattr(component, field.name)
+    return vector
+
+
+def candidate_neighbor_map(
+    candidate_universe: Sequence[ExperimentCandidate],
+) -> dict[str, tuple[str, ...]]:
+    """Return deterministic same-route peers differing in at most one parameter."""
+    candidates = list(candidate_universe)
+    vectors = {candidate.name: _parameter_vector(candidate) for candidate in candidates}
+    result: dict[str, tuple[str, ...]] = {}
+    for candidate in candidates:
+        neighbors: list[str] = []
+        left = vectors[candidate.name]
+        for other in candidates:
+            if other.name == candidate.name or other.route != candidate.route:
+                continue
+            right = vectors[other.name]
+            keys = set(left) | set(right)
+            distance = sum(left.get(key) != right.get(key) for key in keys)
+            if distance <= 1:
+                neighbors.append(other.name)
+        result[candidate.name] = tuple(sorted(neighbors))
+    return result
+
+
+def stable_training_scores(
+    route: str,
+    training_scores: pd.DataFrame,
+    candidate_universe: Sequence[ExperimentCandidate],
+    *,
+    tolerance: float = .10,
+) -> pd.DataFrame:
+    """Keep only candidates supported by two close, structurally adjacent train peers."""
+    _require_route(route)
+    _validate_score_frame(training_scores)
+    if not training_scores["route"].eq(route).all():
+        raise ValueError("training score route does not match requested route")
+    neighbor_map = candidate_neighbor_map(candidate_universe)
+    metric = STABILITY_METRIC[route]
+    scores = training_scores.set_index("candidate")[metric].astype(float).to_dict()
+    stable: list[str] = []
+    for name in training_scores["candidate"]:
+        available = tuple(neighbor for neighbor in neighbor_map.get(name, ()) if neighbor in scores)
+        # Task 5 deliberately rejects fewer than two neighbors. At orchestration
+        # level that is a conservative exclusion, not an exception or fallback.
+        if len(available) >= 2 and neighbor_stability(scores, name, available, tolerance):
+            stable.append(name)
+    return training_scores.loc[training_scores["candidate"].isin(stable)].copy()
+
+
 def _validate_gate_frames(test_scores: pd.DataFrame, anchor_scores: pd.DataFrame) -> None:
     _validate_score_frame(test_scores, folds=True)
     _validate_score_frame(anchor_scores, folds=True)
@@ -151,6 +221,18 @@ def _aligned(test_scores: pd.DataFrame, anchor_scores: pd.DataFrame) -> tuple[pd
     policy = test_scores.set_index("fold").loc[order].reset_index()
     anchor = anchor_scores.set_index("fold").loc[order].reset_index()
     return policy, anchor
+
+
+def _complete_test_year_mask(policy: pd.DataFrame) -> pd.Series:
+    for column in ("test_end", "period_end"):
+        if column in policy:
+            ends = pd.to_datetime(policy[column], errors="raise")
+            return ends.dt.is_year_end
+    years = policy["fold"].astype(str).str.extract(r"((?:19|20)\d{2})", expand=False)
+    if years.isna().any():
+        raise ValueError("return gates require test_end metadata or a four-digit year in each fold")
+    numeric_years = years.astype(int)
+    return numeric_years.lt(numeric_years.max())
 
 
 def _annualized_ratios(candidate: pd.Series, anchor: pd.Series) -> pd.Series:
@@ -237,9 +319,9 @@ def evaluate_route_gates(
                 summary["combined_max_drawdown"] = value
                 if value < -.32:
                     reasons.append("combined_max_drawdown")
-        yearly_lag_failures = int(
-            policy["total_return"].iloc[:-1].sub(anchor["total_return"].iloc[:-1]).lt(-.15 - 1e-12).sum()
-        )
+        complete_years = _complete_test_year_mask(policy)
+        yearly_lags = policy["total_return"].sub(anchor["total_return"])
+        yearly_lag_failures = int(yearly_lags.loc[complete_years].lt(-.15 - 1e-12).sum())
         summary["complete_year_lag_failures"] = yearly_lag_failures
         if yearly_lag_failures:
             reasons.append("complete_year_return_lag")
@@ -364,9 +446,11 @@ def run_walk_forward(
         selected_by_route: dict[str, list[str]] = {}
         for route in ROUTES:
             route_frame = train_frame.loc[train_frame["route"].eq(route)].copy()
-            selected = select_training_candidates(route, route_frame, anchor_score, limit=3)
+            stable_frame = stable_training_scores(route, route_frame, candidates)
+            selected = select_training_candidates(route, stable_frame, anchor_score, limit=3)
             selected_by_route[route] = selected
             for rank, name in enumerate(selected, start=1):
+                selected_train_row = stable_frame.loc[stable_frame["candidate"].eq(name)].iloc[0]
                 selection_rows.append({
                     "fold": fold.name,
                     "route": route,
@@ -374,6 +458,7 @@ def run_walk_forward(
                     "train_rank": rank,
                     "selected_on_train_end": fold.train_end,
                     "test_start": fold.test_start,
+                    "observation_date": pd.Timestamp(selected_train_row["observation_date"]),
                 })
 
         anchor_test_result = runner(candidate=anchor, start=fold.test_start, end=fold.test_end,
@@ -396,7 +481,7 @@ def run_walk_forward(
     training_scores = pd.DataFrame(training_rows)
     selections = pd.DataFrame(selection_rows, columns=[
         "fold", "route", "candidate", "train_rank",
-        "selected_on_train_end", "test_start",
+        "selected_on_train_end", "test_start", "observation_date",
     ])
     test_scores = pd.DataFrame(test_rows)
     policy_scores = (

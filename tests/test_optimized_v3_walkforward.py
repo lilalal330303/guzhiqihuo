@@ -146,6 +146,65 @@ def test_return_gate_boundaries_and_required_cost_evidence() -> None:
     assert "combined_max_drawdown_not_constant" in failed.reasons
 
 
+def test_return_gate_is_order_independent_and_exempts_only_incomplete_fold() -> None:
+    policy, anchor = _gate_frames("return")
+    policy["total_return"] = [1.01, 1.01, 1.01, 1.01, .50]
+    policy["combined_max_drawdown"] = -.32
+    cost = pd.DataFrame([
+        {"fold": fold, "series": series, "total_return": value}
+        for fold in policy["fold"]
+        for series, value in (("candidate", 1.01), ("anchor", 1.0))
+    ])
+    order = [4, 0, 1, 2, 3]
+
+    result = wf.evaluate_route_gates(
+        "return", policy.iloc[order].reset_index(drop=True), anchor.iloc[order].reset_index(drop=True),
+        cost_2x_scores=cost,
+    )
+
+    assert result.passed
+    assert "complete_year_return_lag" not in result.reasons
+
+
+def test_major_gate_failure_boundaries_are_enforced() -> None:
+    balanced, anchor = _gate_frames("balanced")
+    balanced["annualized_return"] = .18
+    balanced["calmar"] = [1.1, 1.1, .9, .9, .9]
+    balanced["sharpe"] = [1.1, 1.1, .9, .9, .9]
+    balanced["max_underwater_calendar_days"] = [99, 99, 101, 101, 101]
+    balanced_result = wf.evaluate_route_gates("balanced", balanced, anchor)
+    assert {"calmar_sharpe_wins", "underwater_wins"}.issubset(balanced_result.reasons)
+
+    returns, anchor = _gate_frames("return")
+    returns["total_return"] = [1.01, 1.01, 1.01, .849, .50]
+    returns["combined_max_drawdown"] = -.320001
+    cost = pd.DataFrame([
+        {"fold": fold, "series": series, "total_return": value}
+        for index, fold in enumerate(returns["fold"])
+        for series, value in (("candidate", 1.01 if index < 2 else .99), ("anchor", 1.0))
+    ])
+    return_result = wf.evaluate_route_gates("return", returns, anchor, cost_2x_scores=cost)
+    assert {
+        "combined_max_drawdown", "complete_year_return_lag", "cost_2x_return_wins"
+    }.issubset(return_result.reasons)
+
+    defensive, anchor = _gate_frames("defensive")
+    defensive["max_drawdown"] = -.1801
+    defensive["annualized_return"] = .1399
+    defensive["max_underwater_calendar_days"] = [99, 99, 101, 101, 101]
+    stress = pd.DataFrame({
+        "window": ["2024_q1", "2026_ytd"],
+        "candidate_max_drawdown": [-.20, -.10],
+        "anchor_max_drawdown": [-.20, -.10],
+    })
+    defensive_result = wf.evaluate_route_gates(
+        "defensive", defensive, anchor, stress_scores=stress
+    )
+    assert {
+        "median_drawdown_improvement", "annualized_return_ratio", "underwater_wins"
+    }.issubset(defensive_result.reasons)
+
+
 def test_defensive_gate_boundaries_and_required_stress_evidence() -> None:
     policy, anchor = _gate_frames("defensive")
     policy["max_drawdown"] = -.18
@@ -197,7 +256,7 @@ def test_walk_forward_freezes_each_fold_selection_and_never_runs_rejected_candid
         index = int(candidate.name.rsplit("_", 1)[-1]) if candidate.route != "anchor" else 0
         values = {**METRICS, "observation_date": pd.Timestamp(end)}
         if phase == "train" and candidate.route != "anchor":
-            values["total_return"] = values["calmar"] = 10 - index
+            values["total_return"] = values["calmar"] = 1.0 - .03 * index
             values["max_drawdown"] = -.20
         return values
 
@@ -231,3 +290,48 @@ def test_walk_forward_does_not_fallback_when_every_candidate_misses_training_gat
     assert result.selections.empty
     assert result.policy_scores.empty
     assert all(gate.reasons == ("missing_policy_fold",) for gate in result.gate_results)
+
+
+def test_walk_forward_filters_training_only_isolated_spike_before_test_runner() -> None:
+    candidates = [ExperimentCandidate.anchor()]
+    candidates.extend(
+        replace(ExperimentCandidate.anchor(), name=name, route="return")
+        for name in ("spike", "stable_a", "stable_b", "stable_c")
+    )
+    calls = []
+
+    def runner(*, candidate, start, end, phase, fold):
+        calls.append((candidate.name, phase, fold, pd.Timestamp(end)))
+        values = {**METRICS, "observation_date": pd.Timestamp(end)}
+        if phase == "train" and candidate.name == "spike":
+            values["total_return"] = 2.0
+        if phase == "test" and candidate.name == "spike":
+            raise AssertionError("training-isolated spike reached the test runner")
+        return values
+
+    result = wf.run_walk_forward(
+        candidates, wf.default_folds(pd.Timestamp("2026-07-06")), runner
+    )
+
+    assert "spike" not in set(result.selections["candidate"])
+    assert not any(name == "spike" and phase == "test" for name, phase, *_ in calls)
+    assert all(
+        row.observation_date <= row.selected_on_train_end
+        for row in result.selections.itertuples()
+    )
+
+
+def test_stability_conservatively_excludes_candidate_without_two_defined_neighbors() -> None:
+    candidates = [
+        replace(ExperimentCandidate.anchor(), name="only_a", route="balanced"),
+        replace(ExperimentCandidate.anchor(), name="only_b", route="balanced"),
+    ]
+    training = _scores("balanced", [("only_a", {}), ("only_b", {})])
+
+    stable = wf.stable_training_scores("balanced", training, candidates)
+
+    assert stable.empty
+    assert wf.candidate_neighbor_map(candidates) == {
+        "only_a": ("only_b",),
+        "only_b": ("only_a",),
+    }
