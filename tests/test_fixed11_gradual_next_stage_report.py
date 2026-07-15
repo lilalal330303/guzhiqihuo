@@ -216,6 +216,53 @@ def test_verifier_rejects_tampered_root_tables(
         validate_evidence(broken)
 
 
+@pytest.mark.parametrize(
+    ("mutation", "match"),
+    [
+        (
+            lambda e: e["candidate_runs"]["fixed11_gradual"]["equity"][-1].__setitem__(
+                "equity", e["candidate_runs"]["fixed11_gradual"]["equity"][-1]["equity"] + 1
+            ),
+            "curve audit",
+        ),
+        (
+            lambda e: e["candidate_runs"]["balanced__recovery_0.45_confirm_2"]["equity"][-1].__setitem__(
+                "trade_date", e["candidate_runs"]["balanced__recovery_0.45_confirm_2"]["equity"][-2]["trade_date"]
+            ),
+            "curve audit",
+        ),
+        (
+            lambda e: e["candidate_runs"]["return__one_factor_fixed_stop_loss_0p115__current"]["audit"]["score"].__setitem__(
+                "total_return", -1
+            ),
+            "curve audit",
+        ),
+        (
+            lambda e: next(
+                row for row in e["route_scores"]
+                if row["candidate"] == "defensive__crash_overlay_05"
+            ).__setitem__("calmar", -1),
+            "root score",
+        ),
+        (
+            lambda e: e["candidate_runs"]["fixed11_gradual"]["audit"]["run_context"].__setitem__("phase", "test"),
+            "run context",
+        ),
+        (
+            lambda e: e["candidate_runs"]["fixed11_gradual"]["equity"][0].pop("cash"),
+            "curve audit",
+        ),
+    ],
+)
+def test_verifier_rejects_curve_audit_tampering(
+    evidence: dict[str, object], mutation, match: str
+) -> None:
+    broken = copy.deepcopy(evidence)
+    mutation(broken)
+    with pytest.raises(VerificationError, match=match):
+        validate_evidence(broken)
+
+
 def test_artifact_verifier_rejects_missing_heading_and_mojibake(
     artifact: dict[str, object],
 ) -> None:

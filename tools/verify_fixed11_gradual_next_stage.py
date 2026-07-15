@@ -108,9 +108,98 @@ def validate_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
             _fail("crash audit pass states disagree with route scores")
 
     reference = evidence.get("current_db_anchor_reference", [])
-    anchor_equity = evidence.get("candidate_runs", {}).get("fixed11_gradual", {}).get("equity", [])
+    candidate_runs = evidence.get("candidate_runs", {})
+    anchor_equity = candidate_runs.get("fixed11_gradual", {}).get("equity", [])
     if len(reference) != len(anchor_equity) or not reference:
         _fail("baseline drift: same-snapshot anchor series is incomplete")
+    reference_dates = [str(row["trade_date"]) for row in reference]
+    if len(reference_dates) != len(set(reference_dates)) or reference_dates != sorted(reference_dates):
+        _fail("curve audit: same-snapshot reference dates are not unique and ascending")
+
+    root_scores = {
+        row["candidate"]: row
+        for row in [*evidence.get("core_scores", []), *evidence.get("route_scores", [])]
+    }
+    required_curve_names = {
+        "fixed11_gradual",
+        "balanced__recovery_0.45_confirm_2",
+        "return__one_factor_fixed_stop_loss_0p115__current",
+        "defensive__crash_overlay_05",
+    }
+    if set(candidate_runs) != required_curve_names:
+        _fail("curve audit: required full-sample candidate runs are incomplete")
+    numeric_score_fields = (
+        "total_return",
+        "annualized_return",
+        "max_drawdown",
+        "sharpe",
+        "calmar",
+        "win_rate",
+        "turnover",
+        "minimum_cash",
+        "account_reconciliation_error",
+        "mean_exposure_budget",
+    )
+    exact_score_fields = (
+        "candidate",
+        "candidate_hash",
+        "route",
+        "family",
+        "target_hash",
+        "trade_count",
+        "max_underwater_calendar_days",
+        "defensive_budget_days",
+    )
+    required_curve_columns = {"trade_date", "equity", "cash", "market_value"}
+    for candidate in required_curve_names:
+        run = candidate_runs[candidate]
+        audit = run.get("audit", {})
+        context = audit.get("run_context", {})
+        if (
+            context.get("phase") != "full_sample"
+            or context.get("fold") not in (None, "")
+            or context.get("experiment_fingerprint") != manifest.get("experiment_fingerprint")
+            or context.get("input_data_fingerprint") != manifest.get("experiment_fingerprint")
+        ):
+            _fail(f"run context mismatch for {candidate}")
+        rows = run.get("equity", [])
+        if len(rows) != len(reference_dates) or not rows:
+            _fail(f"curve audit: row count mismatch for {candidate}")
+        if any(not required_curve_columns.issubset(row) for row in rows):
+            _fail(f"curve audit: required equity columns missing for {candidate}")
+        dates = [str(row["trade_date"]) for row in rows]
+        if dates != reference_dates or len(dates) != len(set(dates)) or dates != sorted(dates):
+            _fail(f"curve audit: dates must exactly match the anchor reference for {candidate}")
+        equity = [float(row["equity"]) for row in rows]
+        cash = [float(row["cash"]) for row in rows]
+        market_value = [float(row["market_value"]) for row in rows]
+        reconciliation = max(abs(eq - ca - mv) for eq, ca, mv in zip(equity, cash, market_value))
+        if reconciliation > 1e-6:
+            _fail(f"curve audit: daily account identity failed for {candidate}")
+        if abs(equity[0] - float(manifest["initial_cash"])) > 1e-6:
+            _fail(f"curve audit: first equity differs from initial cash for {candidate}")
+        running_peak = equity[0]
+        computed_drawdown = 0.0
+        for value in equity:
+            running_peak = max(running_peak, value)
+            computed_drawdown = min(computed_drawdown, value / running_peak - 1.0)
+        computed_return = equity[-1] / equity[0] - 1.0
+        score = audit.get("score", {})
+        if (
+            abs(computed_return - float(score.get("total_return", float("inf")))) > 1e-10
+            or abs(computed_drawdown - float(score.get("max_drawdown", float("inf")))) > 1e-10
+            or abs(equity[-1] - equity[0] * (1.0 + float(score.get("total_return", float("inf"))))) > 1e-6
+            or abs(min(cash) - float(score.get("minimum_cash", float("inf")))) > 1e-9
+        ):
+            _fail(f"curve audit: equity path does not reproduce audit score for {candidate}")
+        root_score = root_scores.get(candidate)
+        if root_score is None:
+            _fail(f"root score missing for {candidate}")
+        if any(abs(float(score[field]) - float(root_score[field])) > 1e-9 for field in numeric_score_fields):
+            _fail(f"root score numeric mismatch for {candidate}")
+        if any(score.get(field) != root_score.get(field) for field in exact_score_fields):
+            _fail(f"root score identity mismatch for {candidate}")
+
     reference_by_date = {row["trade_date"]: float(row["equity"]) for row in reference}
     try:
         computed_anchor_diff = max(
