@@ -286,17 +286,34 @@ def build_artifact(evidence: dict[str, Any] | None = None) -> dict[str, Any]:
     source_queries: list[dict[str, Any]] = []
     source_specs = [
         ("run_manifest", "运行与完整性审计", "reports/small_cap_fixed11_gradual_next_stage/run_manifest.json", "Task 7 严格运行清单与审计门禁"),
-        ("scores", "全样本候选得分", "reports/small_cap_fixed11_gradual_next_stage/core_scores.csv", "核心和路线全样本得分；路线得分合并自 route_scores.csv"),
-        ("catalog", "候选参数目录", "reports/small_cap_fixed11_gradual_next_stage/candidate_catalog.csv", "预注册候选参数与家族"),
+        ("scores", "全样本候选得分", "logical/full_sample_scores", "核心和路线全样本得分"),
+        ("catalog", "单因子参数与得分", "logical/one_factor_sensitivity", "预注册候选参数与核心全样本得分"),
         ("walkforward", "严格滚动样本外", "reports/small_cap_fixed11_gradual_next_stage/walkforward_test.csv", "五个滚动窗口的训练冻结与测试证据"),
         ("stress", "成本与压力证据", "reports/small_cap_fixed11_gradual_next_stage/stress_results.csv", "七种成本模型、两个压力窗口与缺失策略标记"),
         ("rejections", "拒绝原因审计", "reports/small_cap_fixed11_gradual_next_stage/rejected_candidates.csv", "路线候选拒绝原因"),
-        ("equity", "当前指纹全样本净值", evidence["candidate_runs"]["fixed11_gradual"]["equity_path"], "基准与三个样本内诊断冠军的当前指纹净值文件"),
+        ("equity", "当前指纹全样本净值", "logical/current_fingerprint_monthly_equity", "基准与三个样本内诊断冠军的当前指纹净值文件"),
     ]
     for spec in source_specs:
         manifest_source, query_source = _source(*spec)
         sources.append(manifest_source)
         source_queries.append(query_source)
+    query_by_id = {source["id"]: source["query"] for source in source_queries}
+    query_by_id["scores"].update({
+        "sql": "SELECT * FROM read_csv_auto('reports/small_cap_fixed11_gradual_next_stage/core_scores.csv') UNION ALL BY NAME SELECT * FROM read_csv_auto('reports/small_cap_fixed11_gradual_next_stage/route_scores.csv')",
+        "tables": ["reports/small_cap_fixed11_gradual_next_stage/core_scores.csv", "reports/small_cap_fixed11_gradual_next_stage/route_scores.csv"],
+    })
+    query_by_id["catalog"].update({
+        "sql": "SELECT c.*, s.total_return, s.max_drawdown FROM read_csv_auto('reports/small_cap_fixed11_gradual_next_stage/candidate_catalog.csv') c JOIN read_csv_auto('reports/small_cap_fixed11_gradual_next_stage/core_scores.csv') s ON c.name = s.candidate WHERE c.name = 'fixed11_gradual' OR c.name LIKE 'one_factor_%'",
+        "tables": ["reports/small_cap_fixed11_gradual_next_stage/candidate_catalog.csv", "reports/small_cap_fixed11_gradual_next_stage/core_scores.csv"],
+    })
+    equity_paths = [evidence["candidate_runs"][candidate]["equity_path"] for candidate in CURVE_CANDIDATES]
+    query_by_id["equity"].update({
+        "sql": " UNION ALL BY NAME ".join(
+            f"SELECT *, '{candidate}' AS series FROM read_csv_auto('{path}')"
+            for candidate, path in zip(CURVE_CANDIDATES, equity_paths)
+        ),
+        "tables": equity_paths,
+    })
 
     generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     summary = (
