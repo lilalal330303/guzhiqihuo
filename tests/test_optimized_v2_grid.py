@@ -114,6 +114,94 @@ def test_gradual_crowding_budget_reduces_then_clears_on_confirmation() -> None:
     assert budget["exposure_budget"].tolist() == [1.0, 0.25, 0.0, 1.0, 0.0]
 
 
+def test_gradual_budget_preserves_anchor_behavior() -> None:
+    crowding = pd.DataFrame({
+        "trade_date": pd.date_range("2024-01-02", periods=4, freq="D"),
+        "concentration": [0.47, 0.48, 0.48, 0.47],
+    })
+
+    result = build_gradual_crowding_budget(crowding)
+
+    assert result["exposure_budget"].tolist() == [1.0, 0.25, 0.0, 1.0]
+
+
+def test_recovery_hysteresis_requires_safe_confirmation_and_steps_up() -> None:
+    crowding = pd.DataFrame({
+        "trade_date": pd.date_range("2024-01-02", periods=7, freq="D"),
+        "concentration": [0.48, 0.48, 0.46, 0.44, 0.44, 0.44, 0.44],
+    })
+
+    result = build_gradual_crowding_budget(
+        crowding,
+        recovery_threshold=0.45,
+        recovery_confirmation_days=2,
+        recovery_step_days=1,
+    )
+
+    assert result["exposure_budget"].tolist() == [0.25, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0]
+
+
+def test_gradual_budget_rejects_duplicate_dates() -> None:
+    crowding = pd.DataFrame({
+        "trade_date": ["2024-01-02", "2024-01-02"],
+        "concentration": [0.47, 0.48],
+    })
+
+    with pytest.raises(ValueError, match="duplicate"):
+        build_gradual_crowding_budget(crowding)
+
+
+@pytest.mark.parametrize(
+    ("warning_threshold", "clear_threshold"),
+    [(0.0, 0.50), (0.50, 0.50), (0.51, 0.50), (0.48, 1.0)],
+)
+def test_gradual_budget_rejects_invalid_threshold_ordering(
+    warning_threshold: float, clear_threshold: float
+) -> None:
+    crowding = pd.DataFrame({
+        "trade_date": ["2024-01-02"],
+        "concentration": [0.47],
+    })
+
+    with pytest.raises(ValueError, match="warning_threshold"):
+        build_gradual_crowding_budget(
+            crowding,
+            warning_threshold=warning_threshold,
+            clear_threshold=clear_threshold,
+        )
+
+
+@pytest.mark.parametrize("concentration", [None, float("nan"), float("inf")])
+def test_gradual_budget_rejects_missing_or_non_finite_concentration(
+    concentration: float | None,
+) -> None:
+    crowding = pd.DataFrame({
+        "trade_date": ["2024-01-02"],
+        "concentration": [concentration],
+    })
+
+    with pytest.raises(ValueError, match="concentration"):
+        build_gradual_crowding_budget(crowding)
+
+
+def test_warning_interrupts_staged_recovery() -> None:
+    crowding = pd.DataFrame({
+        "trade_date": pd.date_range("2024-01-02", periods=8, freq="D"),
+        "concentration": [0.48, 0.48, 0.44, 0.44, 0.48, 0.44, 0.44, 0.44],
+    })
+
+    result = build_gradual_crowding_budget(
+        crowding,
+        recovery_threshold=0.45,
+        recovery_confirmation_days=2,
+        recovery_step_days=2,
+    )
+
+    assert result["exposure_budget"].tolist() == [
+        0.25, 0.0, 0.0, 0.5, 0.25, 0.25, 0.5, 0.5,
+    ]
+
+
 def test_market_state_budget_uses_only_current_and_prior_index_closes() -> None:
     index_bars = pd.DataFrame({
         "trade_date": pd.date_range("2024-01-01", periods=61, freq="D"),

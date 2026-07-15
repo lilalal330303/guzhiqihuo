@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -144,26 +145,87 @@ def run_grid(
 def build_gradual_crowding_budget(
     crowding_daily: pd.DataFrame,
     *,
-    reduce_threshold: float = 0.48,
+    warning_threshold: float = 0.48,
     clear_threshold: float = 0.50,
     confirmation_days: int = 2,
-    reduced_exposure: float = 0.25,
+    reduced_budget: float = 0.25,
+    recovery_threshold: float | None = None,
+    recovery_confirmation_days: int = 1,
+    recovery_step_days: int = 0,
 ) -> pd.DataFrame:
+    required = {"trade_date", "concentration"}
+    missing = required.difference(crowding_daily.columns)
+    if missing:
+        raise ValueError(f"crowding daily missing columns: {sorted(missing)}")
+    if not 0 < warning_threshold < clear_threshold < 1:
+        raise ValueError("require 0 < warning_threshold < clear_threshold < 1")
+    if not 0 <= reduced_budget <= 1:
+        raise ValueError("reduced_budget must be between 0 and 1")
+    if confirmation_days < 1:
+        raise ValueError("confirmation_days must be at least 1")
+    if recovery_threshold is not None and not 0 < recovery_threshold < warning_threshold:
+        raise ValueError("recovery_threshold must be between 0 and warning_threshold")
+    if recovery_confirmation_days < 1:
+        raise ValueError("recovery_confirmation_days must be at least 1")
+    if recovery_step_days < 0:
+        raise ValueError("recovery_step_days must be non-negative")
+
     frame = crowding_daily.loc[:, ["trade_date", "concentration"]].copy()
     frame["trade_date"] = pd.to_datetime(frame["trade_date"])
+    if bool(frame["trade_date"].duplicated().any()):
+        raise ValueError("crowding daily contains duplicate trade_date values")
+    concentrations = pd.to_numeric(frame["concentration"], errors="coerce")
+    if not bool(concentrations.map(math.isfinite).all()):
+        raise ValueError("concentration must contain only finite values")
+    frame["concentration"] = concentrations
     frame = frame.sort_values("trade_date").reset_index(drop=True)
-    streak = 0
+    high_run = 0
+    safe_run = 0
+    recovery_stage_days_emitted = 0
+    current_budget = 1.0
     budgets: list[float] = []
-    for concentration in frame["concentration"].astype(float):
+    for concentration in frame["concentration"]:
         if concentration >= clear_threshold:
-            streak += 1
-            budgets.append(0.0)
-        elif concentration >= reduce_threshold:
-            streak += 1
-            budgets.append(0.0 if streak >= confirmation_days else reduced_exposure)
+            high_run += 1
+            safe_run = 0
+            recovery_stage_days_emitted = 0
+            current_budget = 0.0
+        elif concentration >= warning_threshold:
+            high_run += 1
+            safe_run = 0
+            recovery_stage_days_emitted = 0
+            current_budget = (
+                0.0 if high_run >= confirmation_days else float(reduced_budget)
+            )
         else:
-            streak = 0
-            budgets.append(1.0)
+            high_run = 0
+            if recovery_threshold is None:
+                safe_run = 0
+                recovery_stage_days_emitted = 0
+                current_budget = 1.0
+            elif current_budget >= 1.0:
+                safe_run = 0
+                recovery_stage_days_emitted = 0
+            elif concentration >= recovery_threshold:
+                safe_run = 0
+            else:
+                safe_run += 1
+                if safe_run >= recovery_confirmation_days:
+                    if recovery_step_days == 0:
+                        current_budget = 1.0
+                        safe_run = 0
+                        recovery_stage_days_emitted = 0
+                    elif recovery_stage_days_emitted == 0:
+                        current_budget = 0.5
+                        recovery_stage_days_emitted = 1
+                    elif recovery_stage_days_emitted < recovery_step_days:
+                        current_budget = 0.5
+                        recovery_stage_days_emitted += 1
+                    else:
+                        current_budget = 1.0
+                        safe_run = 0
+                        recovery_stage_days_emitted = 0
+        budgets.append(current_budget)
     frame["exposure_budget"] = budgets
     return frame[["trade_date", "exposure_budget"]]
 
