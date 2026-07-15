@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import copy
+import base64
+import gzip
 import json
 from pathlib import Path
 
 import pytest
+import duckdb
 
 from tools.build_fixed11_gradual_next_stage_report import (
     REPORT_DIR,
@@ -14,7 +17,9 @@ from tools.build_fixed11_gradual_next_stage_report import (
 from tools.verify_fixed11_gradual_next_stage import (
     VerificationError,
     validate_artifact,
+    validate_artifact_against_evidence,
     validate_evidence,
+    validate_html,
 )
 
 
@@ -82,6 +87,27 @@ def test_required_sections_and_visual_references_resolve(
             assert block["tableId"] in table_ids
 
 
+def test_chart_and_table_presentation_contracts(artifact: dict[str, object]) -> None:
+    manifest = artifact["manifest"]
+    charts = {chart["id"]: chart for chart in manifest["charts"]}
+    for chart_id in ("frontier", "sensitivity", "combined_cost", "stress_windows"):
+        quantitative = [
+            encoding for encoding in charts[chart_id]["encodings"].values()
+            if isinstance(encoding, dict) and encoding.get("type") == "quantitative"
+        ]
+        assert quantitative and all(encoding.get("format") == "percent" for encoding in quantitative)
+    assert charts["sensitivity"]["settings"]["orientation"] == "horizontal"
+    assert charts["sensitivity"]["type"] == "horizontalBar"
+    assert charts["sensitivity"]["encodings"]["y"]["field"] == "delta"
+    assert charts["stress_windows"]["encodings"]["x"]["field"] == "window_route"
+    assert charts["stress_windows"]["encodings"]["color"]["field"] == "series"
+    assert all(chart["palette"]["name"] in {"blue-orange-neutral", "blue-neutral"} for chart in charts.values())
+    for table in manifest["tables"]:
+        fields = {column["field"] for column in table["columns"]}
+        assert table["defaultSort"]["field"] in fields
+        assert table["defaultSort"]["direction"] in {"asc", "desc"}
+
+
 def test_source_evidence_counts_and_audit_facts(evidence: dict[str, object]) -> None:
     facts = validate_evidence(evidence)
     assert facts["qualified_route_count"] == 0
@@ -122,10 +148,45 @@ def test_encoding_is_clean(artifact: dict[str, object]) -> None:
         assert marker not in text
 
 
+def test_provenance_is_runnable_and_records_python_transforms(
+    artifact: dict[str, object],
+) -> None:
+    with duckdb.connect() as connection:
+        for source in artifact["sources"]:
+            query = source["query"]
+            assert "SELECT 1" not in query["sql"].upper()
+            assert query["tables_used"]
+            assert query["transformations"]
+            assert query["metric_definitions"]
+            assert all(path.startswith("reports/small_cap_fixed11_gradual_next_stage/") for path in query["tables_used"])
+            assert connection.execute(
+                f"SELECT * FROM ({query['sql']}) AS provenance LIMIT 1"
+            ).fetchone() is not None
+
+
+def test_artifact_must_match_rebuilt_root_evidence(
+    evidence: dict[str, object], artifact: dict[str, object]
+) -> None:
+    validate_artifact_against_evidence(artifact, evidence)
+    for mutate in (
+        lambda item: item["snapshot"]["datasets"]["candidate_frontier"][0].__setitem__("total_return", -99),
+        lambda item: item["snapshot"]["datasets"]["route_decisions"][0].__setitem__("passed", True),
+        lambda item: item["snapshot"]["datasets"]["audit_facts"][0].__setitem__("value", "tampered"),
+    ):
+        broken = copy.deepcopy(artifact)
+        mutate(broken)
+        with pytest.raises(VerificationError, match="rebuilt evidence"):
+            validate_artifact_against_evidence(broken, evidence)
+
+
 @pytest.mark.parametrize(
     ("mutation", "match"),
     [
         (lambda e: e["manifest"].__setitem__("qualified_route_count", 1), "gate drift"),
+        (lambda e: e["manifest"].__setitem__("requested_start", "2020-01-02"), "interval"),
+        (lambda e: e["manifest"].__setitem__("requested_end", "2026-07-05"), "interval"),
+        (lambda e: e["manifest"].__setitem__("initial_cash", 999999), "initial cash"),
+        (lambda e: e["manifest"].__setitem__("passed", False), "manifest passed"),
         (lambda e: e["manifest"].__setitem__("max_account_reconciliation_error", 1e-3), "reconciliation"),
         (lambda e: e["manifest"].__setitem__("minimum_cash", -0.01), "negative cash"),
         (lambda e: e["manifest"].__setitem__("test_selection_leakage_count", 1), "leakage"),
@@ -145,6 +206,16 @@ def test_verifier_rejects_integrity_failures(
         validate_evidence(broken)
 
 
+@pytest.mark.parametrize("table", ["route_gate_results", "target_manifest", "annual_returns"])
+def test_verifier_rejects_tampered_root_tables(
+    evidence: dict[str, object], table: str
+) -> None:
+    broken = copy.deepcopy(evidence)
+    broken[table].pop()
+    with pytest.raises(VerificationError, match="root evidence"):
+        validate_evidence(broken)
+
+
 def test_artifact_verifier_rejects_missing_heading_and_mojibake(
     artifact: dict[str, object],
 ) -> None:
@@ -159,3 +230,27 @@ def test_artifact_verifier_rejects_missing_heading_and_mojibake(
     corrupt["manifest"]["title"] += "�锟絽"
     with pytest.raises(VerificationError, match="encoding corruption"):
         validate_artifact(corrupt)
+
+
+def _portable_html(artifact: dict[str, object], *, charset: bool = True) -> str:
+    payload = base64.b64encode(
+        gzip.compress(json.dumps(artifact, ensure_ascii=False).encode("utf-8"))
+    ).decode("ascii")
+    meta = '<meta charset="utf-8">' if charset else ""
+    return (
+        f"<!doctype html><html><head>{meta}</head><body>"
+        '<template id="data-analytics-portable-artifact-payload-source" data-compression="gzip-base64">'
+        f"{payload}</template></body></html>"
+    )
+
+
+def test_html_verifier_rejects_charset_and_payload_corruption(
+    artifact: dict[str, object],
+) -> None:
+    validate_html(_portable_html(artifact), artifact)
+    with pytest.raises(VerificationError, match="UTF-8"):
+        validate_html(_portable_html(artifact, charset=False), artifact)
+    broken = copy.deepcopy(artifact)
+    broken["snapshot"]["datasets"]["route_coverage"][0]["covered_folds"] = 5
+    with pytest.raises(VerificationError, match="differs"):
+        validate_html(_portable_html(broken), artifact)

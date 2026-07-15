@@ -213,9 +213,16 @@ def _source(source_id: str, label: str, path: str, description: str) -> tuple[di
         "query": {
             "engine": "duckdb",
             "language": "sql",
-            "sql": f"SELECT * FROM read_csv_auto('{path}')" if path.endswith(".csv") else "SELECT 1 AS reviewed_artifact",
+            "sql": (
+                f"SELECT * FROM read_csv_auto('{path}')"
+                if path.endswith(".csv")
+                else f"SELECT * FROM read_json_auto('{path}', format='unstructured')"
+            ),
             "description": description,
-            "tables": [path],
+            "tables_used": [path],
+            "filters": ["2020-01-01 through 2026-07-06", "current experiment fingerprint only"],
+            "transformations": ["Python report builder applies the reviewed dataset-specific filters, joins, and aggregations described by this source."],
+            "metric_definitions": {"report_value": "Value is computed from the listed reviewed files without forward-looking rows."},
         },
     }
     return manifest_source, query_source
@@ -253,7 +260,12 @@ def build_artifact(evidence: dict[str, Any] | None = None) -> dict[str, Any]:
     ]
     exact_cost = [{**row, "route_label": ROUTE_CN[row["route"]]} for row in stress if row["evidence_type"] == "cost"]
     stress_windows = [
-        {**row, "route_label": ROUTE_CN[row["route"]], "route_series": f"{ROUTE_CN[row['route']]}-{row['series']}"}
+        {
+            **row,
+            "route_label": ROUTE_CN[row["route"]],
+            "route_series": f"{ROUTE_CN[row['route']]}-{row['series']}",
+            "window_route": f"{row['window']}｜{ROUTE_CN[row['route']]}",
+        }
         for row in stress if row["evidence_type"] == "stress_window"
     ]
     crash_rows = [
@@ -292,6 +304,8 @@ def build_artifact(evidence: dict[str, Any] | None = None) -> dict[str, Any]:
         ("stress", "成本与压力证据", "reports/small_cap_fixed11_gradual_next_stage/stress_results.csv", "七种成本模型、两个压力窗口与缺失策略标记"),
         ("rejections", "拒绝原因审计", "reports/small_cap_fixed11_gradual_next_stage/rejected_candidates.csv", "路线候选拒绝原因"),
         ("equity", "当前指纹全样本净值", "logical/current_fingerprint_monthly_equity", "基准与三个样本内诊断冠军的当前指纹净值文件"),
+        ("decisions", "路线决策与诊断参数", "logical/route_decisions_with_parameters", "运行清单路线决策与候选目录参数"),
+        ("audit", "多源运行与账户审计", "logical/multi_source_audit", "根产物、当前指纹审计与净值的交叉核验"),
     ]
     for spec in source_specs:
         manifest_source, query_source = _source(*spec)
@@ -300,11 +314,15 @@ def build_artifact(evidence: dict[str, Any] | None = None) -> dict[str, Any]:
     query_by_id = {source["id"]: source["query"] for source in source_queries}
     query_by_id["scores"].update({
         "sql": "SELECT * FROM read_csv_auto('reports/small_cap_fixed11_gradual_next_stage/core_scores.csv') UNION ALL BY NAME SELECT * FROM read_csv_auto('reports/small_cap_fixed11_gradual_next_stage/route_scores.csv')",
-        "tables": ["reports/small_cap_fixed11_gradual_next_stage/core_scores.csv", "reports/small_cap_fixed11_gradual_next_stage/route_scores.csv"],
+        "tables_used": ["reports/small_cap_fixed11_gradual_next_stage/core_scores.csv", "reports/small_cap_fixed11_gradual_next_stage/route_scores.csv"],
+        "transformations": ["UNION ALL BY NAME combines 37 anchor/core rows with 29 route rows; no ranking is applied to the frontier."],
+        "metric_definitions": {"total_return": "ending_equity / 1,000,000 - 1", "max_drawdown": "minimum equity / prior running peak - 1", "calmar": "annualized_return / abs(max_drawdown)"},
     })
     query_by_id["catalog"].update({
         "sql": "SELECT c.*, s.total_return, s.max_drawdown FROM read_csv_auto('reports/small_cap_fixed11_gradual_next_stage/candidate_catalog.csv') c JOIN read_csv_auto('reports/small_cap_fixed11_gradual_next_stage/core_scores.csv') s ON c.name = s.candidate WHERE c.name = 'fixed11_gradual' OR c.name LIKE 'one_factor_%'",
-        "tables": ["reports/small_cap_fixed11_gradual_next_stage/candidate_catalog.csv", "reports/small_cap_fixed11_gradual_next_stage/core_scores.csv"],
+        "tables_used": ["reports/small_cap_fixed11_gradual_next_stage/candidate_catalog.csv", "reports/small_cap_fixed11_gradual_next_stage/core_scores.csv"],
+        "transformations": ["Flatten parameters_json, retain the anchor plus names beginning one_factor_, require exactly one material parameter difference, then compute candidate minus anchor deltas."],
+        "metric_definitions": {"total_return_delta": "candidate total_return - fixed11_gradual total_return", "drawdown_improvement": "abs(anchor max_drawdown) - abs(candidate max_drawdown)"},
     })
     equity_paths = [evidence["candidate_runs"][candidate]["equity_path"] for candidate in CURVE_CANDIDATES]
     query_by_id["equity"].update({
@@ -312,7 +330,56 @@ def build_artifact(evidence: dict[str, Any] | None = None) -> dict[str, Any]:
             f"SELECT *, '{candidate}' AS series FROM read_csv_auto('{path}')"
             for candidate, path in zip(CURVE_CANDIDATES, equity_paths)
         ),
-        "tables": equity_paths,
+        "tables_used": equity_paths,
+        "transformations": ["For each series, parse trade_date, group by calendar month, keep the final trading-day row, and divide equity by CNY 1,000,000."],
+        "metric_definitions": {"wealth_multiple": "month-end equity / 1,000,000"},
+    })
+    query_by_id["walkforward"].update({
+        "tables_used": ["reports/small_cap_fixed11_gradual_next_stage/walkforward_test.csv"],
+        "transformations": ["Within each route and fold retain train_rank=1; left-complete the 3x5 route-fold grid and compare with the same-fold anchor."],
+        "metric_definitions": {"return_difference": "selected test total_return - same-fold anchor total_return", "drawdown_difference": "selected test max_drawdown - same-fold anchor max_drawdown"},
+    })
+    query_by_id["stress"].update({
+        "tables_used": ["reports/small_cap_fixed11_gradual_next_stage/stress_results.csv"],
+        "transformations": ["Filter evidence_type into 42 cost rows, 12 stress-window rows, and 3 missing-policy markers; window_route concatenates window and route for grouped display."],
+        "metric_definitions": {"total_return": "window or full-sample ending_equity / starting_equity - 1", "max_drawdown": "minimum equity / prior running peak - 1"},
+    })
+    query_by_id["rejections"].update({
+        "tables_used": ["reports/small_cap_fixed11_gradual_next_stage/rejected_candidates.csv"],
+        "transformations": ["Group rows by rejected_for_route and reason with null categories retained, then count rows."],
+        "metric_definitions": {"count": "number of rejected-candidate audit rows in each route/reason group"},
+    })
+    query_by_id["run_manifest"].update({
+        "tables_used": ["reports/small_cap_fixed11_gradual_next_stage/run_manifest.json"],
+        "transformations": ["Extract route decisions, policy-fold counts, crash audit, run counts, database snapshot hashes, and integrity tolerances without changing values."],
+        "metric_definitions": {"qualified_route_count": "number of routes passing every formal gate", "policy_fold_count": "number of five walk-forward folds with a stable training-only policy"},
+    })
+    query_by_id["decisions"].update({
+        "sql": "SELECT c.*, m.route_decisions FROM read_csv_auto('reports/small_cap_fixed11_gradual_next_stage/candidate_catalog.csv') c CROSS JOIN read_json_auto('reports/small_cap_fixed11_gradual_next_stage/run_manifest.json', format='unstructured') m WHERE c.name IN ('balanced__recovery_0.45_confirm_2','return__one_factor_fixed_stop_loss_0p115__current','defensive__crash_overlay_05')",
+        "tables_used": ["reports/small_cap_fixed11_gradual_next_stage/run_manifest.json", "reports/small_cap_fixed11_gradual_next_stage/candidate_catalog.csv"],
+        "transformations": ["Extract each route decision from route_decisions and join its diagnostic candidate to parameters_json; preserve diagnostic_only, selection_basis, and rejection reasons."],
+        "metric_definitions": {"policy_fold_count": "stable training-only policy folds out of five", "passed": "true only if every formal route gate passes"},
+    })
+    audit_tables = [
+        "reports/small_cap_fixed11_gradual_next_stage/run_manifest.json",
+        *[f"reports/small_cap_fixed11_gradual_next_stage/{name}" for name in ROOT_CSV_FILES],
+        *[evidence["candidate_runs"][candidate]["audit_path"] for candidate in CURVE_CANDIDATES],
+        *equity_paths,
+    ]
+    count_subqueries = ", ".join(
+        (
+            f"(SELECT count(*) FROM read_csv_auto('{path}')) AS rows_{index}"
+            if path.endswith(".csv")
+            else f"(SELECT count(*) FROM read_json_auto('{path}', format='unstructured')) AS rows_{index}"
+        )
+        for index, path in enumerate(audit_tables)
+        if path.endswith((".csv", ".json"))
+    )
+    query_by_id["audit"].update({
+        "sql": f"SELECT m.*, {count_subqueries} FROM read_json_auto('reports/small_cap_fixed11_gradual_next_stage/run_manifest.json', format='unstructured') m",
+        "tables_used": audit_tables,
+        "transformations": ["Cross-check all 11 root CSV artifacts plus run_manifest, current-fingerprint audits, and four equity files; recompute counts, anchor equality, cash/reconciliation limits, target hashes, route gates, crash ratios, and stress composition."],
+        "metric_definitions": {"anchor_max_abs_equity_diff": "max(abs(current anchor equity - current_db_anchor_reference equity)) by trade_date", "minimum_cash": "minimum audited cash across all experiment runs", "max_account_reconciliation_error": "max(abs(equity - cash - market_value))", "stress_row_count": "42 cost + 12 stress-window + 3 missing-policy rows"},
     })
 
     generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -325,13 +392,17 @@ def build_artifact(evidence: dict[str, Any] | None = None) -> dict[str, Any]:
     )
 
     charts = [
-        {"id": "frontier", "title": "66 个全样本候选的收益—回撤前沿", "subtitle": "2020-01-01至2026-07-06；全样本排名不等于样本外资格", "type": "scatter", "dataset": "candidate_frontier", "sourceId": "scores", "encodings": {"x": {"field": "max_drawdown", "type": "quantitative", "label": "最大回撤"}, "y": {"field": "total_return", "type": "quantitative", "label": "总收益"}, "color": {"field": "route_label", "type": "nominal", "label": "路线"}, "tooltip": [{"field": "candidate", "type": "nominal", "label": "候选"}, {"field": "family", "type": "nominal", "label": "家族"}, {"field": "calmar", "type": "quantitative", "label": "Calmar"}] }},
-        {"id": "sensitivity", "title": "核心单因子参数相对锚点的变化", "subtitle": "每次只改一个参数；正的回撤改善表示回撤绝对值缩小", "type": "bar", "dataset": "one_factor_deltas", "sourceId": "catalog", "encodings": {"x": {"field": "parameter", "type": "nominal", "label": "参数值"}, "y": {"field": "delta", "type": "quantitative", "label": "相对变化"}, "color": {"field": "metric", "type": "nominal", "label": "指标"}}},
+        {"id": "frontier", "title": "66 个全样本候选的收益—回撤前沿", "subtitle": "2020-01-01至2026-07-06；全样本排名不等于样本外资格", "type": "scatter", "dataset": "candidate_frontier", "sourceId": "scores", "encodings": {"x": {"field": "max_drawdown", "type": "quantitative", "format": "percent", "label": "最大回撤"}, "y": {"field": "total_return", "type": "quantitative", "format": "percent", "label": "总收益"}, "color": {"field": "route_label", "type": "nominal", "label": "路线"}, "label": {"field": "candidate", "type": "nominal", "label": "候选"}, "tooltip": [{"field": "candidate", "type": "nominal", "label": "候选"}, {"field": "family", "type": "nominal", "label": "家族"}, {"field": "calmar", "type": "quantitative", "label": "Calmar"}] }},
+        {"id": "sensitivity", "title": "核心单因子参数相对锚点的变化", "subtitle": "每次只改一个参数；正的回撤改善表示回撤绝对值缩小", "type": "horizontalBar", "dataset": "one_factor_deltas", "sourceId": "catalog", "settings": {"orientation": "horizontal", "groupMode": "grouped"}, "encodings": {"x": {"field": "parameter", "type": "nominal", "label": "参数值"}, "y": {"field": "delta", "type": "quantitative", "format": "percent", "label": "相对变化"}, "color": {"field": "metric", "type": "nominal", "label": "指标"}, "label": {"field": "metric", "type": "nominal", "label": "指标"}}},
         {"id": "coverage", "title": "路线滚动样本外策略覆盖", "subtitle": "通过资格需要5/5个测试窗口均有稳定训练策略", "type": "bar", "dataset": "route_coverage", "sourceId": "run_manifest", "encodings": {"x": {"field": "route_label", "type": "nominal", "label": "路线"}, "y": {"field": "covered_folds", "type": "quantitative", "label": "已覆盖窗口"}}},
         {"id": "wealth", "title": "锚点与三个诊断对照的月末财富曲线", "subtitle": "全样本内诊断曲线，不是被选候选的样本外曲线", "type": "line", "dataset": "monthly_wealth", "sourceId": "equity", "encodings": {"x": {"field": "trade_date", "type": "temporal", "label": "日期"}, "y": {"field": "wealth_multiple", "type": "quantitative", "label": "财富倍数"}, "color": {"field": "series", "type": "nominal", "label": "系列"}}},
-        {"id": "combined_cost", "title": "三条路线诊断对照的组合成本总收益", "subtitle": "1x、1.5x、2x为离散成本场景；不用于候选资格判定", "type": "bar", "dataset": "combined_cost", "sourceId": "stress", "encodings": {"x": {"field": "cost_label", "type": "nominal", "label": "成本场景"}, "y": {"field": "total_return", "type": "quantitative", "label": "总收益"}, "color": {"field": "route_label", "type": "nominal", "label": "路线"}}},
-        {"id": "stress_windows", "title": "2024年一季度与2026年年初至今压力窗口", "subtitle": "诊断候选与锚点同窗口对比", "type": "bar", "dataset": "stress_windows", "sourceId": "stress", "encodings": {"x": {"field": "window", "type": "nominal", "label": "压力窗口"}, "y": {"field": "total_return", "type": "quantitative", "label": "总收益"}, "color": {"field": "route_series", "type": "nominal", "label": "路线-系列"}}},
+        {"id": "combined_cost", "title": "三条路线诊断对照的组合成本总收益", "subtitle": "1x、1.5x、2x为离散成本场景；不用于候选资格判定", "type": "bar", "dataset": "combined_cost", "sourceId": "stress", "encodings": {"x": {"field": "cost_label", "type": "nominal", "label": "成本场景"}, "y": {"field": "total_return", "type": "quantitative", "format": "percent", "label": "总收益"}, "color": {"field": "route_label", "type": "nominal", "label": "路线"}, "label": {"field": "route_label", "type": "nominal", "label": "路线"}}},
+        {"id": "stress_windows", "title": "2024年一季度与2026年年初至今压力窗口", "subtitle": "每个窗口按路线展开，颜色只区分诊断候选与锚点", "type": "bar", "dataset": "stress_windows", "sourceId": "stress", "encodings": {"x": {"field": "window_route", "type": "nominal", "label": "压力窗口｜路线"}, "y": {"field": "total_return", "type": "quantitative", "format": "percent", "label": "总收益"}, "color": {"field": "series", "type": "nominal", "label": "候选/锚点"}, "label": {"field": "series", "type": "nominal", "label": "候选/锚点"}}},
     ]
+    for chart in charts:
+        has_color = "color" in chart.get("encodings", {})
+        chart["palette"] = {"kind": "categorical" if has_color else "sequential", "name": "blue-orange-neutral" if has_color else "blue-neutral"}
+    next(chart for chart in charts if chart["id"] == "wealth")["encodings"]["lineStyle"] = {"field": "series", "type": "nominal", "label": "系列线型"}
 
     def table(table_id: str, title: str, subtitle: str, dataset: str, source_id: str, columns: list[tuple[str, str, str]]) -> dict[str, Any]:
         return {"id": table_id, "title": title, "subtitle": subtitle, "dataset": dataset, "sourceId": source_id, "columns": [{"field": field, "label": label, "format": fmt} for field, label, fmt in columns]}
@@ -342,10 +413,23 @@ def build_artifact(evidence: dict[str, Any] | None = None) -> dict[str, Any]:
         table("cost_exact", "七种成本模型完整明细", "三条路线各含诊断候选和锚点，共42行", "cost_exact", "stress", [("route_label", "路线", "text"), ("series", "系列", "text"), ("cost_label", "成本模型", "text"), ("total_return", "总收益", "percent"), ("max_drawdown", "最大回撤", "percent"), ("calmar", "Calmar", "number")]),
         table("stress_exact", "压力窗口完整对照", "两个压力窗口×三条路线×候选/锚点", "stress_windows", "stress", [("window", "窗口", "text"), ("route_label", "路线", "text"), ("series", "系列", "text"), ("total_return", "总收益", "percent"), ("max_drawdown", "最大回撤", "percent")]),
         table("crash", "崩盘覆盖机制审计", "分母为精确60个交易日预热后的正式区间", "crash_audit", "run_manifest", [("candidate", "覆盖方案", "text"), ("crash_trigger_ratio", "触发比例", "percent"), ("passed", "机制审计通过", "text"), ("warmup_trading_days", "预热交易日", "number")]),
-        table("decisions", "三条路线决策与诊断参数", "诊断冠军仅用于解释，全部因 missing_policy_fold 失败", "route_decisions", "run_manifest", [("route_label", "路线", "text"), ("candidate", "样本内诊断对照", "text"), ("policy_fold_count", "策略覆盖", "number"), ("passed", "通过", "text"), ("reasons", "拒绝原因", "text"), ("parameters_json", "精确参数", "text")]),
+        table("decisions", "三条路线决策与诊断参数", "诊断冠军仅用于解释，全部因 missing_policy_fold 失败", "route_decisions", "decisions", [("route_label", "路线", "text"), ("candidate", "样本内诊断对照", "text"), ("policy_fold_count", "策略覆盖", "number"), ("passed", "通过", "text"), ("reasons", "拒绝原因", "text"), ("parameters_json", "精确参数", "text")]),
         table("rejections", "拒绝原因计数", "按路线和原因聚合的审计计数", "rejection_counts", "rejections", [("rejected_for_route", "路线", "text"), ("reason", "原因", "text"), ("count", "数量", "number")]),
-        table("audit_facts", "数据、运行与账户审计事实", "重现门禁所需的精确区间、计数与容差", "audit_facts", "run_manifest", [("item", "审计项", "text"), ("value", "精确值", "text"), ("interpretation", "口径/结论", "text")]),
+        table("audit_facts", "数据、运行与账户审计事实", "重现门禁所需的精确区间、计数与容差", "audit_facts", "audit", [("item", "审计项", "text"), ("value", "精确值", "text"), ("interpretation", "口径/结论", "text")]),
     ]
+    default_sorts = {
+        "one_factor": ("total_return_delta", "desc"),
+        "folds": ("fold", "asc"),
+        "cost_exact": ("route_label", "asc"),
+        "stress_exact": ("window", "asc"),
+        "crash": ("candidate", "asc"),
+        "decisions": ("route_label", "asc"),
+        "rejections": ("count", "desc"),
+        "audit_facts": ("item", "asc"),
+    }
+    for table_spec in tables:
+        field, direction = default_sorts[table_spec["id"]]
+        table_spec["defaultSort"] = {"field": field, "direction": direction}
 
     blocks = [
         {"id": "title", "type": "markdown", "body": "# fixed11_gradual 下一阶段严格优化研究报告"},

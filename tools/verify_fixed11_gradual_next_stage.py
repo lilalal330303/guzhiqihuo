@@ -39,6 +39,12 @@ def _fail(message: str) -> None:
 
 def validate_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
     manifest = evidence["manifest"]
+    if manifest.get("requested_start") != "2020-01-01" or manifest.get("requested_end") != "2026-07-06":
+        _fail("interval drift: reviewed start/end changed")
+    if float(manifest.get("initial_cash", -1)) != 1_000_000.0:
+        _fail("initial cash drift: reviewed capital changed")
+    if manifest.get("passed") is not True:
+        _fail("manifest passed flag must confirm evidence completeness")
     decisions = manifest.get("route_decisions", {})
     expected_routes = {"balanced", "return", "defensive"}
     if manifest.get("qualified_route_count") != 0 or set(decisions) != expected_routes:
@@ -51,6 +57,16 @@ def validate_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
             _fail(f"gate drift: {route} is no longer diagnostic-only and rejected")
         if decision.get("reasons") != ["missing_policy_fold"]:
             _fail(f"gate drift: {route} rejection reason changed")
+
+    route_gates = {row["route"]: row for row in evidence.get("route_gate_results", [])}
+    if set(route_gates) != expected_routes or len(evidence.get("route_gate_results", [])) != 3:
+        _fail("root evidence drift: route_gate_results must contain exactly three routes")
+    for route in expected_routes:
+        gate = route_gates[route]
+        if bool(gate.get("passed")) or gate.get("selected_candidate") not in (None, ""):
+            _fail("root evidence drift: route gate selected or passed unexpectedly")
+        if "missing_policy_fold" not in str(gate.get("reasons")) or str(policy_counts[route]) not in str(gate.get("summary")):
+            _fail("root evidence drift: route gate disagrees with route decision")
     selected_test_counts = {route: 0 for route in expected_routes}
     for row in evidence.get("walkforward_test", []):
         rank = row.get("train_rank")
@@ -119,12 +135,39 @@ def validate_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
     diagnostic_count = int(manifest.get("executed_run_count", -1)) - core_count - route_count - train_count - test_count
     if (core_count + route_count, train_count, test_count, non_anchor_test, diagnostic_count) != (66, 135, 24, 19, 36):
         _fail("incomplete evidence: run counts do not match the reviewed experiment")
+    expected_manifest_counts = {
+        "core_full_sample_call_count": core_count,
+        "route_full_sample_call_count": route_count,
+        "full_sample_candidate_count": core_count + route_count,
+        "normal_test_call_count": non_anchor_test,
+        "core_one_factor_count": 20,
+        "core_orthogonal_count": 17,
+    }
+    if any(int(manifest.get(key, -1)) != value for key, value in expected_manifest_counts.items()):
+        _fail("root evidence drift: manifest run counts disagree with score/test tables")
     if stress_count != 57 or stress_types != {"missing_policy": 3, "cost": 42, "stress_window": 12}:
         _fail("incomplete evidence: stress rows are not 3+42+12")
     if int(manifest.get("executed_run_count", -1)) != 261:
         _fail("incomplete evidence: total executed run count changed")
     if not manifest.get("cost_evidence_complete") or not manifest.get("stress_evidence_complete"):
         _fail("incomplete evidence: cost/stress completeness flags are false")
+
+    target_rows = evidence.get("target_manifest", [])
+    if len(target_rows) != 4:
+        _fail("root evidence drift: target_manifest must contain four frozen target sets")
+    target_hashes = {row["target_name"]: row["target_hash"] for row in target_rows}
+    if target_hashes != manifest.get("target_hashes"):
+        _fail("root evidence drift: target hashes disagree with run manifest")
+    expected_target_counts = {"fixed11_gradual": 1229, "concentrated": 922, "current": 1229, "diversified": 1536}
+    if {row["target_name"]: int(row["row_count"]) for row in target_rows} != expected_target_counts:
+        _fail("root evidence drift: target row counts changed")
+
+    annual = evidence.get("annual_returns", [])
+    if len(annual) != 960:
+        _fail("root evidence drift: annual_returns row count changed")
+    catalog_names = {row["name"] for row in evidence.get("candidate_catalog", [])}
+    if any(row.get("candidate") not in catalog_names or int(row.get("year", 0)) not in range(2020, 2027) for row in annual):
+        _fail("root evidence drift: annual_returns contains unknown candidates or years")
 
     expected_leaders = {
         "balanced": "balanced__recovery_0.45_confirm_2",
@@ -178,7 +221,7 @@ def validate_artifact(artifact: dict[str, Any]) -> dict[str, Any]:
         _fail("encoding corruption detected")
     if "0 条路线通过" not in body or "样本内诊断" not in body:
         _fail("gate drift: report does not state zero qualified routes and diagnostic-only leaders")
-    for phrase in ("正式入选", "样本外最优", "已通过路线"):
+    for phrase in ("正式入选", "可部署", "样本外最优", "已通过路线"):
         if phrase in body:
             _fail(f"forced-winner language detected: {phrase}")
 
@@ -215,6 +258,28 @@ def validate_artifact(artifact: dict[str, Any]) -> dict[str, Any]:
         "encoding_clean": True,
         "qualified_route_count": 0,
     }
+
+
+def _normalized_artifact(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: _normalized_artifact(item)
+            for key, item in value.items()
+            if key not in {"generatedAt", "generated_at", "package_info", "packageInfo", "ok", "widget_type"}
+        }
+    if isinstance(value, list):
+        return [_normalized_artifact(item) for item in value]
+    return value
+
+
+def validate_artifact_against_evidence(
+    artifact: dict[str, Any], evidence: dict[str, Any]
+) -> None:
+    from tools.build_fixed11_gradual_next_stage_report import build_artifact
+
+    expected = build_artifact(evidence=evidence)
+    if _normalized_artifact(artifact) != _normalized_artifact(expected):
+        _fail("artifact differs from rebuilt evidence")
 
 
 def _embedded_artifact(html_text: str) -> dict[str, Any]:
@@ -263,6 +328,7 @@ def verify(
     evidence_facts = validate_evidence(evidence)
     artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
     artifact_checks = validate_artifact(artifact)
+    validate_artifact_against_evidence(artifact, evidence)
     html_checks = validate_html(html_path.read_text(encoding="utf-8"), artifact)
     result = {
         "passed": True,
