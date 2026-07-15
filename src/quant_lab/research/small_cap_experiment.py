@@ -7,7 +7,12 @@ import numpy as np
 import pandas as pd
 
 from quant_lab.backtest.metrics import calculate_metrics
-from quant_lab.backtest.portfolio import DailyRiskConfig, PortfolioBacktestResult, run_portfolio_backtest
+from quant_lab.backtest.portfolio import (
+    CostModel,
+    DailyRiskConfig,
+    PortfolioBacktestResult,
+    run_portfolio_backtest,
+)
 from quant_lab.data.repository import DuckDBRepository
 from quant_lab.strategies.small_cap import (
     SmallCapParams,
@@ -241,6 +246,7 @@ def run_small_cap_experiment(
     crowding_daily: pd.DataFrame | None = None,
     exposure_budget_daily: pd.DataFrame | None = None,
     buy_new_only: bool = False,
+    costs: CostModel | None = None,
 ) -> SmallCapExperimentResult:
     config = config or SmallCapExperimentConfig()
     backtest = run_portfolio_backtest(
@@ -248,6 +254,7 @@ def run_small_cap_experiment(
         market_daily=market_daily, index_bars=index_bars, crowding_daily=crowding_daily,
         exposure_budget_daily=exposure_budget_daily,
         buy_new_only=buy_new_only,
+        costs=costs,
     )
     trades = backtest.trades.copy()
     if "return_pct" not in trades:

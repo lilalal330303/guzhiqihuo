@@ -5,7 +5,7 @@ from dataclasses import replace
 import pandas as pd
 import pytest
 
-from quant_lab.backtest.portfolio import PortfolioBacktestResult
+from quant_lab.backtest.portfolio import CostModel, PortfolioBacktestResult
 from quant_lab.research.optimized_v2_grid import (
     GridVariant,
     build_gradual_crowding_budget,
@@ -251,6 +251,22 @@ def test_profit_protection_reaches_risk_config(monkeypatch) -> None:
     assert captured["risk"].repair_cost_protection is True
     assert captured["risk"].profit_activation == 0.30
     assert captured["risk"].profit_floor == 0.05
+
+
+def test_candidate_runner_threads_explicit_cost_model(monkeypatch) -> None:
+    captured = {}
+
+    def fake_run(*args, **kwargs):
+        captured["costs"] = kwargs.get("costs")
+        return _experiment()
+
+    monkeypatch.setattr(runner, "run_small_cap_experiment", fake_run)
+    costs = CostModel(commission_rate=0.001, minimum_commission=7.0,
+                      sell_stamp_tax=0.002, fixed_slippage=0.003)
+
+    runner.run_candidate(_inputs(), runner.ExperimentCandidate.anchor(), _config(), costs=costs)
+
+    assert captured["costs"] is costs
 
 
 def test_account_reconciliation_and_hard_failures(monkeypatch) -> None:

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from quant_lab.backtest.portfolio import DailyRiskConfig, PortfolioBacktestResult
+from quant_lab.backtest.portfolio import CostModel, DailyRiskConfig, PortfolioBacktestResult
 from quant_lab.research.optimized_v2_grid import (
     build_gradual_crowding_budget,
     drawdown_diagnostics,
@@ -121,6 +121,8 @@ def run_candidate(
     inputs: ExperimentInputs,
     candidate: ExperimentCandidate,
     config: SmallCapExperimentConfig,
+    *,
+    costs: CostModel | None = None,
 ) -> ExperimentResult:
     final_budget = _build_exposure_budget(inputs, candidate)
     protection = candidate.profit_protection
@@ -144,6 +146,7 @@ def run_candidate(
         crowding_daily=inputs.crowding_daily,
         exposure_budget_daily=final_budget,
         buy_new_only=True,
+        costs=costs,
     )
 
     curve = experiment.backtest.equity_curve

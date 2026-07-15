@@ -1,5 +1,6 @@
 import pandas as pd
 
+from quant_lab.backtest.portfolio import CostModel
 from quant_lab.research.small_cap_experiment import (
     SmallCapExperimentConfig,
     build_joinquant_v3_targets,
@@ -31,6 +32,34 @@ def test_experiment_reports_required_and_extended_metrics():
                 "volatility", "sharpe", "turnover"}
     assert required <= set(result.metrics)
     assert result.config.initial_cash == 10_000.0
+
+
+def test_experiment_threads_explicit_cost_model(monkeypatch):
+    from quant_lab.research import small_cap_experiment as module
+
+    captured = {}
+    original = module.run_portfolio_backtest
+
+    def spy(*args, **kwargs):
+        captured["costs"] = kwargs.get("costs")
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(module, "run_portfolio_backtest", spy)
+    costs = CostModel(commission_rate=0.001, minimum_commission=7.0,
+                      sell_stamp_tax=0.002, fixed_slippage=0.003)
+    bars = pd.DataFrame({
+        "symbol": ["000001"] * 2,
+        "trade_date": pd.to_datetime(["2024-01-02", "2024-01-03"]),
+        "open": [10.0, 10.0], "close": [10.0, 10.0],
+        "high_limit": [11.0, 11.0], "low_limit": [9.0, 9.0],
+        "paused": [False, False],
+    })
+    targets = pd.DataFrame({"signal_date": pd.to_datetime(["2024-01-02"]),
+                            "symbol": ["000001"], "target_weight": [1.0]})
+
+    run_small_cap_experiment(bars, targets, costs=costs)
+
+    assert captured["costs"] is costs
 
 
 def _make_strict_inputs(symbols: list[str]) -> dict[str, pd.DataFrame]:
