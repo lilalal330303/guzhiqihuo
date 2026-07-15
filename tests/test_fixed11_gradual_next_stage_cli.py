@@ -118,6 +118,62 @@ def test_diagnostic_leaders_are_full_sample_only_and_never_gate_qualified() -> N
                for item in leaders.values())
 
 
+@pytest.mark.parametrize("missing_route", ["return", "defensive"])
+def test_diagnostic_leaders_allow_an_absent_route_without_inventing_candidate(
+    missing_route: str,
+) -> None:
+    scores = pd.DataFrame([
+        {"candidate": f"{route}_only", "route": route, "calmar": 1.0,
+         "sharpe": 1.0, "max_underwater_calendar_days": 10,
+         "total_return": 0.5, "max_drawdown": -0.2,
+         "crash_mechanism_passed": True}
+        for route in cli.ROUTES if route != missing_route
+    ])
+
+    leaders = select_diagnostic_leaders(scores)
+
+    assert set(leaders) == set(cli.ROUTES)
+    assert leaders[missing_route] is None
+    assert all(leaders[route]["candidate"] == f"{route}_only"
+               for route in cli.ROUTES if route != missing_route)
+
+
+def test_all_absent_diagnostic_routes_are_anchor_only_and_audit_complete() -> None:
+    empty = pd.DataFrame(columns=[
+        "candidate", "route", "calmar", "sharpe", "max_underwater_calendar_days",
+        "total_return", "max_drawdown", "crash_mechanism_passed",
+    ])
+    assert select_diagnostic_leaders(empty) == {route: None for route in cli.ROUTES}
+
+    rows = []
+    for route in cli.ROUTES:
+        rows.append({
+            "evidence_type": "diagnostic_unavailable", "route": route,
+            "reason": "no_route_candidate", "diagnostic_only": True,
+            "qualified_for_gate": False,
+        })
+        for cost_label in cli.cost_stress_models(CostModel()):
+            rows.append({
+                "evidence_type": "cost", "route": route, "series": "anchor",
+                "candidate": "fixed11_gradual", "cost_label": cost_label,
+                "diagnostic_only": True, "qualified_for_gate": False,
+                "selection_basis": "full_sample_in_sample",
+            })
+        for window in ("2024_q1", "2026_ytd"):
+            rows.append({
+                "evidence_type": "stress_window", "route": route, "series": "anchor",
+                "candidate": "fixed11_gradual", "window": window,
+                "diagnostic_only": True, "qualified_for_gate": False,
+                "selection_basis": "full_sample_in_sample",
+            })
+    gates = [{"route": route, "passed": False,
+              "reasons": ("missing_policy_fold",)} for route in cli.ROUTES]
+
+    assert evaluate_stress_evidence(
+        pd.DataFrame(rows), {}, gates, cost_model_count=7,
+    ) == (True, True)
+
+
 def test_incomplete_policy_diagnostic_evidence_requires_exact_counts_and_missing_gate() -> None:
     rows = []
     for route in cli.ROUTES:

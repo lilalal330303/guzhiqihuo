@@ -213,7 +213,9 @@ def candidate_run_hash(
     return _sha256_json(payload)
 
 
-def select_diagnostic_leaders(route_scores: pd.DataFrame) -> dict[str, dict[str, Any]]:
+def select_diagnostic_leaders(
+    route_scores: pd.DataFrame,
+) -> dict[str, dict[str, Any] | None]:
     """Select one deterministic in-sample diagnostic leader per route.
 
     These leaders exist only to measure costs and stress when a route has no
@@ -226,7 +228,7 @@ def select_diagnostic_leaders(route_scores: pd.DataFrame) -> dict[str, dict[str,
     missing = required.difference(route_scores.columns)
     if missing:
         raise ValueError(f"route scores missing diagnostic columns: {sorted(missing)}")
-    leaders: dict[str, dict[str, Any]] = {}
+    leaders: dict[str, dict[str, Any] | None] = {}
     sort_contracts = {
         "balanced": (["calmar", "sharpe", "max_underwater_calendar_days", "candidate"],
                      [False, False, True, True]),
@@ -239,7 +241,8 @@ def select_diagnostic_leaders(route_scores: pd.DataFrame) -> dict[str, dict[str,
             mechanism = frame["crash_mechanism_passed"].astype("boolean")
             frame = frame.loc[~(mechanism.notna() & ~mechanism.fillna(True))].copy()
         if frame.empty:
-            raise RuntimeError(f"no diagnostic leader available for route {route}")
+            leaders[route] = None
+            continue
         columns, ascending = sort_contracts[route]
         leader = frame.sort_values(columns, ascending=ascending, kind="stable").iloc[0]
         leaders[route] = {
@@ -291,18 +294,28 @@ def evaluate_stress_evidence(
                     "selection_basis", pd.Series("", index=diagnostic_rows.index)
                 ).eq("full_sample_in_sample").all()
             )
-        candidate_names = costs.loc[costs.get("series", pd.Series(dtype=str)).eq("candidate"),
-                                    "candidate"].dropna().unique()
-        leader_ok = len(candidate_names) == 1
+        unavailable = route_rows.loc[
+            route_rows.get("evidence_type", pd.Series(dtype=str)).eq("diagnostic_unavailable")
+        ]
+        anchor_only = (
+            len(unavailable) == 1
+            and unavailable.get("reason", pd.Series(dtype=str)).eq("no_route_candidate").all()
+        )
+        candidate_names = costs.loc[
+            costs.get("series", pd.Series(dtype=str)).eq("candidate"), "candidate"
+        ].dropna().unique()
+        leader_ok = (len(candidate_names) == 0) if anchor_only else (len(candidate_names) == 1)
+        expected_series = {"anchor"} if anchor_only else {"candidate", "anchor"}
+        series_count = 1 if anchor_only else 2
         cost_shape = (
-            len(costs) == 2 * cost_model_count
+            len(costs) == series_count * cost_model_count
             and costs.get("cost_label", pd.Series(dtype=str)).nunique() == cost_model_count
-            and set(costs.get("series", pd.Series(dtype=str))) == {"candidate", "anchor"}
+            and set(costs.get("series", pd.Series(dtype=str))) == expected_series
         )
         stress_shape = (
-            len(windows) == 2 * 2
+            len(windows) == 2 * series_count
             and set(windows.get("window", pd.Series(dtype=str))) == {"2024_q1", "2026_ytd"}
-            and set(windows.get("series", pd.Series(dtype=str))) == {"candidate", "anchor"}
+            and set(windows.get("series", pd.Series(dtype=str))) == expected_series
         )
         cost_complete &= bool(has_missing_gate and flags_ok and leader_ok and cost_shape)
         stress_complete &= bool(has_missing_gate and flags_ok and stress_shape)
@@ -1233,18 +1246,29 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                 route_policy = policy.loc[policy["route"].eq(route)].copy()
                 if len(route_policy) != 5:
                     leader_info = diagnostic_leaders[route]
-                    leader = by_name[leader_info["candidate"]]
                     diagnostic_fields = {
                         "diagnostic_only": True,
                         "qualified_for_gate": False,
                         "selection_basis": "full_sample_in_sample",
                     }
-                    stress_rows.append({
-                        "evidence_type": "missing_policy", "route": route,
-                        "status": "no_stable_training_policy",
-                        "policy_fold_count": len(route_policy),
-                        "candidate": leader.name, **diagnostic_fields,
-                    })
+                    leader = by_name[leader_info["candidate"]] if leader_info else None
+                    if leader is None:
+                        stress_rows.append({
+                            "evidence_type": "diagnostic_unavailable", "route": route,
+                            "reason": "no_route_candidate", "policy_fold_count": len(route_policy),
+                            "candidate": "", **diagnostic_fields,
+                        })
+                        diagnostic_series = (("anchor", ExperimentCandidate.anchor()),)
+                    else:
+                        stress_rows.append({
+                            "evidence_type": "missing_policy", "route": route,
+                            "status": "no_stable_training_policy",
+                            "policy_fold_count": len(route_policy),
+                            "candidate": leader.name, **diagnostic_fields,
+                        })
+                        diagnostic_series = (
+                            ("candidate", leader), ("anchor", ExperimentCandidate.anchor()),
+                        )
                     for cost_label, cost_model in model_matrix.items():
                         runner = _walkforward_runner(
                             inputs, target_hashes, args.initial_cash, cost_model,
@@ -1252,9 +1276,7 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                             input_data_fingerprint=experiment_fingerprint,
                             evidence_schema=STRESS_EVIDENCE_SCHEMA,
                         )
-                        for series, candidate in (
-                            ("candidate", leader), ("anchor", ExperimentCandidate.anchor()),
-                        ):
+                        for series, candidate in diagnostic_series:
                             score = runner(
                                 candidate=candidate, start=pd.Timestamp(args.start),
                                 end=pd.Timestamp(args.end),
@@ -1281,9 +1303,7 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                             resume=args.resume, input_data_fingerprint=experiment_fingerprint,
                             evidence_schema=STRESS_EVIDENCE_SCHEMA,
                         )
-                        for series, candidate in (
-                            ("candidate", leader), ("anchor", ExperimentCandidate.anchor()),
-                        ):
+                        for series, candidate in diagnostic_series:
                             score = runner(
                                 candidate=candidate, start=pd.Timestamp(start),
                                 end=pd.Timestamp(end), phase="diagnostic_stress", fold=window,
@@ -1364,11 +1384,16 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                 if len(route_policy) != 5:
                     gate_row = asdict(next(item for item in wf.gate_results if item.route == route))
                     gate_rows.append(gate_row)
+                    leader_info = diagnostic_leaders[route]
                     route_decisions[route] = {
                         "passed": False, "qualified_for_gate": False,
                         "policy_fold_count": len(route_policy),
                         "reasons": gate_row.get("reasons", ()),
-                        **diagnostic_leaders[route],
+                        "candidate": leader_info["candidate"] if leader_info else None,
+                        "diagnostic_only": True,
+                        "selection_basis": "full_sample_in_sample",
+                        "diagnostic_available": leader_info is not None,
+                        "diagnostic_reason": None if leader_info else "no_route_candidate",
                     }
                     continue
                 if route == "return":
