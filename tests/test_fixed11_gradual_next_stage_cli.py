@@ -5,6 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
+import pytest
 
 from quant_lab.backtest.portfolio import CostModel
 from quant_lab.research.optimized_v3_runner import ExperimentCandidate
@@ -523,12 +524,24 @@ def test_crash_trigger_ratio_excludes_indicator_warmup_dates(monkeypatch) -> Non
         "defensive": [True] * 10 + [True] + [False] * 19,
         "exposure_budget": [1.0] * 30,
     }))
-    audit = audit_crash_mechanisms(
-        [candidate], pd.DataFrame(), start="2019-12-30", end=str(dates[-1].date())
-    )
+    index_dates = pd.date_range(end="2019-12-27", periods=60, freq="B")
+    audit = audit_crash_mechanisms([candidate], pd.DataFrame({
+        "trade_date": index_dates, "close": [100.0] * len(index_dates),
+    }), start="2019-12-30", end=str(dates[-1].date()))
 
     # The first 10 warm-up rows are outside the 20-row evidence interval.
     assert audit.loc[0, "crash_trigger_ratio"] == 0.05
+
+
+def test_crash_audit_rejects_fewer_than_sixty_prestart_trading_days() -> None:
+    candidate = next(item for item in build_route_candidates() if item.crash_overlay is not None)
+    dates = pd.date_range(end="2019-12-31", periods=59, freq="B")
+
+    with pytest.raises(ValueError, match="60 pre-start"):
+        audit_crash_mechanisms(
+            [candidate], pd.DataFrame({"trade_date": dates, "close": [100.0] * 59}),
+            start="2020-01-01", end="2020-12-31",
+        )
 
 
 def test_combined_policy_drawdown_uses_intraperiod_equity_not_only_fold_endpoints(

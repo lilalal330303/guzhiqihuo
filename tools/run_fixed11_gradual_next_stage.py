@@ -18,6 +18,7 @@ if str(ROOT / "src") not in sys.path:
 
 from quant_lab.backtest.portfolio import CostModel
 from quant_lab.data.repository import DuckDBRepository
+from quant_lab.data.small_cap_index_history import load_index_history_with_trading_warmup
 from quant_lab.research.optimized_v2_grid import (
     GridVariant,
     build_gradual_crowding_budget,
@@ -53,7 +54,7 @@ from quant_lab.research.small_cap_experiment import (
 from quant_lab.strategies.small_cap import SmallCapParams
 
 
-SCHEMA_VERSION = "fixed11-gradual-v3.2"
+SCHEMA_VERSION = "fixed11-gradual-v3.3"
 DEFAULT_OUTPUT = ROOT / "reports" / "small_cap_fixed11_gradual_next_stage"
 DEFAULT_TARGETS = ROOT / "reports" / "small_cap_strict_daily" / "optimized_source_bugs_targets.csv"
 BASELINE_CANDIDATES = (
@@ -377,8 +378,18 @@ def audit_crash_mechanisms(
     candidates: Sequence[ExperimentCandidate], index_bars: pd.DataFrame,
     *, start: str | pd.Timestamp | None = None, end: str | pd.Timestamp | None = None,
 ) -> pd.DataFrame:
+    crash_candidates = [candidate for candidate in candidates if candidate.crash_overlay is not None]
+    if start is not None and crash_candidates:
+        required_warmup = max(candidate.crash_overlay.lookback for candidate in crash_candidates)
+        dates = pd.to_datetime(index_bars["trade_date"]).drop_duplicates()
+        observed_warmup = int(dates.lt(pd.Timestamp(start)).sum())
+        if observed_warmup < required_warmup:
+            raise ValueError(
+                f"crash audit requires {required_warmup} pre-start trading days; "
+                f"found {observed_warmup}"
+            )
     rows = []
-    for candidate in candidates:
+    for candidate in crash_candidates:
         overlay = candidate.crash_overlay
         if overlay is None:
             continue
@@ -567,6 +578,9 @@ def _period_inputs(inputs: ExperimentInputs, targets: pd.DataFrame, start: str, 
 def _load_context(db: Path, start: str, end: str, initial_cash: float) -> tuple[ExperimentInputs, dict[str, str], pd.DataFrame]:
     repo = DuckDBRepository(db)
     strict_inputs = repo.load_strict_small_cap_selection_inputs(start, end)
+    strict_inputs["index_prices"] = load_index_history_with_trading_warmup(
+        db, "399101", start, end, lookback=60,
+    )
     frozen = load_frozen_targets(DEFAULT_TARGETS)
     target_sets: dict[str, pd.DataFrame] = {}
     target_hashes = {"fixed11_gradual": target_frame_hash(frozen)}
@@ -958,6 +972,7 @@ def run_stages(args: argparse.Namespace) -> dict[str, Any]:
                      "initial_cash": args.initial_cash, "db": str(Path(args.db).resolve())})
     manifest["database_snapshot_before"] = db_before
     manifest["experiment_fingerprint"] = experiment_fingerprint
+    manifest["index_warmup_trading_days"] = 60
     write_json(manifest_path, manifest)
     manifest["input_date_coverage"] = {
         "bars_start": str(pd.to_datetime(inputs.bars["trade_date"]).min().date()),
