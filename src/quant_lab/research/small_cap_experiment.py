@@ -35,6 +35,37 @@ class SmallCapExperimentResult:
     annual_returns: pd.DataFrame
 
 
+def _validate_dynamic_stock_counts(counts: tuple[int, int, int, int]) -> None:
+    if (
+        not isinstance(counts, tuple)
+        or len(counts) != 4
+        or any(
+            isinstance(count, (bool, np.bool_))
+            or not isinstance(count, (int, np.integer))
+            or count <= 0
+            for count in counts
+        )
+    ):
+        raise ValueError("counts must contain exactly four positive integers")
+
+
+def dynamic_stock_num(
+    index_diff: float,
+    counts: tuple[int, int, int, int] = (3, 4, 5, 6),
+) -> int:
+    """Map the 399101-to-MA10 difference to a profile holding count."""
+    _validate_dynamic_stock_counts(counts)
+    if not np.isfinite(index_diff):
+        raise ValueError("index_diff must be finite")
+    if index_diff >= 200:
+        return counts[0]
+    if index_diff >= -200:
+        return counts[1]
+    if index_diff >= -500:
+        return counts[2]
+    return counts[3]
+
+
 def build_joinquant_v3_targets(
     inputs: dict[str, pd.DataFrame],
     params: SmallCapParams,
@@ -46,6 +77,8 @@ def build_joinquant_v3_targets(
     fix_known_source_bugs: bool = False,
     audit_mode: str = "hard",
     quality_penalty: float = 0.10,
+    dynamic_stock_counts: tuple[int, int, int, int] = (3, 4, 5, 6),
+    profile_name: str | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Build Tuesday v3 targets from JoinQuant point-in-time exports.
 
@@ -53,6 +86,11 @@ def build_joinquant_v3_targets(
     deterministic, fixture-testable and reusable by baseline, sensitivity and
     ablation orchestration.
     """
+    _validate_dynamic_stock_counts(dynamic_stock_counts)
+    if profile_name is not None and (
+        not isinstance(profile_name, str) or not profile_name.strip()
+    ):
+        raise ValueError("profile_name must be a non-empty string or None")
     snapshots = inputs["snapshots"].copy()
     if snapshots.empty:
         raise ValueError("strict JoinQuant snapshots are empty")
@@ -93,12 +131,7 @@ def build_joinquant_v3_targets(
             if exact.empty or pd.isna(exact.iloc[-1].get("ma10")):
                 raise ValueError(f"missing exact 399101 MA10 input for query date {query_date.date()}")
             index_diff = float(exact.iloc[-1]["close"] - exact.iloc[-1]["ma10"])
-            stock_num = (
-                3 if index_diff >= 500 else
-                3 if index_diff >= 200 else
-                4 if index_diff >= -200 else
-                5 if index_diff >= -500 else 6
-            )
+            stock_num = dynamic_stock_num(index_diff, dynamic_stock_counts)
         run_params = SmallCapParams(**{**params.__dict__, "stock_num": stock_num})
         likely = group.loc[
             group["market_cap_100m"].between(run_params.market_cap_min / 1e8, run_params.market_cap_max / 1e8)
@@ -154,16 +187,24 @@ def build_joinquant_v3_targets(
         selected = selection.selected
         if selected and position_ratio > 0:
             weight = position_ratio / len(selected)
-            target_rows.extend(
-                {"signal_date": signal_date, "symbol": symbol, "target_weight": weight}
-                for symbol in selected
-            )
+            for symbol in selected:
+                target_row = {
+                    "signal_date": signal_date,
+                    "symbol": symbol,
+                    "target_weight": weight,
+                }
+                if profile_name is not None:
+                    target_row.update({"stock_num": stock_num, "profile_name": profile_name})
+                target_rows.append(target_row)
         else:
             # The source switches to 511880 during its empty/maximum-crowding
             # states.  The daily engine will apply its stock-like fill model;
             # this fee-model difference is disclosed in the report.
-            target_rows.append({"signal_date": signal_date, "symbol": "511880", "target_weight": 1.0})
-        diagnostic_rows.append({
+            target_row = {"signal_date": signal_date, "symbol": "511880", "target_weight": 1.0}
+            if profile_name is not None:
+                target_row.update({"stock_num": stock_num, "profile_name": profile_name})
+            target_rows.append(target_row)
+        diagnostic_row = {
             "signal_date": signal_date,
             "query_date": query_date,
             "stock_num": stock_num,
@@ -174,8 +215,14 @@ def build_joinquant_v3_targets(
             "position_ratio": position_ratio,
             "selected_count": len(selected),
             "selected_symbols": ",".join(selected),
-        })
-    targets = pd.DataFrame(target_rows, columns=["signal_date", "symbol", "target_weight"])
+        }
+        if profile_name is not None:
+            diagnostic_row["profile_name"] = profile_name
+        diagnostic_rows.append(diagnostic_row)
+    target_columns = ["signal_date", "symbol", "target_weight"]
+    if profile_name is not None:
+        target_columns.extend(["stock_num", "profile_name"])
+    targets = pd.DataFrame(target_rows, columns=target_columns)
     diagnostics = pd.DataFrame(diagnostic_rows)
     rejections = pd.concat(rejection_frames, ignore_index=True) if rejection_frames else pd.DataFrame(
         columns=["symbol", "rule", "evidence_date", "signal_date"]

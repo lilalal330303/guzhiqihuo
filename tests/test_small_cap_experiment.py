@@ -33,17 +33,18 @@ def test_experiment_reports_required_and_extended_metrics():
     assert result.config.initial_cash == 10_000.0
 
 
-def test_strict_target_builder_uses_query_date_crowding_and_dynamic_stock_count():
+def _make_strict_inputs(symbols: list[str]) -> dict[str, pd.DataFrame]:
     signal_date = pd.Timestamp("2024-01-09")
     query_date = pd.Timestamp("2024-01-08")
+    count = len(symbols)
     snapshots = pd.DataFrame({
-        "signal_date": [signal_date] * 3, "query_date": [query_date] * 3,
-        "symbol": ["A", "B", "C"], "market_cap_100m": [11, 12, 13],
-        "operating_revenue": [2e8] * 3, "net_profit": [3e6] * 3,
-        "roe_pct": [1.0] * 3, "roa_pct": [1.0] * 3,
-        "close": [10.0] * 3, "paused": [False] * 3, "is_st": [False] * 3,
-        "name": ["测试"] * 3, "board": ["main"] * 3,
-        "listing_days": [500] * 3,
+        "signal_date": [signal_date] * count, "query_date": [query_date] * count,
+        "symbol": symbols, "market_cap_100m": range(11, 11 + count),
+        "operating_revenue": [2e8] * count, "net_profit": [3e6] * count,
+        "roe_pct": [1.0] * count, "roa_pct": [1.0] * count,
+        "close": [10.0] * count, "paused": [False] * count, "is_st": [False] * count,
+        "name": ["测试"] * count, "board": ["main"] * count,
+        "listing_days": [500] * count,
     })
     inputs = {
         "snapshots": snapshots,
@@ -58,6 +59,12 @@ def test_strict_target_builder_uses_query_date_crowding_and_dynamic_stock_count(
             "trade_date": [query_date], "concentration": [0.44], "observed_symbols": [5000]
         }),
     }
+    return inputs
+
+
+def test_strict_target_builder_uses_query_date_crowding_and_dynamic_stock_count():
+    query_date = pd.Timestamp("2024-01-08")
+    inputs = _make_strict_inputs(["A", "B", "C"])
 
     targets, diagnostics, _ = build_joinquant_v3_targets(
         inputs, SmallCapParams(stock_num=5), enable_dynamic_stock_num=True
