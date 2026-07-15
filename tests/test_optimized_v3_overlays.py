@@ -52,13 +52,15 @@ def test_both_crash_conditions_trigger_defensive_budget():
 
 
 def test_recovery_count_is_exact_and_severe_relapse_resets_it():
-    closes = [100.0] * 59 + [80.0, 100.0, 80.0, 100.0, 100.0, 100.0]
+    closes = [100.0] * 59 + [80.0, 100.0, 80.0, 100.0, 100.0, 100.0, 100.0]
     result = _budget(closes)
 
-    tail = result.iloc[-6:].reset_index(drop=True)
-    assert tail["severe"].tolist() == [True, False, True, False, False, False]
-    assert tail["defensive"].tolist() == [True, True, True, True, True, False]
-    assert tail["exposure_budget"].tolist() == [0.25, 0.25, 0.25, 0.25, 0.25, 1.0]
+    tail = result.iloc[-7:].reset_index(drop=True)
+    assert tail["severe"].tolist() == [True, False, True, False, False, False, False]
+    assert tail["defensive"].tolist() == [True, True, True, True, True, True, False]
+    assert tail["exposure_budget"].tolist() == [
+        0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 1.0,
+    ]
 
 
 def test_prefix_calculations_do_not_change_with_future_rows():

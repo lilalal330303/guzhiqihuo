@@ -67,7 +67,7 @@ def build_crash_exposure_budget(
             recovery_count = 0
         elif defensive:
             recovery_count += 1
-            if recovery_count >= recovery_confirmation_days:
+            if recovery_count > recovery_confirmation_days:
                 defensive = False
                 recovery_count = 0
         defensive_states.append(defensive)
