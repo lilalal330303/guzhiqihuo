@@ -13,7 +13,7 @@ import pandas as pd
 
 
 STRATEGY_NAME = "near_n1_q20"
-SCRIPT_VERSION = "ths_v2_data_shape_fix"
+SCRIPT_VERSION = "ths_v4_pretrade_signal"
 INDEX_CODE = "399101.SZ"
 DEFENSIVE_ETF = "511880.SH"
 STOCK_COUNT = 5
@@ -94,22 +94,46 @@ def _code_candidates(code):
 
 def _call_get_price(codes, count, fields, context=None, frequency="1d"):
     fn = _api("get_price")
-    if not callable(fn):
-        return pd.DataFrame()
     now = _now(context)
     values = list(codes) if isinstance(codes, (list, tuple, set, pd.Index)) else codes
-    attempts = [
-        lambda: fn(values, None, now, frequency, fields, bar_count=count),
-        lambda: fn(values, end_date=now, count=count, frequency=frequency, fields=fields, panel=False, skip_paused=True),
-        lambda: fn(values, end_date=now, count=count, frequency=frequency, fields=fields),
-    ]
-    for attempt in attempts:
-        try:
-            frame = attempt()
-            if frame is not None:
-                return frame if isinstance(frame, pd.DataFrame) else pd.DataFrame(frame)
-        except Exception:
-            continue
+    def usable(frame):
+        if frame is None:
+            return False
+        if isinstance(frame, (pd.DataFrame, dict)):
+            return not frame.empty if isinstance(frame, pd.DataFrame) else bool(frame)
+        return True
+
+    if callable(fn):
+        # SuperMind 的多标的 get_price(is_panel=False) 返回 {code: DataFrame}，
+        # 不能先强制 pd.DataFrame(frame)，否则会丢失证券维度。
+        attempts = [
+            lambda: fn(values, None, now, frequency, fields, False, "pre", count, False),
+            lambda: fn(values, end_date=now, bar_count=count, fre_step=frequency, fields=fields, skip_paused=False, fq="pre", is_panel=False),
+            lambda: fn(values, end_date=now, count=count, frequency=frequency, fields=fields, panel=False, skip_paused=True),
+            lambda: fn(values, end_date=now, count=count, frequency=frequency, fields=fields),
+        ]
+        for attempt in attempts:
+            try:
+                frame = attempt()
+                if usable(frame):
+                    return frame
+            except Exception:
+                continue
+
+    # 部分 SuperMind 回测环境对 history 的支持比 get_price 更稳定，作为同口径兜底。
+    history_fn = _api("history")
+    if callable(history_fn):
+        attempts = [
+            lambda: history_fn(values, fields, count, frequency, False, "pre", 0),
+            lambda: history_fn(values, fields, count, frequency, skip_paused=False, fq="pre", is_panel=0),
+        ]
+        for attempt in attempts:
+            try:
+                frame = attempt()
+                if usable(frame):
+                    return frame
+            except Exception:
+                continue
     return pd.DataFrame()
 
 
@@ -665,6 +689,11 @@ def before_trading(context):
     context.ths_limit_date = ""
     context.ths_record_date = ""
     _log("info", "THS_BEFORE_TRADING date={}".format(_today(context)))
+    # 选股只依赖 T-1 数据，放在开盘前准备，避免 09:31 handle_bar 批量查询
+    # 961 只股票后错过 09:45 执行事件。
+    context.ths_last_signal = select_near_n1_q20(context)
+    context.ths_signal_date = _today(context)
+    _log("info", "THS_SIGNAL_READY date={} target={}".format(_today(context), ",".join(context.ths_last_signal or [])))
 
 
 def handle_bar(context, bar_dict):
@@ -675,6 +704,7 @@ def handle_bar(context, bar_dict):
         context.ths_last_signal = select_near_n1_q20(context)
         context.ths_signal_date = today
     if hhmm >= 945 and getattr(context, "ths_execute_date", "") != today:
+        _log("info", "THS_EXECUTE date={} time={} target={}".format(today, hhmm, ",".join(getattr(context, "ths_last_signal", []) or [])))
         rebalance(context, context.ths_last_signal, bar_dict)
         context.ths_execute_date = today
     if 1000 <= hhmm <= 1450 and getattr(context, "ths_risk_date", "") != today + str(hhmm):

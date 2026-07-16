@@ -2,7 +2,7 @@
 
 脚本：`C:/Users/16052/Documents/量化研究/reports/ths_near_n1_q20.py`
 
-当前脚本版本：`ths_v2_data_shape_fix`。该版本修复了 SuperMind 批量 `get_price` 返回 MultiIndex/字典形态时 T-1 行情被解析为空的问题，并加入 `POOL_STAGE`、`POOL_EMPTY`、`THS_ORDER_SKIP` 和 `PRICE_FALLBACK_T1` 诊断日志。
+当前脚本版本：`ths_v4_pretrade_signal`。该版本按 SuperMind API 的 `is_panel=False` 规范保留多标的 `{代码: DataFrame}` 返回值，修复 T-1 行情被解析为空的问题；选股前移到 `before_trading`，并加入 `THS_SIGNAL_READY`、`THS_EXECUTE`、`POOL_STAGE`、`POOL_EMPTY`、`THS_ORDER_SKIP` 和 `PRICE_FALLBACK_T1` 诊断日志。
 
 在当前 SuperMind 策略编辑器中：
 
@@ -17,6 +17,7 @@
 - `POOL_EMPTY reason=no_index_components`：同花顺没有返回 399101 成分股；
 - `POOL_EMPTY reason=no_previous_close`：批量日行情返回格式或代码格式仍不匹配；
 - `THS_ORDER_SKIP reason=no_current_price`：目标已生成，但盘中价格接口为空；
+- 没有 `THS_EXECUTE`：分钟回调未到达 09:45，需检查回测频率是否确实为“分钟”；
 - `QUALITY_FALLBACK` / `CAP_FALLBACK`：因子接口缺失，只是降级选股，不代表完整复刻。
 
 ## 结果口径
