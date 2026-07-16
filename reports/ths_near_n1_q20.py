@@ -13,6 +13,7 @@ import pandas as pd
 
 
 STRATEGY_NAME = "near_n1_q20"
+SCRIPT_VERSION = "ths_v2_data_shape_fix"
 INDEX_CODE = "399101.SZ"
 DEFENSIVE_ETF = "511880.SH"
 STOCK_COUNT = 5
@@ -124,26 +125,53 @@ def _date_series(frame):
     return pd.to_datetime(frame.index, errors="coerce")
 
 
+def _split_price_frame(codes, frame):
+    """适配 SuperMind 批量 get_price 的 code 列、MultiIndex 和 dict 三种返回形态。"""
+    if frame is None:
+        return {}
+    if isinstance(frame, dict):
+        return {_to_ths_code(code): value for code, value in frame.items() if value is not None}
+    if not isinstance(frame, pd.DataFrame) or frame.empty:
+        return {}
+    code_set = set([_to_ths_code(code) for code in codes])
+    for column in ("code", "security", "symbol"):
+        if column in frame.columns:
+            output = {}
+            for raw_code, rows in frame.groupby(column):
+                normalized = _to_ths_code(raw_code)
+                if normalized in code_set:
+                    output[normalized] = rows.drop(columns=[column], errors="ignore")
+            if output:
+                return output
+    if isinstance(frame.index, pd.MultiIndex):
+        for level in range(frame.index.nlevels):
+            values = set([_to_ths_code(value) for value in frame.index.get_level_values(level)])
+            if values.intersection(code_set):
+                output = {}
+                for raw_code, rows in frame.groupby(level=level):
+                    normalized = _to_ths_code(raw_code)
+                    if normalized in code_set:
+                        output[normalized] = rows.reset_index(level=level, drop=True)
+                if output:
+                    return output
+    if len(codes) == 1:
+        return {_to_ths_code(codes[0]): frame}
+    return {}
+
+
 def _previous_close_map(codes, context=None):
     """批量提取 T-1 收盘，失败时返回空映射而不是读取当日未来价格。"""
     frame = _call_get_price(codes, 3, ["close"], context=context, frequency="1d")
-    if frame.empty or "close" not in frame.columns:
-        return {}
-    work = frame.copy()
-    work["_date"] = _date_series(work)
     today = pd.Timestamp(_today(context))
-    work = work.loc[work["_date"].lt(today)].copy()
-    if work.empty:
-        return {}
-    if "code" not in work.columns:
-        if len(codes) == 1:
-            code = _to_ths_code(list(codes)[0])
-            values = pd.to_numeric(work["close"], errors="coerce").dropna()
-            return {code: float(values.iloc[-1])} if not values.empty else {}
-        return {}
     out = {}
-    for code, group in work.groupby("code"):
-        values = pd.to_numeric(group["close"], errors="coerce").dropna()
+    frames = _split_price_frame(codes, frame)
+    for code, group in frames.items():
+        if not isinstance(group, pd.DataFrame) or "close" not in group.columns:
+            continue
+        work = group.copy()
+        work["_date"] = _date_series(work)
+        work = work.loc[work["_date"].lt(today)].copy()
+        values = pd.to_numeric(work["close"], errors="coerce").dropna()
         if not values.empty:
             out[_to_ths_code(code)] = float(values.iloc[-1])
     return out
@@ -352,6 +380,7 @@ def build_stock_pool(context):
     codes = _index_components(context)
     if not codes:
         context.ths_ranked = []
+        _log("info", "POOL_EMPTY date={} reason=no_index_components".format(_today(context)))
         return []
     current = _current_data()
     starts = _listing_date_map(context)
@@ -365,10 +394,13 @@ def build_stock_pool(context):
             continue
         eligible.append(code)
     closes = _previous_close_map(eligible, context)
+    eligible_before_close = len(eligible)
     eligible = [code for code in eligible if code in closes and closes[code] > 0]
     if not eligible:
         context.ths_ranked = []
+        _log("info", "POOL_EMPTY date={} reason=no_previous_close components={} eligible_before_close={} eligible_after_close={} close_map={}".format(_today(context), len(codes), eligible_before_close, len(eligible), len(closes)))
         return []
+    _log("info", "POOL_STAGE date={} components={} eligible={} close_map={}".format(_today(context), len(codes), len(eligible), len(closes)))
     frame = _try_factor_frame(context, eligible)
     if frame is not None and not frame.empty and "market_cap" in frame.columns and "code" in frame.columns:
         work = frame.copy()
@@ -447,6 +479,10 @@ def _position_price(code, context, bar_dict=None):
         values = pd.to_numeric(frame["close"], errors="coerce").dropna()
         if not values.empty:
             return float(values.iloc[-1])
+    previous = _previous_close_map([code], context=context)
+    if previous.get(_to_ths_code(code), 0.0) > 0:
+        _log("info", "PRICE_FALLBACK_T1 date={} code={} price={:.4f}".format(_today(context), _to_ths_code(code), previous[_to_ths_code(code)]))
+        return float(previous[_to_ths_code(code)])
     return 0.0
 
 
@@ -504,6 +540,8 @@ def rebalance(context, target, bar_dict=None):
         value = round_lot_value(price, per_target, ROUND_LOT)
         if value > 0:
             _place_target_value(code, value, "buy_or_adjust", "near_n1_q20")
+        else:
+            _log("info", "THS_ORDER_SKIP action=buy_or_adjust code={} reason=no_current_price price={:.6f} budget={:.2f}".format(_to_ths_code(code), price, per_target))
     context.ths_last_execute = _today(context)
 
 
@@ -611,7 +649,13 @@ def init(context):
             slippage_fn(slippage_cls(SLIPPAGE_RATE), "stock")
         except Exception:
             pass
-    _log("info", "THS_INIT strategy={} initial_cash_target=1000000 stock_count={} quality_weight={:.2f}".format(STRATEGY_NAME, STOCK_COUNT, QUALITY_WEIGHT))
+    universe_fn = _api("set_universe")
+    if callable(universe_fn):
+        try:
+            universe_fn([INDEX_CODE, DEFENSIVE_ETF])
+        except Exception:
+            pass
+    _log("info", "THS_INIT strategy={} version={} initial_cash_target=1000000 stock_count={} quality_weight={:.2f}".format(STRATEGY_NAME, SCRIPT_VERSION, STOCK_COUNT, QUALITY_WEIGHT))
 
 
 def before_trading(context):

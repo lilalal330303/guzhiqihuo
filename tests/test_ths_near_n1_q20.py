@@ -55,3 +55,33 @@ def test_order_value_uses_round_lot():
     from reports.ths_near_n1_q20 import round_lot_value
 
     assert round_lot_value(10.01, 10000, 100) == 9009.0
+
+
+def test_previous_close_map_handles_supermind_multiindex_batch(monkeypatch):
+    import reports.ths_near_n1_q20 as strategy
+
+    now = __import__("datetime").datetime(2025, 7, 17, 9, 31)
+
+    def fake_datetime():
+        return now
+
+    frame = __import__("pandas").DataFrame(
+        {"close": [10.0, 10.5, 20.0, 20.5]},
+        index=__import__("pandas").MultiIndex.from_tuples(
+            [
+                ("000001.SZ", "2025-07-16"),
+                ("000001.SZ", "2025-07-17"),
+                ("000002.SZ", "2025-07-16"),
+                ("000002.SZ", "2025-07-17"),
+            ],
+            names=["code", "time"],
+        ),
+    )
+
+    monkeypatch.setattr(strategy, "get_datetime", fake_datetime, raising=False)
+    monkeypatch.setattr(strategy, "get_price", lambda *args, **kwargs: frame, raising=False)
+
+    assert strategy._previous_close_map(["000001.SZ", "000002.SZ"], type("C", (), {})()) == {
+        "000001.SZ": 10.0,
+        "000002.SZ": 20.0,
+    }
