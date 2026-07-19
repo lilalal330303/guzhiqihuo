@@ -13,6 +13,7 @@
 
 from jqdata import *
 import datetime
+import math
 
 import numpy as np
 import pandas as pd
@@ -77,6 +78,22 @@ def _safe_ratio(value, volatility):
     if not np.isfinite(value) or not np.isfinite(volatility) or volatility <= 1e-8:
         return 0.0
     return float(value) / float(volatility)
+
+
+def valid_index_statistics(volatility, ma60):
+    """Validate scalar index statistics without NumPy truth-value quirks."""
+    if not volatility:
+        return False
+    try:
+        ma_value = float(ma60)
+        if not math.isfinite(ma_value) or ma_value <= 0:
+            return False
+        return all(
+            math.isfinite(float(value)) and float(value) > 1e-8
+            for value in volatility.values()
+        )
+    except (TypeError, ValueError):
+        return False
 
 
 def compute_style_scores(small_returns, big_returns, small_vol, big_vol):
@@ -283,9 +300,7 @@ def index_statistics(index_code, cutoff):
             daily_returns.tail(lookback).std(ddof=1) * np.sqrt(252)
         )
     ma60 = float(series.tail(60).mean())
-    if any(
-        not np.isfinite(value) or value <= 1e-8 for value in volatility.values()
-    ) or ma60 <= 0:
+    if not valid_index_statistics(volatility, ma60):
         log.warn(
             "指数统计失败 %s: volatility=%s, ma60=%s",
             index_code,

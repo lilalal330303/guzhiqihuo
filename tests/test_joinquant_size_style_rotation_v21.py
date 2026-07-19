@@ -119,3 +119,13 @@ def test_index_history_falls_back_when_attribute_history_is_short():
 
     assert result is not None
     assert result.tolist() == [200.0, 201.0, 202.0]
+
+
+def test_valid_index_statistics_accepts_finite_volatility_and_ma():
+    ns = load_strategy()
+    assert ns["valid_index_statistics"](
+        {20: 0.1504, 60: 0.1572}, 5903.1996
+    ) is True
+    assert ns["valid_index_statistics"](
+        {20: float("nan"), 60: 0.1572}, 5903.1996
+    ) is False
