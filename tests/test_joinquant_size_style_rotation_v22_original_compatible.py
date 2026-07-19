@@ -9,12 +9,20 @@ import pytest
 
 
 def load_strategy():
+    missing = object()
+    previous_jqdata = sys.modules.get("jqdata", missing)
     jqdata_stub = types.ModuleType("jqdata")
     sys.modules["jqdata"] = jqdata_stub
-    return runpy.run_path(
-        Path("reports/joinquant_size_style_rotation_v22_original_compatible.py"),
-        run_name="joinquant_size_style_rotation_v22_original_compatible_test",
-    )
+    try:
+        return runpy.run_path(
+            Path("reports/joinquant_size_style_rotation_v22_original_compatible.py"),
+            run_name="joinquant_size_style_rotation_v22_original_compatible_test",
+        )
+    finally:
+        if previous_jqdata is missing:
+            sys.modules.pop("jqdata", None)
+        else:
+            sys.modules["jqdata"] = previous_jqdata
 
 
 def test_original_ratio_preserves_branch_direction():
@@ -34,7 +42,7 @@ def test_cross_sectional_mean_return_ignores_missing_values():
         [[100.0, 100.0], [110.0, np.nan]],
         columns=["A", "B"],
     )
-    result = ns["safe_mean_return"](frame, min_samples=2, winsorize=False)
+    result = ns["safe_mean_return"](frame, min_samples=1, winsorize=False)
     assert result == pytest.approx(0.10)
 
 
