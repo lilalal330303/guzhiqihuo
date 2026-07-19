@@ -4,8 +4,6 @@
 确认执行和风控口径后，将其改为 True 才启用下行趋势做空。
 """
 
-from __future__ import annotations
-
 import math
 import re
 
