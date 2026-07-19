@@ -737,7 +737,11 @@ def prepare_stock_list(context):
             codes = [g.hold_list[0]] * len(frame)
         if len(codes) != len(frame):
             return
-        if not set(g.hold_list).issubset(set(codes)):
+        if len(codes) != len(g.hold_list):
+            return
+        if len(set(codes)) != len(codes):
+            return
+        if set(codes) != set(g.hold_list):
             return
         close = pd.to_numeric(frame["close"], errors="coerce")
         high_limit = pd.to_numeric(frame["high_limit"], errors="coerce")
@@ -824,11 +828,11 @@ def _market_guard_passes(context):
 
 def monthly_adjustment(context):
     """Select the original style branch and rebalance missing target slots."""
-    holdings = _position_symbols(context)
-    if holdings and not bool(getattr(g, "stock_list_ready", False)):
+    if not bool(getattr(g, "stock_list_ready", False)):
         log.warn("stock preparation unavailable; keep current holdings")
         return
 
+    holdings = _position_symbols(context)
     mean_2000 = get_style_mean_return(context, INDEX_2000)
     mean_500 = get_style_mean_return(context, INDEX_500)
     branch = select_original_branch(
@@ -893,6 +897,10 @@ def monthly_adjustment(context):
 
 def check_limit_up(context):
     """Sell yesterday's limit-up holding after its intraday limit opens."""
+    if not bool(getattr(g, "stock_list_ready", False)):
+        log.warn("stock preparation unavailable; skip limit-up check")
+        return
+
     for stock in list(getattr(g, "yesterday_HL_list", [])):
         if stock not in context.portfolio.positions:
             continue

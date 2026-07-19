@@ -357,6 +357,45 @@ def test_prepare_stock_list_failure_preserves_protection_and_marks_not_ready():
     assert runtime.stock_list_ready is False
 
 
+@pytest.mark.parametrize(
+    "codes",
+    [
+        ["A", "A", "B"],
+        ["A"],
+        ["A", "B", "C"],
+    ],
+    ids=["duplicate", "missing", "unexpected"],
+)
+def test_prepare_stock_list_rejects_non_bijective_rows(codes):
+    ns = load_strategy()
+    frame = pd.DataFrame(
+        {
+            "code": codes,
+            "close": [10.0] * len(codes),
+            "high_limit": [10.0] * len(codes),
+        }
+    )
+    runtime = types.SimpleNamespace(
+        hold_list=["OLD"],
+        yesterday_HL_list=["OLD"],
+        stock_list_ready=True,
+    )
+    ns["g"] = runtime
+    ns["get_price"] = lambda *args, **kwargs: frame
+    context = types.SimpleNamespace(
+        previous_date=pd.Timestamp("2024-01-02").date(),
+        portfolio=types.SimpleNamespace(
+            positions={"A": object(), "B": object()}
+        ),
+    )
+
+    ns["prepare_stock_list"](context)
+
+    assert runtime.hold_list == ["A", "B"]
+    assert runtime.yesterday_HL_list == ["OLD"]
+    assert runtime.stock_list_ready is False
+
+
 def test_prepare_stock_list_without_holdings_is_ready():
     ns = load_strategy()
     runtime = types.SimpleNamespace(
@@ -414,6 +453,46 @@ def test_monthly_adjustment_keeps_holdings_when_preparation_is_not_ready():
     assert orders == []
 
 
+def test_monthly_adjustment_keeps_empty_portfolio_when_preparation_is_not_ready():
+    ns = load_strategy()
+    downstream_calls = []
+    orders = []
+    ns["g"] = types.SimpleNamespace(
+        params=dict(ns["DEFAULT_PARAMS"]),
+        yesterday_HL_list=[],
+        stock_list_ready=False,
+    )
+    ns["log"] = types.SimpleNamespace(
+        warn=lambda *args: None,
+        info=lambda *args: None,
+    )
+
+    def style_return(context, index_code):
+        downstream_calls.append(("style", index_code))
+        return 0.10 if index_code == ns["INDEX_2000"] else 0.20
+
+    def candidates(context, branch):
+        downstream_calls.append(("candidates", branch))
+        return ["A"]
+
+    ns["get_style_mean_return"] = style_return
+    ns["get_candidates"] = candidates
+    ns["safe_order_target_value"] = (
+        lambda stock, value: orders.append((stock, value))
+    )
+    context = types.SimpleNamespace(
+        portfolio=types.SimpleNamespace(
+            positions={},
+            available_cash=10000.0,
+        )
+    )
+
+    ns["monthly_adjustment"](context)
+
+    assert downstream_calls == []
+    assert orders == []
+
+
 def test_monthly_adjustment_catches_candidate_errors_without_orders():
     ns = load_strategy()
     orders = []
@@ -449,6 +528,35 @@ def test_monthly_adjustment_catches_candidate_errors_without_orders():
 
     ns["monthly_adjustment"](context)
 
+    assert orders == []
+
+
+def test_check_limit_up_ignores_stale_protection_when_preparation_is_not_ready():
+    ns = load_strategy()
+    price_requests = []
+    orders = []
+    ns["g"] = types.SimpleNamespace(
+        yesterday_HL_list=["A"],
+        stock_list_ready=False,
+    )
+    ns["log"] = types.SimpleNamespace(warn=lambda *args: None)
+
+    def get_price(stock, **kwargs):
+        price_requests.append((stock, kwargs))
+        return pd.DataFrame({"close": [9.0], "high_limit": [10.0]})
+
+    ns["get_price"] = get_price
+    ns["safe_order_target_value"] = (
+        lambda stock, value: orders.append((stock, value))
+    )
+    context = types.SimpleNamespace(
+        current_dt=pd.Timestamp("2024-01-02 14:00"),
+        portfolio=types.SimpleNamespace(positions={"A": object()}),
+    )
+
+    ns["check_limit_up"](context)
+
+    assert price_requests == []
     assert orders == []
 
 
