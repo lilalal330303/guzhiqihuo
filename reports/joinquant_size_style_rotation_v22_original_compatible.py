@@ -270,9 +270,13 @@ def _configured_value(name, default):
 def get_style_mean_return(context, index_code):
     """Fetch cutoff-safe index closes and return their cross-sectional mean."""
     cutoff = context.previous_date
-    style_window = int(_configured_value("style_window", 20))
-    min_samples = int(_configured_value("min_style_samples", 2))
-    winsorize = bool(_configured_value("winsorize_returns", False))
+    try:
+        style_window = int(_configured_value("style_window", 20))
+        min_samples = int(_configured_value("min_style_samples", 2))
+        winsorize = bool(_configured_value("winsorize_returns", False))
+    except Exception as exc:
+        log.warn("style signal configuration failed for %s: %s", index_code, exc)
+        return None
 
     # Historical constituents remain mandatory for a cutoff-safe signal.  The
     # Task 3 default for use_historical_constituents is therefore honored here
@@ -280,7 +284,11 @@ def get_style_mean_return(context, index_code):
     use_historical = bool(_configured_value("use_historical_constituents", True))
     if not use_historical:
         return None
-    stocks = get_index_stocks(index_code, date=cutoff)
+    try:
+        stocks = get_index_stocks(index_code, date=cutoff)
+    except Exception as exc:
+        log.warn("style constituent fetch failed for %s: %s", index_code, exc)
+        return None
     if not stocks:
         return None
 
@@ -294,15 +302,31 @@ def get_style_mean_return(context, index_code):
         raw_prices = get_price(stocks, panel=False, **request)
     except TypeError as exc:
         if "panel" not in str(exc):
-            raise
-        raw_prices = get_price(stocks, **request)
+            log.warn("style price fetch failed for %s: %s", index_code, exc)
+            return None
+        try:
+            raw_prices = get_price(stocks, **request)
+        except Exception as fallback_exc:
+            log.warn(
+                "style price fallback failed for %s: %s",
+                index_code,
+                fallback_exc,
+            )
+            return None
+    except Exception as exc:
+        log.warn("style price fetch failed for %s: %s", index_code, exc)
+        return None
 
-    close_frame = safe_close_frame(raw_prices)
-    return safe_mean_return(
-        close_frame,
-        min_samples=min_samples,
-        winsorize=winsorize,
-    )
+    try:
+        close_frame = safe_close_frame(raw_prices)
+        return safe_mean_return(
+            close_frame,
+            min_samples=min_samples,
+            winsorize=winsorize,
+        )
+    except Exception as exc:
+        log.warn("style price data failed for %s: %s", index_code, exc)
+        return None
 
 
 # -----------------------------------------------------------------------------
@@ -351,6 +375,11 @@ def _frame_codes(frame):
         return []
     if "code" in frame.columns:
         return list(frame["code"])
+    if isinstance(frame.index, pd.MultiIndex):
+        if "code" in frame.index.names:
+            return list(frame.index.get_level_values("code"))
+        if frame.index.nlevels >= 2:
+            return list(frame.index.get_level_values(-1))
     if frame.index.name == "code":
         return list(frame.index)
     return []
@@ -489,6 +518,16 @@ def recent_limit_up_stocks(context, stocks, recent_days):
     return result
 
 
+def _exclude_recent_limit_up_holdings(ranked_candidates, holdings, recent_limit_ups):
+    """Remove original SMALL black-list holdings while preserving rank order."""
+    black_list = set(holdings or ()) & set(recent_limit_ups or ())
+    return [
+        stock
+        for stock in ranked_candidates or ()
+        if stock not in black_list
+    ]
+
+
 def small_candidates(context):
     """Rank the original full-market SMALL branch candidates."""
     _, choice = _full_market_pool(context)
@@ -518,20 +557,16 @@ def small_candidates(context):
     if not ranked:
         return []
 
-    held = set(_position_symbols(context))
-    recent = set(
-        recent_limit_up_stocks(
-            context,
-            ranked,
-            int(_configured_value("recent_limit_days", 40)),
-        )
+    recent = recent_limit_up_stocks(
+        context,
+        ranked,
+        int(_configured_value("recent_limit_days", 40)),
     )
-    protected = [
-        stock
-        for stock in ranked
-        if stock in held and stock in recent
-    ]
-    return protected + [stock for stock in ranked if stock not in protected]
+    return _exclude_recent_limit_up_holdings(
+        ranked,
+        _position_symbols(context),
+        recent,
+    )
 
 
 def big_candidates(context):
@@ -595,8 +630,7 @@ def prepare_stock_list(context):
 
     try:
         hit = frame[frame["close"] == frame["high_limit"]]
-        if "code" in hit.columns:
-            g.yesterday_HL_list = list(dict.fromkeys(hit["code"]))
+        g.yesterday_HL_list = list(dict.fromkeys(_frame_codes(hit)))
     except (KeyError, TypeError):
         return
 
