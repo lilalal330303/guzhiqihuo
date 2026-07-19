@@ -27,6 +27,25 @@ def load_strategy():
             sys.modules["jqdata"] = previous_jqdata
 
 
+class QueryFieldStub:
+    def __gt__(self, other):
+        return ("gt", other)
+
+    def in_(self, values):
+        return ("in", tuple(values))
+
+    def asc(self):
+        return ("asc",)
+
+
+class QueryStub:
+    def filter(self, *conditions):
+        return self
+
+    def order_by(self, *fields):
+        return self
+
+
 def test_strategy_calls_use_explicit_historical_dates():
     source = Path(
         "reports/joinquant_size_style_rotation_v22_original_compatible.py"
@@ -127,6 +146,44 @@ def test_small_candidate_blacklist_excludes_recent_limit_up_holdings():
     ) == ["A", "C"]
 
 
+def test_small_candidates_limit_ranked_universe_so_sixth_holding_is_replaced():
+    ns = load_strategy()
+    ranked = ["A", "B", "C", "D", "E", "F", "G"]
+    fundamentals = iter(
+        [
+            pd.DataFrame({"code": ranked}),
+            pd.DataFrame({"code": ranked}),
+        ]
+    )
+    field = QueryFieldStub()
+    ns["g"] = types.SimpleNamespace(
+        params={"stock_num": 5, "recent_limit_days": 40}
+    )
+    ns["valuation"] = types.SimpleNamespace(code=field, market_cap=field)
+    ns["indicator"] = types.SimpleNamespace(roe=field, roa=field)
+    ns["query"] = lambda *fields: QueryStub()
+    ns["get_fundamentals"] = lambda *args, **kwargs: next(fundamentals)
+    ns["_full_market_pool"] = lambda context: (ranked, ranked)
+    ns["_filter_high_price"] = lambda context, stocks: stocks
+    ns["recent_limit_up_stocks"] = (
+        lambda context, stocks, days: ["C"]
+    )
+    context = types.SimpleNamespace(
+        previous_date=pd.Timestamp("2024-01-31").date(),
+        portfolio=types.SimpleNamespace(
+            positions={"C": object(), "G": object()}
+        ),
+    )
+
+    candidates = ns["small_candidates"](context)
+    target = ns["merge_target_with_protected_holdings"](
+        list(context.portfolio.positions), candidates, [], 5
+    )
+
+    assert candidates == ["A", "B", "D", "E", "F"]
+    assert target == ["A", "B", "D", "E", "F"]
+
+
 def test_style_signal_returns_none_when_constituent_api_fails():
     ns = load_strategy()
     warnings = []
@@ -180,6 +237,65 @@ def test_style_signal_returns_none_when_price_shape_normalization_fails():
     assert warnings
 
 
+def test_style_signal_rejects_twenty_rows_with_only_nineteen_unique_dates():
+    ns = load_strategy()
+    cutoff = pd.Timestamp("2024-01-31").date()
+    dates = list(pd.date_range("2024-01-01", periods=19))
+    raw = pd.DataFrame(
+        {
+            "A": np.linspace(100.0, 119.0, 20),
+            "B": np.linspace(200.0, 219.0, 20),
+        },
+        index=pd.DatetimeIndex(dates + [dates[-1]]),
+    )
+    requests = []
+    ns["g"] = types.SimpleNamespace(params=dict(ns["DEFAULT_PARAMS"]))
+    ns["get_index_stocks"] = lambda *args, **kwargs: ["A", "B"]
+
+    def get_price(*args, **kwargs):
+        requests.append(kwargs)
+        return raw
+
+    ns["get_price"] = get_price
+    ns["log"] = types.SimpleNamespace(warn=lambda *args: None)
+    context = types.SimpleNamespace(previous_date=cutoff)
+
+    assert ns["get_style_mean_return"](context, "INDEX") is None
+    assert requests == [
+        {
+            "end_date": cutoff,
+            "frequency": "daily",
+            "fields": ["close"],
+            "count": 20,
+            "panel": False,
+        }
+    ]
+
+
+def test_style_signal_uses_only_the_trailing_configured_window():
+    ns = load_strategy()
+    raw = pd.DataFrame(
+        {
+            "A": [50.0, 100.0, 110.0, 121.0],
+            "B": [100.0, 100.0, 100.0, 100.0],
+        },
+        index=pd.date_range("2024-01-01", periods=4),
+    )
+    params = dict(ns["DEFAULT_PARAMS"])
+    params["style_window"] = 3
+    ns["g"] = types.SimpleNamespace(params=params)
+    ns["get_index_stocks"] = lambda *args, **kwargs: ["A", "B"]
+    ns["get_price"] = lambda *args, **kwargs: raw
+    ns["log"] = types.SimpleNamespace(warn=lambda *args: None)
+    context = types.SimpleNamespace(
+        previous_date=pd.Timestamp("2024-01-31").date()
+    )
+
+    result = ns["get_style_mean_return"](context, "INDEX")
+
+    assert result == pytest.approx(0.105)
+
+
 @pytest.mark.parametrize(
     "index",
     [
@@ -200,7 +316,7 @@ def test_prepare_stock_list_extracts_limit_up_codes_from_multiindex(index):
         {"close": [10.0, 9.0], "high_limit": [10.0, 10.0]},
         index=index,
     )
-    runtime = types.SimpleNamespace()
+    runtime = types.SimpleNamespace(stock_list_ready=False)
     ns["g"] = runtime
     ns["get_price"] = lambda *args, **kwargs: frame
     context = types.SimpleNamespace(
@@ -212,6 +328,128 @@ def test_prepare_stock_list_extracts_limit_up_codes_from_multiindex(index):
 
     assert runtime.hold_list == ["A", "B"]
     assert runtime.yesterday_HL_list == ["A"]
+    assert runtime.stock_list_ready is True
+
+
+def test_prepare_stock_list_failure_preserves_protection_and_marks_not_ready():
+    ns = load_strategy()
+    runtime = types.SimpleNamespace(
+        hold_list=["OLD"],
+        yesterday_HL_list=["A"],
+        stock_list_ready=True,
+    )
+    ns["g"] = runtime
+
+    def fail_price_fetch(*args, **kwargs):
+        raise RuntimeError("daily prices unavailable")
+
+    ns["get_price"] = fail_price_fetch
+    ns["log"] = types.SimpleNamespace(warn=lambda *args: None)
+    context = types.SimpleNamespace(
+        previous_date=pd.Timestamp("2024-01-02").date(),
+        portfolio=types.SimpleNamespace(positions={"A": object()}),
+    )
+
+    ns["prepare_stock_list"](context)
+
+    assert runtime.hold_list == ["A"]
+    assert runtime.yesterday_HL_list == ["A"]
+    assert runtime.stock_list_ready is False
+
+
+def test_prepare_stock_list_without_holdings_is_ready():
+    ns = load_strategy()
+    runtime = types.SimpleNamespace(
+        hold_list=["OLD"],
+        yesterday_HL_list=["OLD"],
+        stock_list_ready=False,
+    )
+    ns["g"] = runtime
+    ns["get_price"] = lambda *args, **kwargs: pytest.fail(
+        "empty holdings must not fetch prices"
+    )
+    context = types.SimpleNamespace(
+        previous_date=pd.Timestamp("2024-01-02").date(),
+        portfolio=types.SimpleNamespace(positions={}),
+    )
+
+    ns["prepare_stock_list"](context)
+
+    assert runtime.hold_list == []
+    assert runtime.yesterday_HL_list == []
+    assert runtime.stock_list_ready is True
+
+
+def test_monthly_adjustment_keeps_holdings_when_preparation_is_not_ready():
+    ns = load_strategy()
+    orders = []
+    runtime = types.SimpleNamespace(
+        params=dict(ns["DEFAULT_PARAMS"]),
+        yesterday_HL_list=[],
+        stock_list_ready=False,
+    )
+    ns["g"] = runtime
+    ns["log"] = types.SimpleNamespace(
+        warn=lambda *args: None,
+        info=lambda *args: None,
+    )
+    ns["get_style_mean_return"] = (
+        lambda context, index_code: 0.10
+        if index_code == ns["INDEX_2000"]
+        else 0.20
+    )
+    ns["get_candidates"] = lambda context, branch: ["B", "C", "D", "E", "F"]
+    ns["safe_order_target_value"] = (
+        lambda stock, value: orders.append((stock, value))
+    )
+    context = types.SimpleNamespace(
+        portfolio=types.SimpleNamespace(
+            positions={"A": types.SimpleNamespace(total_amount=100)},
+            available_cash=10000.0,
+        )
+    )
+
+    ns["monthly_adjustment"](context)
+
+    assert orders == []
+
+
+def test_monthly_adjustment_catches_candidate_errors_without_orders():
+    ns = load_strategy()
+    orders = []
+    runtime = types.SimpleNamespace(
+        params=dict(ns["DEFAULT_PARAMS"]),
+        yesterday_HL_list=[],
+        stock_list_ready=True,
+    )
+    ns["g"] = runtime
+    ns["log"] = types.SimpleNamespace(
+        warn=lambda *args: None,
+        info=lambda *args: None,
+    )
+    ns["get_style_mean_return"] = (
+        lambda context, index_code: 0.10
+        if index_code == ns["INDEX_2000"]
+        else 0.20
+    )
+
+    def fail_candidates(context, branch):
+        raise RuntimeError("fundamentals unavailable")
+
+    ns["get_candidates"] = fail_candidates
+    ns["safe_order_target_value"] = (
+        lambda stock, value: orders.append((stock, value))
+    )
+    context = types.SimpleNamespace(
+        portfolio=types.SimpleNamespace(
+            positions={"A": types.SimpleNamespace(total_amount=100)},
+            available_cash=10000.0,
+        )
+    )
+
+    ns["monthly_adjustment"](context)
+
+    assert orders == []
 
 
 def test_safe_close_frame_pivots_panel_false_multi_stock_frame():
@@ -250,17 +488,62 @@ def test_safe_close_frame_preserves_explicit_date_column_for_single_close():
     assert result["close"].tolist() == [100.0, 110.0]
 
 
-def test_safe_close_frame_pivots_time_code_multiindex_close_only_frame():
+@pytest.mark.parametrize(
+    ("index", "case"),
+    [
+        (
+            pd.MultiIndex.from_tuples(
+                [
+                    ("2024-01-01", "A"),
+                    ("2024-01-01", "B"),
+                    ("2024-01-02", "A"),
+                    ("2024-01-02", "B"),
+                ],
+                names=["time", "code"],
+            ),
+            "named-time-code",
+        ),
+        (
+            pd.MultiIndex.from_tuples(
+                [
+                    ("A", "2024-01-01"),
+                    ("B", "2024-01-01"),
+                    ("A", "2024-01-02"),
+                    ("B", "2024-01-02"),
+                ],
+                names=["code", "time"],
+            ),
+            "named-code-time",
+        ),
+        (
+            pd.MultiIndex.from_tuples(
+                [
+                    ("2024-01-01", "A"),
+                    ("2024-01-01", "B"),
+                    ("2024-01-02", "A"),
+                    ("2024-01-02", "B"),
+                ],
+                names=[None, None],
+            ),
+            "unnamed-time-code",
+        ),
+        (
+            pd.MultiIndex.from_tuples(
+                [
+                    ("A", "2024-01-01"),
+                    ("B", "2024-01-01"),
+                    ("A", "2024-01-02"),
+                    ("B", "2024-01-02"),
+                ],
+                names=[None, None],
+            ),
+            "unnamed-code-time",
+        ),
+    ],
+    ids=lambda value: value if isinstance(value, str) else None,
+)
+def test_safe_close_frame_pivots_multiindex_close_only_frame(index, case):
     ns = load_strategy()
-    index = pd.MultiIndex.from_tuples(
-        [
-            ("2024-01-01", "A"),
-            ("2024-01-01", "B"),
-            ("2024-01-02", "A"),
-            ("2024-01-02", "B"),
-        ],
-        names=["time", "code"],
-    )
     raw = pd.DataFrame(
         {"close": [100.0, 200.0, 110.0, 220.0]},
         index=index,
@@ -268,8 +551,52 @@ def test_safe_close_frame_pivots_time_code_multiindex_close_only_frame():
 
     result = ns["safe_close_frame"](raw)
 
-    assert result.index.equals(
-        pd.to_datetime(pd.Index(["2024-01-01", "2024-01-02"], name="time"))
+    assert result is not None, case
+    assert list(result.index) == [
+        pd.Timestamp("2024-01-01"),
+        pd.Timestamp("2024-01-02"),
+    ]
+    assert list(result.columns) == ["A", "B"]
+    assert result.iloc[-1].to_dict() == {"A": 110.0, "B": 220.0}
+
+
+@pytest.mark.parametrize(
+    "columns",
+    [
+        pd.MultiIndex.from_tuples(
+            [("close", "A"), ("close", "B")],
+            names=["field", "code"],
+        ),
+        pd.MultiIndex.from_tuples(
+            [("A", "close"), ("B", "close")],
+            names=["code", "field"],
+        ),
+        pd.MultiIndex.from_tuples(
+            [("close", "A"), ("close", "B")],
+            names=[None, None],
+        ),
+        pd.MultiIndex.from_tuples(
+            [("A", "close"), ("B", "close")],
+            names=[None, None],
+        ),
+    ],
+    ids=[
+        "named-close-code",
+        "named-code-close",
+        "unnamed-close-code",
+        "unnamed-code-close",
+    ],
+)
+def test_safe_close_frame_accepts_close_in_either_multiindex_column_level(columns):
+    ns = load_strategy()
+    raw = pd.DataFrame(
+        [[100.0, 200.0], [110.0, 220.0]],
+        index=pd.to_datetime(["2024-01-01", "2024-01-02"]),
+        columns=columns,
     )
+
+    result = ns["safe_close_frame"](raw)
+
+    assert result is not None
     assert list(result.columns) == ["A", "B"]
     assert result.iloc[-1].to_dict() == {"A": 110.0, "B": 220.0}

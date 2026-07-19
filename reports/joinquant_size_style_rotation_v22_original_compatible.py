@@ -7,6 +7,7 @@ this file with an empty ``jqdata`` stub.
 """
 
 import datetime
+import warnings
 import numpy as np
 import pandas as pd
 
@@ -122,6 +123,75 @@ def merge_target_with_protected_holdings(
     return merge_target_with_holdings(holdings, ranked, target_count)
 
 
+def _infer_multiindex_levels(index):
+    """Return integer ``(date_level, code_level)`` positions when inferable."""
+    if not isinstance(index, pd.MultiIndex) or index.nlevels < 2:
+        return None, None
+
+    normalized_names = [
+        str(name).lower() if name is not None else None
+        for name in index.names
+    ]
+    date_names = {"time", "date", "trade_date", "datetime"}
+    code_names = {"code", "security", "symbol"}
+    date_level = next(
+        (
+            level
+            for level, name in enumerate(normalized_names)
+            if name in date_names
+        ),
+        None,
+    )
+    code_level = next(
+        (
+            level
+            for level, name in enumerate(normalized_names)
+            if name in code_names
+        ),
+        None,
+    )
+
+    if date_level is not None and code_level is not None:
+        if date_level != code_level:
+            return date_level, code_level
+        return None, None
+    if index.nlevels == 2:
+        if date_level is not None:
+            return date_level, 1 - date_level
+        if code_level is not None:
+            return 1 - code_level, code_level
+
+    scores = []
+    for level in range(index.nlevels):
+        values = index.get_level_values(level)
+        if pd.api.types.is_datetime64_any_dtype(values.dtype):
+            scores.append(1.0)
+            continue
+        if pd.api.types.is_numeric_dtype(values.dtype):
+            scores.append(0.0)
+            continue
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            parsed = pd.to_datetime(values, errors="coerce")
+        scores.append(float(pd.notna(parsed).mean()))
+
+    best_score = max(scores)
+    if best_score <= 0:
+        return None, None
+    best_levels = [
+        level for level, score in enumerate(scores) if score == best_score
+    ]
+    if len(best_levels) != 1:
+        return None, None
+    date_level = best_levels[0]
+    if index.nlevels == 2:
+        return date_level, 1 - date_level
+    remaining = [level for level in range(index.nlevels) if level != date_level]
+    if len(remaining) == 1:
+        return date_level, remaining[0]
+    return None, None
+
+
 def _date_values(frame):
     """Extract date-like values from a price frame without inventing dates."""
     for column in ("time", "date", "trade_date"):
@@ -131,6 +201,9 @@ def _date_values(frame):
         for level_name in ("time", "date", "trade_date"):
             if level_name in frame.index.names:
                 return frame.index.get_level_values(level_name)
+        date_level, _ = _infer_multiindex_levels(frame.index)
+        if date_level is not None:
+            return frame.index.get_level_values(date_level)
         return frame.index.get_level_values(0)
     return frame.index
 
@@ -160,48 +233,63 @@ def _normalize_wide_close_frame(frame):
 
 def _normalize_single_close_frame(frame):
     """Normalize a close-only frame without losing row dates or code levels."""
-    if isinstance(frame.index, pd.MultiIndex) and "code" in frame.index.names:
-        date_level = next(
-            (
-                level_name
-                for level_name in ("time", "date", "trade_date")
-                if level_name in frame.index.names
-            ),
-            None,
+    if isinstance(frame.index, pd.MultiIndex):
+        date_level, code_level = _infer_multiindex_levels(frame.index)
+        if date_level is None or code_level is None:
+            return None
+        long_frame = pd.DataFrame(
+            {
+                "date": frame.index.get_level_values(date_level),
+                "code": frame.index.get_level_values(code_level),
+                "close": frame["close"].to_numpy(),
+            }
         )
-        if date_level is not None:
-            long_frame = pd.DataFrame(
-                {
-                    "date": frame.index.get_level_values(date_level),
-                    "code": frame.index.get_level_values("code"),
-                    "close": frame["close"].to_numpy(),
-                }
-            )
-            long_frame["date"] = pd.to_datetime(
-                long_frame["date"], errors="coerce"
-            )
-            long_frame["close"] = pd.to_numeric(
-                long_frame["close"], errors="coerce"
-            )
-            long_frame = long_frame.dropna(subset=["date", "code"])
-            if long_frame.empty:
-                return None
+        long_frame["date"] = pd.to_datetime(
+            long_frame["date"], errors="coerce"
+        )
+        long_frame["close"] = pd.to_numeric(
+            long_frame["close"], errors="coerce"
+        )
+        long_frame = long_frame.dropna(subset=["date", "code"])
+        if long_frame.empty:
+            return None
 
-            close_frame = long_frame.pivot_table(
-                index="date",
-                columns="code",
-                values="close",
-                aggfunc="last",
-                sort=False,
-            )
-            close_frame.columns.name = None
-            return _normalize_wide_close_frame(close_frame)
+        close_frame = long_frame.pivot_table(
+            index="date",
+            columns="code",
+            values="close",
+            aggfunc="last",
+            sort=False,
+        )
+        close_frame.columns.name = None
+        return _normalize_wide_close_frame(close_frame)
 
     close_frame = frame[["close"]].copy()
     close_frame.index = pd.DatetimeIndex(
         pd.to_datetime(_date_values(frame), errors="coerce")
     )
     return _normalize_wide_close_frame(close_frame)
+
+
+def _multiindex_close_columns(frame):
+    """Extract close values when ``close`` appears in either column level."""
+    for level in range(frame.columns.nlevels):
+        if "close" not in frame.columns.get_level_values(level):
+            continue
+        try:
+            close_frame = frame.xs(
+                "close",
+                axis=1,
+                level=level,
+                drop_level=True,
+            )
+        except (KeyError, TypeError, ValueError):
+            continue
+        if isinstance(close_frame, pd.Series):
+            close_frame = close_frame.to_frame()
+        if isinstance(close_frame, pd.DataFrame) and not close_frame.empty:
+            return close_frame
+    return None
 
 
 def safe_close_frame(raw_prices):
@@ -220,10 +308,10 @@ def safe_close_frame(raw_prices):
         return None
 
     if isinstance(raw_prices.columns, pd.MultiIndex):
-        try:
-            return _normalize_wide_close_frame(raw_prices["close"])
-        except KeyError:
+        close_frame = _multiindex_close_columns(raw_prices)
+        if close_frame is None:
             return None
+        return _normalize_wide_close_frame(close_frame)
 
     if "close" not in raw_prices.columns:
         return _normalize_wide_close_frame(raw_prices)
@@ -319,6 +407,12 @@ def get_style_mean_return(context, index_code):
 
     try:
         close_frame = safe_close_frame(raw_prices)
+        if (
+            close_frame is None
+            or close_frame.index.nunique() < style_window
+        ):
+            return None
+        close_frame = close_frame.tail(style_window)
         return safe_mean_return(
             close_frame,
             min_samples=min_samples,
@@ -361,6 +455,7 @@ def initialize(context):
 
     g.hold_list = []
     g.yesterday_HL_list = []
+    g.stock_list_ready = False
     run_daily(prepare_stock_list, "09:05")
     run_monthly(monthly_adjustment, 1, "09:30")
     run_daily(check_limit_up, "14:00")
@@ -378,6 +473,9 @@ def _frame_codes(frame):
     if isinstance(frame.index, pd.MultiIndex):
         if "code" in frame.index.names:
             return list(frame.index.get_level_values("code"))
+        _, code_level = _infer_multiindex_levels(frame.index)
+        if code_level is not None:
+            return list(frame.index.get_level_values(code_level))
         if frame.index.nlevels >= 2:
             return list(frame.index.get_level_values(-1))
     if frame.index.name == "code":
@@ -562,11 +660,12 @@ def small_candidates(context):
         ranked,
         int(_configured_value("recent_limit_days", 40)),
     )
-    return _exclude_recent_limit_up_holdings(
+    filtered = _exclude_recent_limit_up_holdings(
         ranked,
         _position_symbols(context),
         recent,
     )
+    return filtered[: int(_configured_value("stock_num", 5))]
 
 
 def big_candidates(context):
@@ -608,8 +707,10 @@ def get_candidates(context, branch):
 def prepare_stock_list(context):
     """Record current holdings and yesterday's closing limit-up holdings."""
     g.hold_list = _position_symbols(context)
-    g.yesterday_HL_list = []
+    g.stock_list_ready = False
     if not g.hold_list:
+        g.yesterday_HL_list = []
+        g.stock_list_ready = True
         return
 
     try:
@@ -629,10 +730,29 @@ def prepare_stock_list(context):
         return
 
     try:
-        hit = frame[frame["close"] == frame["high_limit"]]
-        g.yesterday_HL_list = list(dict.fromkeys(_frame_codes(hit)))
-    except (KeyError, TypeError):
+        if "close" not in frame.columns or "high_limit" not in frame.columns:
+            return
+        codes = _frame_codes(frame)
+        if not codes and len(g.hold_list) == 1:
+            codes = [g.hold_list[0]] * len(frame)
+        if len(codes) != len(frame):
+            return
+        if not set(g.hold_list).issubset(set(codes)):
+            return
+        close = pd.to_numeric(frame["close"], errors="coerce")
+        high_limit = pd.to_numeric(frame["high_limit"], errors="coerce")
+        if close.isna().any() or high_limit.isna().any():
+            return
+        hit_mask = close.eq(high_limit).to_numpy()
+        new_yesterday_limit_ups = list(
+            dict.fromkeys(
+                code for code, is_hit in zip(codes, hit_mask) if is_hit
+            )
+        )
+    except (AttributeError, KeyError, TypeError, ValueError):
         return
+    g.yesterday_HL_list = new_yesterday_limit_ups
+    g.stock_list_ready = True
 
 
 def _tradeable_now(stock, side):
@@ -704,6 +824,11 @@ def _market_guard_passes(context):
 
 def monthly_adjustment(context):
     """Select the original style branch and rebalance missing target slots."""
+    holdings = _position_symbols(context)
+    if holdings and not bool(getattr(g, "stock_list_ready", False)):
+        log.warn("stock preparation unavailable; keep current holdings")
+        return
+
     mean_2000 = get_style_mean_return(context, INDEX_2000)
     mean_500 = get_style_mean_return(context, INDEX_500)
     branch = select_original_branch(
@@ -721,12 +846,15 @@ def monthly_adjustment(context):
             log.info("market guard blocked this rebalance; keep current holdings")
             return
 
-    ranked = get_candidates(context, branch)
+    try:
+        ranked = get_candidates(context, branch)
+    except Exception as exc:
+        log.warn("%s candidate fetch failed: %s", branch, exc)
+        return
     if not ranked:
         log.warn("%s candidate list unavailable; keep current holdings", branch)
         return
 
-    holdings = _position_symbols(context)
     protected = set(getattr(g, "yesterday_HL_list", []))
     target = merge_target_with_protected_holdings(
         holdings,
