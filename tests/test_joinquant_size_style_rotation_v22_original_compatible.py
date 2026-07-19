@@ -59,6 +59,37 @@ def test_existing_holdings_are_kept_in_ranked_target():
     ) == ["A", "B"]
 
 
+def test_default_parameters_are_original_compatible():
+    ns = load_strategy()
+    params = ns["DEFAULT_PARAMS"]
+    assert params["stock_num"] == 5
+    assert params["style_window"] == 20
+    assert params["ratio_threshold"] == 1.2
+    assert params["max_price"] == 10.0
+    assert params["slippage"] == 0.0
+    assert params["winsorize_returns"] is False
+    assert params["market_guard"] is False
+
+
+def test_market_guard_is_disabled_by_default():
+    ns = load_strategy()
+    assert ns["DEFAULT_PARAMS"]["market_guard"] is False
+
+
+def test_merge_target_does_not_duplicate_existing_holdings():
+    ns = load_strategy()
+    assert ns["merge_target_with_holdings"](
+        ["A", "A"], ["A", "B", "C"], 3
+    ) == ["A", "B", "C"]
+
+
+def test_protected_holding_counts_toward_target_size():
+    ns = load_strategy()
+    assert ns["merge_target_with_protected_holdings"](
+        ["A", "B"], ["C", "D", "E"], ["A"], 3
+    ) == ["A", "C", "D"]
+
+
 def test_safe_close_frame_pivots_panel_false_multi_stock_frame():
     ns = load_strategy()
     raw = pd.DataFrame(
