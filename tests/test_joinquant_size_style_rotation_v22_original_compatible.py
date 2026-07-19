@@ -75,3 +75,46 @@ def test_safe_close_frame_pivots_panel_false_multi_stock_frame():
 
     assert list(result.columns) == ["A", "B"]
     assert result.iloc[-1].to_dict() == {"A": 110.0, "B": 220.0}
+
+
+def test_safe_close_frame_preserves_explicit_date_column_for_single_close():
+    ns = load_strategy()
+    raw = pd.DataFrame(
+        {
+            "date": ["2024-01-01", "2024-01-02"],
+            "close": [100.0, 110.0],
+        }
+    )
+
+    result = ns["safe_close_frame"](raw)
+
+    assert list(result.index) == [
+        pd.Timestamp("2024-01-01"),
+        pd.Timestamp("2024-01-02"),
+    ]
+    assert result["close"].tolist() == [100.0, 110.0]
+
+
+def test_safe_close_frame_pivots_time_code_multiindex_close_only_frame():
+    ns = load_strategy()
+    index = pd.MultiIndex.from_tuples(
+        [
+            ("2024-01-01", "A"),
+            ("2024-01-01", "B"),
+            ("2024-01-02", "A"),
+            ("2024-01-02", "B"),
+        ],
+        names=["time", "code"],
+    )
+    raw = pd.DataFrame(
+        {"close": [100.0, 200.0, 110.0, 220.0]},
+        index=index,
+    )
+
+    result = ns["safe_close_frame"](raw)
+
+    assert result.index.equals(
+        pd.to_datetime(pd.Index(["2024-01-01", "2024-01-02"], name="time"))
+    )
+    assert list(result.columns) == ["A", "B"]
+    assert result.iloc[-1].to_dict() == {"A": 110.0, "B": 220.0}

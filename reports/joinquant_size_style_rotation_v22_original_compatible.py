@@ -117,6 +117,52 @@ def _normalize_wide_close_frame(frame):
     return result.sort_index(kind="mergesort")
 
 
+def _normalize_single_close_frame(frame):
+    """Normalize a close-only frame without losing row dates or code levels."""
+    if isinstance(frame.index, pd.MultiIndex) and "code" in frame.index.names:
+        date_level = next(
+            (
+                level_name
+                for level_name in ("time", "date", "trade_date")
+                if level_name in frame.index.names
+            ),
+            None,
+        )
+        if date_level is not None:
+            long_frame = pd.DataFrame(
+                {
+                    "date": frame.index.get_level_values(date_level),
+                    "code": frame.index.get_level_values("code"),
+                    "close": frame["close"].to_numpy(),
+                }
+            )
+            long_frame["date"] = pd.to_datetime(
+                long_frame["date"], errors="coerce"
+            )
+            long_frame["close"] = pd.to_numeric(
+                long_frame["close"], errors="coerce"
+            )
+            long_frame = long_frame.dropna(subset=["date", "code"])
+            if long_frame.empty:
+                return None
+
+            close_frame = long_frame.pivot_table(
+                index="date",
+                columns="code",
+                values="close",
+                aggfunc="last",
+                sort=False,
+            )
+            close_frame.columns.name = None
+            return _normalize_wide_close_frame(close_frame)
+
+    close_frame = frame[["close"]].copy()
+    close_frame.index = pd.DatetimeIndex(
+        pd.to_datetime(_date_values(frame), errors="coerce")
+    )
+    return _normalize_wide_close_frame(close_frame)
+
+
 def safe_close_frame(raw_prices):
     """Normalize supported JoinQuant price responses into a close matrix."""
     if raw_prices is None:
@@ -142,7 +188,7 @@ def safe_close_frame(raw_prices):
         return _normalize_wide_close_frame(raw_prices)
 
     if "code" not in raw_prices.columns:
-        return _normalize_wide_close_frame(raw_prices[["close"]])
+        return _normalize_single_close_frame(raw_prices)
 
     long_frame = raw_prices[["code", "close"]].copy()
     long_frame["date"] = pd.to_datetime(_date_values(raw_prices), errors="coerce")
