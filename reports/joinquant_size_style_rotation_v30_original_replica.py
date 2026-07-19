@@ -152,7 +152,21 @@ def _long_close_frame(raw_prices):
 
 def safe_close_frame(raw_prices):
     """Return a sorted date-indexed wide numeric close frame when usable."""
-    if raw_prices is None or not isinstance(raw_prices, pd.DataFrame) or raw_prices.empty:
+    if raw_prices is None:
+        return None
+
+    if not isinstance(raw_prices, pd.DataFrame):
+        try:
+            close = raw_prices["close"]
+        except Exception:
+            return None
+        if isinstance(close, pd.Series):
+            close = close.to_frame()
+        if not isinstance(close, pd.DataFrame):
+            return None
+        return _finish_close_frame(close)
+
+    if raw_prices.empty:
         return None
 
     if isinstance(raw_prices.index, pd.MultiIndex):
@@ -339,7 +353,9 @@ def filter_highprice_stock(context, stock_list):
 
 
 def _codes_from_fundamentals(frame):
-    if frame is None or getattr(frame, "empty", True):
+    if not isinstance(frame, pd.DataFrame):
+        return None
+    if frame.empty:
         return []
     if "code" in frame.columns:
         return list(frame["code"])
@@ -352,18 +368,26 @@ def get_peg(context, stocks):
         indicator.roe > 0.15,
         indicator.roa > 0.10,
     )
-    qualified = _codes_from_fundamentals(
-        get_fundamentals(quality_query, date=fundamental_date(context))
-    )
+    try:
+        qualified = _codes_from_fundamentals(
+            get_fundamentals(quality_query, date=fundamental_date(context))
+        )
+    except Exception:
+        return None
+    if qualified is None:
+        return None
     if not qualified:
         return []
 
     rank_query = query(valuation.code).filter(
         valuation.code.in_(qualified)
     ).order_by(valuation.market_cap.asc())
-    return _codes_from_fundamentals(
-        get_fundamentals(rank_query, date=fundamental_date(context))
-    )
+    try:
+        return _codes_from_fundamentals(
+            get_fundamentals(rank_query, date=fundamental_date(context))
+        )
+    except Exception:
+        return None
 
 
 def get_recent_limit_up_stock(context, stock_list, recent_days):
@@ -405,6 +429,8 @@ def SMALL(context):
     stocks = filter_limitdown_stock(context, stocks)
     stocks = filter_highprice_stock(context, stocks)
     ranked = get_peg(context, stocks)
+    if ranked is None:
+        return None
     recent_limit_ups = get_recent_limit_up_stock(context, ranked, 40)
     return exclude_recent_limit_up_holdings(
         ranked, g.hold_list, recent_limit_ups
@@ -413,8 +439,8 @@ def SMALL(context):
 
 def BIG(context):
     stocks = _all_stock_symbols(context)
-    choice = filter_kcbj_stock(context, stocks)
-    choice = filter_st_stock(context, choice)
+    stocks = filter_kcbj_stock(context, stocks)
+    choice = filter_st_stock(context, stocks)
     choice = filter_paused_stock(context, choice)
     choice = filter_new_stock(context, choice)
     choice = filter_limitup_stock(context, choice)
@@ -431,9 +457,12 @@ def BIG(context):
         indicator.gross_profit_margin > 0.30,
         indicator.inc_revenue_year_on_year > 0.25,
     ).order_by(valuation.market_cap.desc()).limit(g.stock_num)
-    return _codes_from_fundamentals(
-        get_fundamentals(big_query, date=fundamental_date(context))
-    )
+    try:
+        return _codes_from_fundamentals(
+            get_fundamentals(big_query, date=fundamental_date(context))
+        )
+    except Exception:
+        return None
 
 
 def select_target_list(context, branch):
@@ -453,6 +482,13 @@ def rebalance_lists(holdings, target, protected):
     ]
     buy_list = [stock for stock in target if stock not in holdings]
     return sell_list, buy_list
+
+
+def buy_allocation(position_count, target_num, cash):
+    slot_count = target_num - position_count
+    if slot_count <= 0:
+        return 0.0, 0
+    return cash / slot_count, slot_count
 
 
 def order_target_value_(security, value):
@@ -541,13 +577,22 @@ def weekly_adjustment(context):
         log.warn("style signal unavailable; keep current holdings")
         return
 
-    target = select_target_list(context, branch)
+    try:
+        target = select_target_list(context, branch)
+    except Exception as exc:
+        log.warn("candidate-list-unavailable: %s" % exc)
+        return
+    if target is None:
+        log.warn("candidate-list-unavailable")
+        return
+
     sell_list, buy_list = rebalance_lists(
         g.hold_list, target, g.yesterday_HL_list
     )
+    holdings_before = _position_symbols(context)
     log.info(
-        "mode=%s mean_2000=%s mean_500=%s branch=%s candidate_count=%s "
-        "target_list=%s sell_list=%s buy_list=%s"
+        "mode=%s mean_2000=%s mean_500=%s branch=%s target_count=%s "
+        "target_list=%s holdings_before=%s sell_list=%s buy_list=%s"
         % (
             RUN_MODE,
             mean_2000,
@@ -555,6 +600,7 @@ def weekly_adjustment(context):
             branch,
             len(target),
             target,
+            holdings_before,
             sell_list,
             buy_list,
         )
@@ -567,17 +613,29 @@ def weekly_adjustment(context):
                 stock, close_position(position)
             ))
 
-    if not buy_list:
-        return
-    value = context.portfolio.available_cash / len(buy_list)
-    held_target_count = len([stock for stock in target if stock in g.hold_list])
+    position_count = len(context.portfolio.positions)
+    target_num = len(target)
+    try:
+        cash = context.portfolio.cash
+    except AttributeError:
+        cash = context.portfolio.available_cash
+    value, slot_count = buy_allocation(position_count, target_num, cash)
+    successful_opens = 0
     for stock in buy_list:
-        if held_target_count >= len(target):
+        if (
+            successful_opens >= slot_count
+            or len(context.portfolio.positions) >= target_num
+        ):
             break
         opened = open_position(stock, value)
         log.info("buy order outcome stock=%s success=%s" % (stock, opened))
         if opened:
-            held_target_count += 1
+            successful_opens += 1
+
+    log.info(
+        "holdings_after=%s position_count=%s slot_count=%s"
+        % (_position_symbols(context), len(context.portfolio.positions), slot_count)
+    )
 
 
 def check_limit_up(context):

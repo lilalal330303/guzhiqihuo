@@ -21,6 +21,8 @@
 
 `ORIGINAL_REPLICA` 为提交基线的复现模式：有意保留基本面查询的 `date=None`，以及使用当前时间的指数成分查询，以便比较原始回测路径。因此它不是对实盘无未来函数安全性的证明。
 
+Schedule fidelity: the preserved monthly rebalance at 09:30 runs on the first trading day of each month.
+
 `STRICT_ASOF` 只把上述两处日期语义改为 `context.previous_date`。信号、候选列表、分支判断、调度和下单规则全部保持一致。
 
 ## 明确拒绝的路径
