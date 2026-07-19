@@ -165,13 +165,14 @@ def safe_close_series(raw_prices):
 
 
 def get_index_close(index_code, cutoff, count=61):
-    """Read one index's daily close without relying on the legacy panel switch.
+    """Read one index's daily close through compatible single-index APIs.
 
     ``attribute_history`` returns daily bars strictly before the current
     backtest date, so the 09:35 monthly schedule remains aligned with
-    ``context.previous_date`` without passing an unsupported ``panel``
-    keyword to the single-index API.
+    ``context.previous_date``.  Some backtest runtimes expose this API
+    differently, so a plain single-index ``get_price`` call is the fallback.
     """
+    errors = []
     try:
         raw_prices = attribute_history(
             index_code,
@@ -182,15 +183,52 @@ def get_index_close(index_code, cutoff, count=61):
             df=True,
         )
     except Exception as exc:
-        log.warn("指数历史行情获取失败 %s: %s", index_code, exc)
-        return None
-    return safe_close_series(raw_prices)
+        raw_prices = None
+        errors.append("attribute_history=%s" % exc)
+
+    series = safe_close_series(raw_prices)
+    if series is not None:
+        return series
+    if raw_prices is not None:
+        errors.append(
+            "attribute_history_shape=%s" % type(raw_prices).__name__
+        )
+
+    try:
+        raw_prices = get_price(
+            index_code,
+            end_date=cutoff,
+            frequency="daily",
+            fields=["close"],
+            count=count,
+        )
+    except Exception as exc:
+        raw_prices = None
+        errors.append("get_price=%s" % exc)
+
+    series = safe_close_series(raw_prices)
+    if series is not None:
+        return series
+    if raw_prices is not None:
+        errors.append("get_price_shape=%s" % type(raw_prices).__name__)
+
+    log.warn("指数历史行情无法解析 %s: %s", index_code, "; ".join(errors))
+    return None
 
 
 def index_statistics(index_code, cutoff):
     required_count = max(max(g.params["style_windows"]) + 1, 61)
     series = get_index_close(index_code, cutoff, count=required_count)
-    if series is None or len(series) < required_count:
+    if series is None:
+        log.warn("指数统计失败 %s: close序列为空", index_code)
+        return None
+    if len(series) < required_count:
+        log.warn(
+            "指数统计失败 %s: close样本=%s，要求=%s",
+            index_code,
+            len(series),
+            required_count,
+        )
         return None
 
     latest = float(series.iloc[-1])
@@ -235,7 +273,14 @@ def determine_market_style(context):
     big_stats = index_statistics(BIG_INDEX, cutoff)
     market_stats = index_statistics(MARKET_INDEX, cutoff)
     if small_stats is None or big_stats is None or market_stats is None:
-        log.warn("风格或市场行情不足，保持当前风格")
+        missing = []
+        if small_stats is None:
+            missing.append("SMALL")
+        if big_stats is None:
+            missing.append("BIG")
+        if market_stats is None:
+            missing.append("MARKET")
+        log.warn("风格或市场行情不足，缺少=%s，保持当前风格", ",".join(missing))
         return None, False
 
     scores = compute_style_scores(

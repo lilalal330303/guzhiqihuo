@@ -79,3 +79,24 @@ def test_index_history_uses_single_index_history_api():
 
     assert result is not None
     assert result.tolist() == [100.0, 101.0, 102.0]
+
+
+def test_index_history_falls_back_to_plain_get_price_without_panel():
+    ns = load_strategy()
+
+    def rejected_attribute_history(*args, **kwargs):
+        raise RuntimeError("attribute_history unavailable in this runtime")
+
+    def fake_get_price(*args, **kwargs):
+        assert kwargs["end_date"] == "2024-01-03"
+        assert "panel" not in kwargs
+        return pd.DataFrame({"close": [200.0, 201.0, 202.0]})
+
+    strategy_globals = ns["get_index_close"].__globals__
+    strategy_globals["attribute_history"] = rejected_attribute_history
+    strategy_globals["get_price"] = fake_get_price
+    strategy_globals["log"] = types.SimpleNamespace(warn=lambda *args: None)
+    result = ns["get_index_close"]("000985.XSHG", "2024-01-03", count=3)
+
+    assert result is not None
+    assert result.tolist() == [200.0, 201.0, 202.0]
