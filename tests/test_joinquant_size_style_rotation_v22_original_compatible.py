@@ -57,3 +57,21 @@ def test_existing_holdings_are_kept_in_ranked_target():
     assert ns["merge_target_with_holdings"](
         ["A"], ["B", "A", "C"], 2
     ) == ["A", "B"]
+
+
+def test_safe_close_frame_pivots_panel_false_multi_stock_frame():
+    ns = load_strategy()
+    raw = pd.DataFrame(
+        {
+            "code": ["A", "B", "A", "B"],
+            "close": [100.0, 200.0, 110.0, 220.0],
+        },
+        index=pd.to_datetime(
+            ["2024-01-01", "2024-01-01", "2024-01-02", "2024-01-02"]
+        ),
+    )
+
+    result = ns["safe_close_frame"](raw)
+
+    assert list(result.columns) == ["A", "B"]
+    assert result.iloc[-1].to_dict() == {"A": 110.0, "B": 220.0}
