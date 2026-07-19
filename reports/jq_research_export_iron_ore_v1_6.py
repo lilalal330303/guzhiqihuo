@@ -198,11 +198,6 @@ def export_iron_ore_v16_bundle(
     return manifest
 
 
-if __name__ == "__main__":
-    print(
-        json.dumps(
-            export_iron_ore_v16_bundle(),
-            ensure_ascii=False,
-            indent=2,
-        )
-    )
+# In JoinQuant Research, call export_iron_ore_v16_bundle(...) explicitly after
+# reviewing the date range and metadata_stride.  The module does not auto-run
+# a potentially large download merely because it was pasted or imported.
