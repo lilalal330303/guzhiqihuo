@@ -1,3 +1,4 @@
+import ast
 from datetime import date, datetime
 import importlib.util
 from pathlib import Path
@@ -8,6 +9,13 @@ import pandas as pd
 import pytest
 
 
+SCRIPT = (
+    Path(__file__).resolve().parents[1]
+    / "reports"
+    / "joinquant_size_style_rotation_v30_original_replica.py"
+)
+
+
 @pytest.fixture
 def module():
     missing = object()
@@ -15,13 +23,8 @@ def module():
     jqdata_stub = types.ModuleType("jqdata")
     sys.modules["jqdata"] = jqdata_stub
 
-    module_path = (
-        Path(__file__).resolve().parents[1]
-        / "reports"
-        / "joinquant_size_style_rotation_v30_original_replica.py"
-    )
     module_name = "joinquant_size_style_rotation_v30_original_replica_test"
-    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    spec = importlib.util.spec_from_file_location(module_name, SCRIPT)
     loaded_module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = loaded_module
     try:
@@ -93,3 +96,27 @@ def test_target_selection_keeps_protected_yesterday_limit_up(module):
     assert module.rebalance_lists(
         holdings=["OLD"], target=["NEW"], protected=["OLD"]
     ) == ([], ["NEW"])
+
+
+def test_style_return_uses_arithmetic_mean_in_original_percentage_scale(module):
+    raw_prices = pd.DataFrame(
+        {"A": [100.0, 110.0], "B": [100.0, 90.0]},
+        index=pd.to_datetime(["2020-01-01", "2020-01-02"]),
+    )
+    assert module.cross_sectional_mean_return(raw_prices) == 0.0
+
+
+def test_original_runtime_source_guards_are_preserved():
+    source = Path(SCRIPT).read_text(encoding="utf-8")
+    ast.parse(source)
+
+    assert "pivot_table(sort=" not in source
+    assert "risk_off" not in source
+    assert "candidate_buffer" not in source
+    assert "winsorize" not in source
+    assert "market_guard" not in source
+    assert "hysteresis" not in source
+    assert "PriceRelatedSlippage" not in source
+    assert "date=constituent_date(context)" in source
+    assert "count=20" in source
+    assert "style signal unavailable" in source

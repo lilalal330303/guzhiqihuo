@@ -166,6 +166,25 @@ def safe_close_frame(raw_prices):
     return _finish_close_frame(raw_prices)
 
 
+def cross_sectional_mean_return(raw_prices):
+    """Return the original cross-sectional mean percentage return."""
+    close_frame = safe_close_frame(raw_prices)
+    if close_frame is None or len(close_frame.index) < 2:
+        return None
+
+    first = close_frame.iloc[0]
+    last = close_frame.iloc[-1]
+    usable = first.notna() & last.notna() & first.ne(0)
+    if not usable.any():
+        return None
+
+    returns = (last[usable] - first[usable]) / first[usable] * 100
+    returns = returns[np.isfinite(returns)]
+    if returns.empty:
+        return None
+    return float(returns.mean())
+
+
 def initialize(context):
     """Configure the original monthly size-style strategy settings."""
     set_benchmark(MARKET_INDEX)
@@ -441,37 +460,112 @@ def order_target_value_(security, value):
         log.debug("Selling out %s" % security)
     else:
         log.debug("Order %s to value %f" % (security, value))
-    return order_target_value(security, value)
+    try:
+        order = order_target_value(security, value)
+    except Exception as exc:
+        log.warn("order failed for %s target=%s: %s" % (security, value, exc))
+        return False
+    if order is None:
+        log.warn("order unavailable for %s target=%s" % (security, value))
+        return False
+    return order
 
 
 def open_position(security, value):
     order = order_target_value_(security, value)
-    return order is not None and order.filled > 0
+    filled = getattr(order, "filled", 0) or 0
+    success = bool(order) and filled > 0
+    if not success:
+        log.warn("open order not filled for %s target=%s" % (security, value))
+    return success
 
 
 def close_position(position):
     order = order_target_value_(position.security, 0)
-    return (
-        order is not None
-        and order.status == OrderStatus.held
-        and order.filled == order.amount
+    order_status = globals().get("OrderStatus")
+    held_status = getattr(order_status, "held", None)
+    filled = getattr(order, "filled", None)
+    amount = getattr(order, "amount", None)
+    success = (
+        bool(order)
+        and held_status is not None
+        and getattr(order, "status", None) == held_status
+        and filled is not None
+        and amount is not None
+        and filled == amount
     )
+    if not success:
+        log.warn("close order not fully filled for %s" % position.security)
+    return success
+
+
+def _style_prices(stock_list, yesterday):
+    try:
+        return get_price(
+            stock_list,
+            end_date=yesterday,
+            frequency="1d",
+            fields=["close"],
+            count=20,
+            panel=False,
+        )
+    except TypeError as exc:
+        if "panel" not in str(exc):
+            raise
+        return get_price(
+            stock_list,
+            end_date=yesterday,
+            frequency="1d",
+            fields=["close"],
+            count=20,
+        )
 
 
 def weekly_adjustment(context):
-    """Rebalance a supplied style branch using the original target mechanics."""
-    branch = getattr(g, "style_branch", None)
-    if branch not in ("BIG", "SMALL"):
+    """Select the original style branch and rebalance its target list."""
+    yesterday = context.previous_date
+    stock_list_2000 = get_index_stocks(
+        INDEX_2000, date=constituent_date(context)
+    )
+    stock_list_500 = get_index_stocks(
+        INDEX_500, date=constituent_date(context)
+    )
+    mean_2000 = cross_sectional_mean_return(
+        _style_prices(stock_list_2000, yesterday)
+    )
+    mean_500 = cross_sectional_mean_return(
+        _style_prices(stock_list_500, yesterday)
+    )
+    branch = select_style_branch(mean_2000, mean_500, 1.2)
+    if branch is None:
+        log.warn("style signal unavailable; keep current holdings")
         return
+
     target = select_target_list(context, branch)
     sell_list, buy_list = rebalance_lists(
         g.hold_list, target, g.yesterday_HL_list
+    )
+    log.info(
+        "mode=%s mean_2000=%s mean_500=%s branch=%s candidate_count=%s "
+        "target_list=%s sell_list=%s buy_list=%s"
+        % (
+            RUN_MODE,
+            mean_2000,
+            mean_500,
+            branch,
+            len(target),
+            target,
+            sell_list,
+            buy_list,
+        )
     )
     positions = context.portfolio.positions
     for stock in sell_list:
         position = positions.get(stock)
         if position is not None:
-            close_position(position)
+            log.info("sell order outcome stock=%s success=%s" % (
+                stock, close_position(position)
+            ))
 
     if not buy_list:
         return
@@ -480,13 +574,52 @@ def weekly_adjustment(context):
     for stock in buy_list:
         if held_target_count >= len(target):
             break
-        if open_position(stock, value):
+        opened = open_position(stock, value)
+        log.info("buy order outcome stock=%s success=%s" % (stock, opened))
+        if opened:
             held_target_count += 1
 
 
 def check_limit_up(context):
-    """Implemented with the original intraday order safeguards in Task 4."""
+    """Sell a protected limit-up holding only after its limit opens."""
+    for stock in list(getattr(g, "yesterday_HL_list", [])):
+        position = context.portfolio.positions.get(stock)
+        if position is None:
+            continue
+        try:
+            prices = get_price(
+                stock,
+                end_date=context.current_dt,
+                frequency="1m",
+                fields=["close", "high_limit"],
+                count=1,
+                panel=False,
+                fill_paused=True,
+            )
+            if prices is None or getattr(prices, "empty", True):
+                continue
+            row = prices.iloc[-1]
+            if float(row["close"]) < float(row["high_limit"]):
+                log.info("[%s] limit opened; sell" % stock)
+                log.info("limit-up sell outcome stock=%s success=%s" % (
+                    stock, close_position(position)
+                ))
+            else:
+                log.info("[%s] limit still locked; hold" % stock)
+        except Exception as exc:
+            log.warn("limit-up check failed for %s: %s" % (stock, exc))
 
 
 def close_account(context):
-    """Reserved original schedule entry; Task 4 supplies runtime behavior."""
+    """Close ordinary holdings only when the original flag requests it."""
+    if not getattr(g, "no_trading_today_signal", False):
+        return
+    protected = set(getattr(g, "yesterday_HL_list", []))
+    for stock in list(getattr(g, "hold_list", [])):
+        if stock in protected:
+            continue
+        position = context.portfolio.positions.get(stock)
+        if position is not None:
+            log.info("close-account outcome stock=%s success=%s" % (
+                stock, close_position(position)
+            ))
