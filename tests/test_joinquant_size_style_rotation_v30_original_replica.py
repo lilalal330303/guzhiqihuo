@@ -75,3 +75,21 @@ def test_price_normalizer_accepts_long_multiindex_without_sort_keyword(module):
     result = module.safe_close_frame(raw)
     assert list(result.columns) == ["000001.XSHE"]
     assert result["000001.XSHE"].tolist() == [10.0, 11.0]
+
+
+def test_recent_limit_up_blacklist_removes_only_held_recent_limit_up(module):
+    assert module.exclude_recent_limit_up_holdings(
+        ["A", "B", "C"], ["A", "C"], ["A"]
+    ) == ["B", "C"]
+
+
+def test_target_selection_does_not_keep_non_target_holdings(module):
+    assert module.rebalance_lists(
+        holdings=["OLD"], target=["NEW"], protected=[]
+    ) == (["OLD"], ["NEW"])
+
+
+def test_target_selection_keeps_protected_yesterday_limit_up(module):
+    assert module.rebalance_lists(
+        holdings=["OLD"], target=["NEW"], protected=["OLD"]
+    ) == ([], ["NEW"])

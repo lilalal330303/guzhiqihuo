@@ -4,6 +4,8 @@ The default mode intentionally reproduces the original backtest date
 semantics; STRICT_ASOF is provided only as a research comparison mode.
 """
 
+from datetime import timedelta
+
 import numpy as np
 import pandas as pd
 
@@ -162,3 +164,329 @@ def safe_close_frame(raw_prices):
         return _finish_close_frame(normalized)
 
     return _finish_close_frame(raw_prices)
+
+
+def initialize(context):
+    """Configure the original monthly size-style strategy settings."""
+    set_benchmark(MARKET_INDEX)
+    set_option("use_real_price", True)
+    set_option("avoid_future_data", True)
+    set_slippage(FixedSlippage(0))
+    set_order_cost(
+        OrderCost(
+            open_tax=0,
+            close_tax=0.001,
+            open_commission=0.0003,
+            close_commission=0.0003,
+            close_today_commission=0,
+            min_commission=5,
+        ),
+        type="stock",
+    )
+    log.set_level("order", "error")
+
+    g.stock_num = 5
+    g.no_trading_today_signal = False
+    g.hold_list = []
+    g.yesterday_HL_list = []
+
+    run_daily(prepare_stock_list, time="09:05")
+    run_monthly(weekly_adjustment, 1, time="09:30")
+    run_daily(check_limit_up, time="14:00")
+    run_daily(close_account, time="14:30")
+
+
+def _position_symbols(context):
+    return [position.security for position in context.portfolio.positions.values()]
+
+
+def _price_codes(frame, holdings):
+    """Extract security codes from JoinQuant's long, indexed, or single response."""
+    if "code" in frame.columns:
+        return list(frame["code"])
+    if isinstance(frame.index, pd.MultiIndex):
+        if "code" in frame.index.names:
+            return list(frame.index.get_level_values("code"))
+        return list(frame.index.get_level_values(-1))
+    if len(holdings) == 1:
+        return [holdings[0]] * len(frame)
+    if frame.index.name == "code":
+        return list(frame.index)
+    return []
+
+
+def prepare_stock_list(context):
+    """Snapshot held symbols and yesterday's closing-limit-up positions."""
+    g.hold_list = _position_symbols(context)
+    g.yesterday_HL_list = []
+    if not g.hold_list:
+        return
+
+    prices = get_price(
+        g.hold_list,
+        end_date=context.previous_date,
+        frequency="daily",
+        fields=["close", "high_limit"],
+        count=1,
+        panel=False,
+        fill_paused=False,
+    )
+    if prices is None or getattr(prices, "empty", True):
+        return
+    if "close" not in prices.columns or "high_limit" not in prices.columns:
+        return
+
+    codes = _price_codes(prices, g.hold_list)
+    if len(codes) != len(prices):
+        return
+    hit = prices["close"].eq(prices["high_limit"])
+    g.yesterday_HL_list = list(
+        dict.fromkeys(code for code, is_hit in zip(codes, hit) if is_hit)
+    )
+
+
+def filter_kcbj_stock(context, stock_list):
+    return [
+        stock
+        for stock in stock_list
+        if stock[0] not in ("3", "4", "8") and stock[:2] != "68"
+    ]
+
+
+def filter_st_stock(context, stock_list):
+    current_data = get_current_data()
+    return [
+        stock
+        for stock in stock_list
+        if not current_data[stock].is_st
+        and "ST" not in current_data[stock].name
+        and "*" not in current_data[stock].name
+        and "退" not in current_data[stock].name
+    ]
+
+
+def filter_paused_stock(context, stock_list):
+    current_data = get_current_data()
+    return [stock for stock in stock_list if not current_data[stock].paused]
+
+
+def filter_new_stock(context, stock_list):
+    return [
+        stock
+        for stock in stock_list
+        if context.previous_date - get_security_info(stock).start_date
+        >= timedelta(days=375)
+    ]
+
+
+def _last_minute_prices(stock_list):
+    return history(1, unit="1m", field="close", security_list=stock_list)
+
+
+def _last_price(prices, stock):
+    values = prices[stock]
+    return values.iloc[-1] if hasattr(values, "iloc") else values[-1]
+
+
+def filter_limitup_stock(context, stock_list):
+    last_prices = _last_minute_prices(stock_list)
+    current_data = get_current_data()
+    return [
+        stock
+        for stock in stock_list
+        if stock in g.hold_list
+        or _last_price(last_prices, stock) < current_data[stock].high_limit
+    ]
+
+
+def filter_limitdown_stock(context, stock_list):
+    last_prices = _last_minute_prices(stock_list)
+    current_data = get_current_data()
+    return [
+        stock
+        for stock in stock_list
+        if stock in g.hold_list
+        or _last_price(last_prices, stock) > current_data[stock].low_limit
+    ]
+
+
+def filter_highprice_stock(context, stock_list):
+    last_prices = _last_minute_prices(stock_list)
+    return [
+        stock
+        for stock in stock_list
+        if stock in g.hold_list or _last_price(last_prices, stock) < 10
+    ]
+
+
+def _codes_from_fundamentals(frame):
+    if frame is None or getattr(frame, "empty", True):
+        return []
+    if "code" in frame.columns:
+        return list(frame["code"])
+    return list(frame.index)
+
+
+def get_peg(context, stocks):
+    quality_query = query(valuation.code).filter(
+        valuation.code.in_(stocks),
+        indicator.roe > 0.15,
+        indicator.roa > 0.10,
+    )
+    qualified = _codes_from_fundamentals(
+        get_fundamentals(quality_query, date=fundamental_date(context))
+    )
+    if not qualified:
+        return []
+
+    rank_query = query(valuation.code).filter(
+        valuation.code.in_(qualified)
+    ).order_by(valuation.market_cap.asc())
+    return _codes_from_fundamentals(
+        get_fundamentals(rank_query, date=fundamental_date(context))
+    )
+
+
+def get_recent_limit_up_stock(context, stock_list, recent_days):
+    result = []
+    for stock in stock_list:
+        prices = get_price(
+            stock,
+            end_date=context.previous_date,
+            frequency="daily",
+            fields=["close", "high_limit"],
+            count=recent_days,
+            panel=False,
+            fill_paused=False,
+        )
+        if prices is not None and not prices.empty and (
+            prices["close"] == prices["high_limit"]
+        ).any():
+            result.append(stock)
+    return result
+
+
+def exclude_recent_limit_up_holdings(ranked, holdings, recent_limit_ups):
+    blacklist = set(holdings or ()) & set(recent_limit_ups or ())
+    return [stock for stock in ranked if stock not in blacklist]
+
+
+def _all_stock_symbols(context):
+    securities = get_all_securities("stock", date=context.previous_date)
+    return list(securities.index)
+
+
+def SMALL(context):
+    stocks = _all_stock_symbols(context)
+    stocks = filter_kcbj_stock(context, stocks)
+    stocks = filter_st_stock(context, stocks)
+    stocks = filter_paused_stock(context, stocks)
+    stocks = filter_new_stock(context, stocks)
+    stocks = filter_limitup_stock(context, stocks)
+    stocks = filter_limitdown_stock(context, stocks)
+    stocks = filter_highprice_stock(context, stocks)
+    ranked = get_peg(context, stocks)
+    recent_limit_ups = get_recent_limit_up_stock(context, ranked, 40)
+    return exclude_recent_limit_up_holdings(
+        ranked, g.hold_list, recent_limit_ups
+    )[: g.stock_num]
+
+
+def BIG(context):
+    stocks = _all_stock_symbols(context)
+    choice = filter_kcbj_stock(context, stocks)
+    choice = filter_st_stock(context, choice)
+    choice = filter_paused_stock(context, choice)
+    choice = filter_new_stock(context, choice)
+    choice = filter_limitup_stock(context, choice)
+    choice = filter_limitdown_stock(context, choice)
+
+    big_query = query(valuation.code).filter(
+        valuation.code.in_(stocks),
+        valuation.pe_ratio_lyr.between(0, 30),
+        valuation.ps_ratio.between(0, 8),
+        valuation.pcf_ratio < 10,
+        indicator.eps > 0.3,
+        indicator.roe > 0.10,
+        indicator.net_profit_margin > 0.10,
+        indicator.gross_profit_margin > 0.30,
+        indicator.inc_revenue_year_on_year > 0.25,
+    ).order_by(valuation.market_cap.desc()).limit(g.stock_num)
+    return _codes_from_fundamentals(
+        get_fundamentals(big_query, date=fundamental_date(context))
+    )
+
+
+def select_target_list(context, branch):
+    if branch == "BIG":
+        return BIG(context)
+    if branch == "SMALL":
+        return SMALL(context)
+    return []
+
+
+def rebalance_lists(holdings, target, protected):
+    protected_set = set(protected or ())
+    holdings = list(holdings or ())
+    target = list(target or ())
+    sell_list = [
+        stock for stock in holdings if stock not in target and stock not in protected_set
+    ]
+    buy_list = [stock for stock in target if stock not in holdings]
+    return sell_list, buy_list
+
+
+def order_target_value_(security, value):
+    if value == 0:
+        log.debug("Selling out %s" % security)
+    else:
+        log.debug("Order %s to value %f" % (security, value))
+    return order_target_value(security, value)
+
+
+def open_position(security, value):
+    order = order_target_value_(security, value)
+    return order is not None and order.filled > 0
+
+
+def close_position(position):
+    order = order_target_value_(position.security, 0)
+    return (
+        order is not None
+        and order.status == OrderStatus.held
+        and order.filled == order.amount
+    )
+
+
+def weekly_adjustment(context):
+    """Rebalance a supplied style branch using the original target mechanics."""
+    branch = getattr(g, "style_branch", None)
+    if branch not in ("BIG", "SMALL"):
+        return
+    target = select_target_list(context, branch)
+    sell_list, buy_list = rebalance_lists(
+        g.hold_list, target, g.yesterday_HL_list
+    )
+    positions = context.portfolio.positions
+    for stock in sell_list:
+        position = positions.get(stock)
+        if position is not None:
+            close_position(position)
+
+    if not buy_list:
+        return
+    value = context.portfolio.available_cash / len(buy_list)
+    held_target_count = len([stock for stock in target if stock in g.hold_list])
+    for stock in buy_list:
+        if held_target_count >= len(target):
+            break
+        if open_position(stock, value):
+            held_target_count += 1
+
+
+def check_limit_up(context):
+    """Implemented with the original intraday order safeguards in Task 4."""
+
+
+def close_account(context):
+    """Reserved original schedule entry; Task 4 supplies runtime behavior."""
