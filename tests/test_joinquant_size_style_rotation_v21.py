@@ -1,4 +1,5 @@
 from pathlib import Path
+import pandas as pd
 import runpy
 import sys
 import types
@@ -59,3 +60,22 @@ def test_holdings_in_buffer_are_kept_before_new_candidates():
         buffer_count=5,
     )
     assert result == ["A", "B", "C"]
+
+
+def test_index_history_uses_single_index_history_api():
+    ns = load_strategy()
+
+    def fake_attribute_history(*args, **kwargs):
+        return pd.DataFrame({"close": [100.0, 101.0, 102.0]})
+
+    def rejected_get_price(*args, **kwargs):
+        raise AssertionError("index history should not depend on panel=False")
+
+    strategy_globals = ns["get_index_close"].__globals__
+    strategy_globals["attribute_history"] = fake_attribute_history
+    strategy_globals["get_price"] = rejected_get_price
+    strategy_globals["log"] = types.SimpleNamespace(warn=lambda *args: None)
+    result = ns["get_index_close"]("000985.XSHG", "2024-01-03", count=3)
+
+    assert result is not None
+    assert result.tolist() == [100.0, 101.0, 102.0]

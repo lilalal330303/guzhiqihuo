@@ -165,18 +165,24 @@ def safe_close_series(raw_prices):
 
 
 def get_index_close(index_code, cutoff, count=61):
+    """Read one index's daily close without relying on the legacy panel switch.
+
+    ``attribute_history`` returns daily bars strictly before the current
+    backtest date, so the 09:35 monthly schedule remains aligned with
+    ``context.previous_date`` without passing an unsupported ``panel``
+    keyword to the single-index API.
+    """
     try:
-        raw_prices = get_price(
+        raw_prices = attribute_history(
             index_code,
-            end_date=cutoff,
-            frequency="daily",
-            fields=["close"],
-            count=count,
-            panel=False,
-            fill_paused=True,
+            count,
+            unit="1d",
+            fields=("close",),
+            skip_paused=True,
+            df=True,
         )
     except Exception as exc:
-        log.warn("指数行情获取失败 %s: %s", index_code, exc)
+        log.warn("指数历史行情获取失败 %s: %s", index_code, exc)
         return None
     return safe_close_series(raw_prices)
 
