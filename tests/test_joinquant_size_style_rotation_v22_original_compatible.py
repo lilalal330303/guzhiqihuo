@@ -67,6 +67,49 @@ def test_strategy_calls_use_explicit_historical_dates():
     )
 
 
+def test_style_signal_requests_constituents_and_prices_at_previous_date():
+    ns = load_strategy()
+    cutoff = pd.Timestamp("2024-01-31").date()
+    requests = []
+    params = dict(ns["DEFAULT_PARAMS"])
+    params["style_window"] = 2
+    ns["g"] = types.SimpleNamespace(params=params)
+    ns["log"] = types.SimpleNamespace(warn=lambda *args: None)
+
+    def get_index_stocks(index_code, **kwargs):
+        requests.append(("index", index_code, kwargs))
+        return ["A", "B"]
+
+    def get_price(stocks, **kwargs):
+        requests.append(("price", stocks, kwargs))
+        return pd.DataFrame(
+            {"A": [100.0, 110.0], "B": [200.0, 220.0]},
+            index=pd.to_datetime(["2024-01-30", "2024-01-31"]),
+        )
+
+    ns["get_index_stocks"] = get_index_stocks
+    ns["get_price"] = get_price
+    context = types.SimpleNamespace(previous_date=cutoff)
+
+    result = ns["get_style_mean_return"](context, "INDEX")
+
+    assert result == pytest.approx(0.10)
+    assert requests == [
+        ("index", "INDEX", {"date": cutoff}),
+        (
+            "price",
+            ["A", "B"],
+            {
+                "panel": False,
+                "end_date": cutoff,
+                "frequency": "daily",
+                "fields": ["close"],
+                "count": 2,
+            },
+        ),
+    ]
+
+
 def test_original_ratio_preserves_branch_direction():
     ns = load_strategy()
     assert ns["select_original_branch"](0.30, 0.20, 1.2) == "BIG"
@@ -357,12 +400,44 @@ def test_prepare_stock_list_failure_preserves_protection_and_marks_not_ready():
     assert runtime.stock_list_ready is False
 
 
+def test_prepare_stock_list_marks_not_ready_before_failed_holdings_snapshot():
+    ns = load_strategy()
+    readiness_at_snapshot = []
+    warnings = []
+    runtime = types.SimpleNamespace(
+        hold_list=["OLD"],
+        yesterday_HL_list=["OLD"],
+        stock_list_ready=True,
+    )
+    ns["g"] = runtime
+    ns["log"] = types.SimpleNamespace(warn=lambda *args: warnings.append(args))
+    ns["get_price"] = lambda *args, **kwargs: pytest.fail(
+        "failed holdings snapshot must not fetch prices"
+    )
+
+    class FailingPortfolio:
+        @property
+        def positions(self):
+            readiness_at_snapshot.append(runtime.stock_list_ready)
+            raise RuntimeError("positions unavailable")
+
+    context = types.SimpleNamespace(portfolio=FailingPortfolio())
+
+    ns["prepare_stock_list"](context)
+
+    assert readiness_at_snapshot == [False]
+    assert runtime.hold_list == ["OLD"]
+    assert runtime.yesterday_HL_list == ["OLD"]
+    assert runtime.stock_list_ready is False
+    assert warnings
+
+
 @pytest.mark.parametrize(
     "codes",
     [
-        ["A", "A", "B"],
+        ["A", "A"],
         ["A"],
-        ["A", "B", "C"],
+        ["A", "C"],
     ],
     ids=["duplicate", "missing", "unexpected"],
 )
@@ -375,6 +450,65 @@ def test_prepare_stock_list_rejects_non_bijective_rows(codes):
             "high_limit": [10.0] * len(codes),
         }
     )
+    runtime = types.SimpleNamespace(
+        hold_list=["OLD"],
+        yesterday_HL_list=["OLD"],
+        stock_list_ready=True,
+    )
+    ns["g"] = runtime
+    ns["get_price"] = lambda *args, **kwargs: frame
+    context = types.SimpleNamespace(
+        previous_date=pd.Timestamp("2024-01-02").date(),
+        portfolio=types.SimpleNamespace(
+            positions={"A": object(), "B": object()}
+        ),
+    )
+
+    ns["prepare_stock_list"](context)
+
+    assert runtime.hold_list == ["A", "B"]
+    assert runtime.yesterday_HL_list == ["OLD"]
+    assert runtime.stock_list_ready is False
+
+
+@pytest.mark.parametrize(
+    ("field", "invalid_value"),
+    [
+        ("close", np.nan),
+        ("close", np.inf),
+        ("close", -np.inf),
+        ("close", 0.0),
+        ("close", -1.0),
+        ("high_limit", np.nan),
+        ("high_limit", np.inf),
+        ("high_limit", -np.inf),
+        ("high_limit", 0.0),
+        ("high_limit", -1.0),
+    ],
+    ids=[
+        "close-nan",
+        "close-positive-inf",
+        "close-negative-inf",
+        "close-zero",
+        "close-negative",
+        "high-limit-nan",
+        "high-limit-positive-inf",
+        "high-limit-negative-inf",
+        "high-limit-zero",
+        "high-limit-negative",
+    ],
+)
+def test_prepare_stock_list_rejects_non_positive_or_non_finite_prices(
+    field, invalid_value
+):
+    ns = load_strategy()
+    values = {
+        "code": ["A", "B"],
+        "close": [10.0, 9.0],
+        "high_limit": [10.0, 10.0],
+    }
+    values[field][0] = invalid_value
+    frame = pd.DataFrame(values)
     runtime = types.SimpleNamespace(
         hold_list=["OLD"],
         yesterday_HL_list=["OLD"],

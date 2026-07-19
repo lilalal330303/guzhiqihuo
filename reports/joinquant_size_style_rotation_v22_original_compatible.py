@@ -706,8 +706,13 @@ def get_candidates(context, branch):
 
 def prepare_stock_list(context):
     """Record current holdings and yesterday's closing limit-up holdings."""
-    g.hold_list = _position_symbols(context)
     g.stock_list_ready = False
+    try:
+        hold_list = _position_symbols(context)
+    except Exception as exc:
+        log.warn("holdings snapshot failed: %s", exc)
+        return
+    g.hold_list = hold_list
     if not g.hold_list:
         g.yesterday_HL_list = []
         g.stock_list_ready = True
@@ -745,7 +750,12 @@ def prepare_stock_list(context):
             return
         close = pd.to_numeric(frame["close"], errors="coerce")
         high_limit = pd.to_numeric(frame["high_limit"], errors="coerce")
-        if close.isna().any() or high_limit.isna().any():
+        if (
+            not np.isfinite(close.to_numpy()).all()
+            or not np.isfinite(high_limit.to_numpy()).all()
+            or close.le(0).any()
+            or high_limit.le(0).any()
+        ):
             return
         hit_mask = close.eq(high_limit).to_numpy()
         new_yesterday_limit_ups = list(
