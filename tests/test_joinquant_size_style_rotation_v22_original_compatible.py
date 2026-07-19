@@ -1,3 +1,4 @@
+import ast
 from pathlib import Path
 import runpy
 import sys
@@ -24,6 +25,27 @@ def load_strategy():
             sys.modules.pop("jqdata", None)
         else:
             sys.modules["jqdata"] = previous_jqdata
+
+
+def test_strategy_calls_use_explicit_historical_dates():
+    source = Path(
+        "reports/joinquant_size_style_rotation_v22_original_compatible.py"
+    ).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    names = {"get_fundamentals", "get_index_stocks"}
+    calls = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in names
+    ]
+
+    assert calls
+    assert all(
+        any(keyword.arg == "date" for keyword in call.keywords)
+        for call in calls
+    )
 
 
 def test_original_ratio_preserves_branch_direction():
