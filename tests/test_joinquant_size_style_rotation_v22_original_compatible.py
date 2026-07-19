@@ -712,6 +712,53 @@ def test_safe_close_frame_pivots_panel_false_multi_stock_frame():
     assert result.iloc[-1].to_dict() == {"A": 110.0, "B": 220.0}
 
 
+def test_safe_close_frame_supports_legacy_pandas_pivot_table(monkeypatch):
+    ns = load_strategy()
+    original_pivot_table = pd.DataFrame.pivot_table
+
+    def legacy_pivot_table(self, *args, **kwargs):
+        assert "sort" not in kwargs
+        return original_pivot_table(self, *args, **kwargs)
+
+    monkeypatch.setattr(pd.DataFrame, "pivot_table", legacy_pivot_table)
+    raw = pd.DataFrame(
+        {
+            "time": pd.to_datetime(["2024-01-01", "2024-01-01"]),
+            "code": ["A", "B"],
+            "close": [100.0, 200.0],
+        }
+    )
+
+    result = ns["safe_close_frame"](raw)
+
+    assert list(result.columns) == ["A", "B"]
+
+
+def test_multiindex_close_normalization_supports_legacy_pandas_pivot_table(
+    monkeypatch,
+):
+    ns = load_strategy()
+    original_pivot_table = pd.DataFrame.pivot_table
+
+    def legacy_pivot_table(self, *args, **kwargs):
+        assert "sort" not in kwargs
+        return original_pivot_table(self, *args, **kwargs)
+
+    monkeypatch.setattr(pd.DataFrame, "pivot_table", legacy_pivot_table)
+    index = pd.MultiIndex.from_tuples(
+        [
+            (pd.Timestamp("2024-01-01"), "A"),
+            (pd.Timestamp("2024-01-01"), "B"),
+        ],
+        names=["time", "code"],
+    )
+    raw = pd.DataFrame({"close": [100.0, 200.0]}, index=index)
+
+    result = ns["safe_close_frame"](raw)
+
+    assert list(result.columns) == ["A", "B"]
+
+
 def test_safe_close_frame_preserves_explicit_date_column_for_single_close():
     ns = load_strategy()
     raw = pd.DataFrame(

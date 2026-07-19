@@ -259,7 +259,6 @@ def _normalize_single_close_frame(frame):
             columns="code",
             values="close",
             aggfunc="last",
-            sort=False,
         )
         close_frame.columns.name = None
         return _normalize_wide_close_frame(close_frame)
@@ -331,7 +330,6 @@ def safe_close_frame(raw_prices):
         columns="code",
         values="close",
         aggfunc="last",
-        sort=False,
     )
     close_frame.columns.name = None
     return _normalize_wide_close_frame(close_frame)
