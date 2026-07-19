@@ -100,3 +100,22 @@ def test_index_history_falls_back_to_plain_get_price_without_panel():
 
     assert result is not None
     assert result.tolist() == [200.0, 201.0, 202.0]
+
+
+def test_index_history_falls_back_when_attribute_history_is_short():
+    ns = load_strategy()
+
+    def short_attribute_history(*args, **kwargs):
+        return pd.DataFrame({"close": [100.0, 101.0]})
+
+    def full_get_price(*args, **kwargs):
+        return pd.DataFrame({"close": [200.0, 201.0, 202.0]})
+
+    strategy_globals = ns["get_index_close"].__globals__
+    strategy_globals["attribute_history"] = short_attribute_history
+    strategy_globals["get_price"] = full_get_price
+    strategy_globals["log"] = types.SimpleNamespace(warn=lambda *args: None)
+    result = ns["get_index_close"]("000985.XSHG", "2024-01-03", count=3)
+
+    assert result is not None
+    assert result.tolist() == [200.0, 201.0, 202.0]

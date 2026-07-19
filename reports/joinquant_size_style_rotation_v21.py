@@ -173,6 +173,7 @@ def get_index_close(index_code, cutoff, count=61):
     differently, so a plain single-index ``get_price`` call is the fallback.
     """
     errors = []
+    best_series = None
     try:
         raw_prices = attribute_history(
             index_code,
@@ -188,7 +189,10 @@ def get_index_close(index_code, cutoff, count=61):
 
     series = safe_close_series(raw_prices)
     if series is not None:
-        return series
+        if len(series) >= count:
+            return series
+        best_series = series
+        errors.append("attribute_history_rows=%s" % len(series))
     if raw_prices is not None:
         errors.append(
             "attribute_history_shape=%s" % type(raw_prices).__name__
@@ -208,10 +212,16 @@ def get_index_close(index_code, cutoff, count=61):
 
     series = safe_close_series(raw_prices)
     if series is not None:
-        return series
+        if len(series) >= count:
+            return series
+        if best_series is None or len(series) > len(best_series):
+            best_series = series
+        errors.append("get_price_rows=%s" % len(series))
     if raw_prices is not None:
         errors.append("get_price_shape=%s" % type(raw_prices).__name__)
 
+    if best_series is not None:
+        return best_series
     log.warn("指数历史行情无法解析 %s: %s", index_code, "; ".join(errors))
     return None
 
@@ -233,14 +243,27 @@ def index_statistics(index_code, cutoff):
 
     latest = float(series.iloc[-1])
     if latest <= 0:
+        log.warn("指数统计失败 %s: 最新收盘价无效=%s", index_code, latest)
         return None
 
     returns = {}
     for window in g.params["style_windows"]:
         if len(series) <= window:
+            log.warn(
+                "指数统计失败 %s: 窗口=%s，close样本=%s",
+                index_code,
+                window,
+                len(series),
+            )
             return None
         base = float(series.iloc[-window - 1])
         if base <= 0:
+            log.warn(
+                "指数统计失败 %s: 窗口=%s基准收盘价无效=%s",
+                index_code,
+                window,
+                base,
+            )
             return None
         returns[window] = latest / base - 1.0
 
@@ -249,6 +272,12 @@ def index_statistics(index_code, cutoff):
     for window in g.params["style_windows"]:
         lookback = max(g.params["style_lookback_vol"], window)
         if len(daily_returns) < lookback:
+            log.warn(
+                "指数统计失败 %s: 日收益样本=%s，波动率窗口=%s",
+                index_code,
+                len(daily_returns),
+                lookback,
+            )
             return None
         volatility[window] = float(
             daily_returns.tail(lookback).std(ddof=1) * np.sqrt(252)
@@ -257,6 +286,12 @@ def index_statistics(index_code, cutoff):
     if any(
         not np.isfinite(value) or value <= 1e-8 for value in volatility.values()
     ) or ma60 <= 0:
+        log.warn(
+            "指数统计失败 %s: volatility=%s, ma60=%s",
+            index_code,
+            volatility,
+            ma60,
+        )
         return None
 
     return {
