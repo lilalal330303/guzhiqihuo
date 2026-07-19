@@ -1,9 +1,13 @@
 import json
+import zipfile
 
 import pandas as pd
 import pytest
 
-from reports.jq_research_export_iron_ore_v1_6 import _normalize_price_frame
+from reports.jq_research_export_iron_ore_v1_6 import (
+    _normalize_price_frame,
+    package_export_bundle,
+)
 from quant_lab.data.iron_ore import IronOreDataStore
 
 
@@ -76,6 +80,28 @@ def test_import_bundle_creates_idempotent_iron_ore_tables(tmp_path):
     assert report["main_daily_duplicate_keys"] == 0
     assert report["contract_daily_duplicate_keys"] == 0
     assert report["contract_count"] == 1
+
+
+def test_import_bundle_accepts_the_single_download_zip(tmp_path):
+    export_dir = tmp_path / "export"
+    export_dir.mkdir()
+    _write_bundle(export_dir)
+    zip_path = package_export_bundle(export_dir, tmp_path / "iron_ore_v1_6_export.zip")
+
+    store = IronOreDataStore(tmp_path / "market.duckdb")
+    result = store.import_bundle(zip_path)
+
+    assert result.row_counts["main_daily"] == 3
+    with zipfile.ZipFile(zip_path) as archive:
+        assert sorted(archive.namelist()) == sorted(
+            [
+                "iron_ore_main_daily.csv",
+                "iron_ore_contract_daily.csv",
+                "iron_ore_contracts.csv",
+                "iron_ore_universe_daily.csv",
+                "manifest.json",
+            ]
+        )
 
 
 def test_import_bundle_rejects_duplicate_contract_primary_keys(tmp_path):

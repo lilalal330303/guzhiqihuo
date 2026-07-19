@@ -2,15 +2,16 @@
 
 Run this file in JoinQuant's research environment, not in the strategy editor.
 The default export is daily data with a strict point-in-time futures universe.
-After the files are downloaded from the research workspace, run the local
-import CLI:
+The call writes both an export directory and a same-name .zip file.  Download
+the ZIP from the research workspace, then run the local import CLI:
 
-    python tools/import_iron_ore_v1_6.py --input-dir iron_ore_v1_6_export
+    python tools/import_iron_ore_v1_6.py --input iron_ore_v1_6_export.zip
 """
 
 import json
 import os
 import re
+import zipfile
 
 import pandas as pd
 
@@ -134,13 +135,27 @@ def _download_universe(main_daily, metadata_stride):
     ).sort_values(["asof_date", "symbol"]).reset_index(drop=True)
 
 
+def package_export_bundle(output_dir, zip_path=None):
+    """Package the five export files into one flat ZIP for download."""
+    output_dir = str(output_dir)
+    zip_path = zip_path or output_dir.rstrip("/\\") + ".zip"
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for filename in list(EXPORT_FILES.values()) + ["manifest.json"]:
+            path = os.path.join(output_dir, filename)
+            if not os.path.exists(path):
+                raise FileNotFoundError("missing export file before zipping: {}".format(path))
+            archive.write(path, arcname=filename)
+    return zip_path
+
+
 def export_iron_ore_v16_bundle(
     start_date="2018-01-01",
     end_date="2026-07-18",
     output_dir="iron_ore_v1_6_export",
     metadata_stride=1,
+    output_zip=None,
 ):
-    """Download and write the complete V1.6 daily research bundle."""
+    """Download, write, and ZIP the complete V1.6 daily research bundle."""
     requested_start = pd.Timestamp(start_date).normalize()
     requested_end = pd.Timestamp(end_date).normalize()
     data_start = requested_start - pd.Timedelta(days=180)
@@ -172,6 +187,7 @@ def export_iron_ore_v16_bundle(
         "contracts": contracts,
         "universe_daily": universe_daily,
     }
+    zip_path = output_zip or output_dir.rstrip("/\\") + ".zip"
     for key, frame in datasets.items():
         frame.to_csv(
             os.path.join(output_dir, EXPORT_FILES[key]),
@@ -192,9 +208,11 @@ def export_iron_ore_v16_bundle(
         "row_counts": {key: int(len(frame)) for key, frame in datasets.items()},
         "contract_count": int(contracts["symbol"].nunique()),
         "universe_asof_count": int(universe_daily["asof_date"].nunique()),
+        "zip_file": os.path.basename(zip_path),
     }
     with open(os.path.join(output_dir, "manifest.json"), "w", encoding="utf-8") as handle:
         json.dump(manifest, handle, ensure_ascii=False, indent=2, default=str)
+    package_export_bundle(output_dir, zip_path)
     return manifest
 
 

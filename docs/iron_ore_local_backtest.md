@@ -1,5 +1,18 @@
 # 铁矿石 CTA V1.6 本地数据与回测
 
+研究端导出函数会同时生成目录和同名 ZIP 文件，例如：
+
+~~~text
+iron_ore_v1_6_export/
+iron_ore_v1_6_export.zip
+~~~
+
+正式下载时只需要下载 ZIP。本地导入命令的 --input 参数同时支持目录和 ZIP：
+
+~~~powershell
+.\.venv\Scripts\python.exe tools/import_iron_ore_v1_6.py --input .\iron_ore_v1_6_export.zip --db .\data\market.duckdb
+~~~
+
 ## 一、需要从聚宽研究端下载什么
 
 首版日频本地回测需要四类数据：

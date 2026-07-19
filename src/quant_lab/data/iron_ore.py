@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import re
+import tempfile
+import zipfile
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -117,6 +119,10 @@ class IronOreDataStore:
     ) -> IronOreImportResult:
         """Validate and idempotently import one JoinQuant research export."""
         root = Path(export_dir)
+        if root.is_file() and root.suffix.lower() == ".zip":
+            with tempfile.TemporaryDirectory(prefix="iron_ore_import_") as temporary_dir:
+                self._safe_extract_zip(root, Path(temporary_dir))
+                return self.import_bundle(Path(temporary_dir), source=source)
         if not root.is_dir():
             raise FileNotFoundError(f"export directory does not exist: {root}")
         manifest_path = root / "manifest.json"
@@ -162,6 +168,16 @@ class IronOreDataStore:
         quality = self.quality_report()
         quality["manifest"] = manifest
         return IronOreImportResult(str(self.db_path), counts, quality)
+
+    @staticmethod
+    def _safe_extract_zip(zip_path: Path, destination: Path) -> None:
+        with zipfile.ZipFile(zip_path) as archive:
+            destination_root = destination.resolve()
+            for member in archive.infolist():
+                member_path = (destination / member.filename).resolve()
+                if destination_root not in member_path.parents and member_path != destination_root:
+                    raise ValueError(f"unsafe path in export ZIP: {member.filename}")
+            archive.extractall(destination)
 
     @staticmethod
     def _read_required_csv(path: Path, dataset: str) -> pd.DataFrame:
