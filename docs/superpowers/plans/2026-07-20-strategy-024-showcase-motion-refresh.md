@@ -93,40 +93,30 @@ git commit -m "content: remove source and legacy value label"
 
 - [ ] **Step 1: Add CSS motion primitives**
 
-Append the following rules to `strategy-024.css`, adapting only selector names that already exist in the file:
+Extend the existing `.hero::before` grid rule and append the following rules to `strategy-024.css`, using selectors that already exist in the file:
 
 ```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  opacity: .24;
-  background-image: linear-gradient(rgba(125, 180, 255, .055) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(125, 180, 255, .055) 1px, transparent 1px);
-  background-size: 42px 42px;
-  animation: grid-drift 28s linear infinite;
+.hero::before {
+  background-image: radial-gradient(circle at 78% 20%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 32%),
+                    linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+  background-size: auto, 72px 72px, 72px 72px;
+  animation: hero-grid-drift 28s linear infinite, halo-breathe 8s ease-in-out infinite;
 }
 
-.hero::before,
-.hero::after {
-  transition: opacity .6s ease, transform .8s ease;
-}
-
-.hero::before { animation: halo-breathe 7s ease-in-out infinite; }
-.hero::after { animation: halo-breathe 9s ease-in-out -3s infinite reverse; }
-
-.card,
-.metric-card,
-.evidence-card,
-.flow-step {
+.hero-card,
+.metric,
+.evidence-callout,
+.flow-step,
+.factor,
+.parameter,
+.note {
   transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease, opacity .45s ease;
 }
 
-.card:hover,
-.metric-card:hover,
-.evidence-card:hover,
+.hero-card:hover,
+.metric:hover,
+.evidence-callout:hover,
 .flow-step:hover {
   transform: translateY(-3px);
   border-color: rgba(125, 180, 255, .48);
@@ -137,17 +127,17 @@ body::before {
 .strategy-tab:hover,
 .strategy-tab:focus-visible { transform: translateY(-1px); box-shadow: 0 0 24px rgba(125, 180, 255, .2); }
 
-.motion-refresh .hero-copy,
-.motion-refresh .hero-panel,
-.motion-refresh .section-block { animation: content-rise .55s ease both; }
-.motion-refresh .hero-panel { animation-delay: .06s; }
-.motion-refresh .section-block:nth-of-type(2) { animation-delay: .1s; }
-.motion-refresh .section-block:nth-of-type(3) { animation-delay: .16s; }
-.motion-refresh .metric-card { animation: metric-rise .48s ease both; }
-.motion-refresh .metric-card:nth-child(2) { animation-delay: .04s; }
-.motion-refresh .metric-card:nth-child(3) { animation-delay: .08s; }
+.motion-refresh .hero-grid > div,
+.motion-refresh .hero-card,
+.motion-refresh main > .wrap > section { animation: content-rise .55s ease both; }
+.motion-refresh .hero-card { animation-delay: .06s; }
+.motion-refresh main > .wrap > section:nth-child(2) { animation-delay: .1s; }
+.motion-refresh main > .wrap > section:nth-child(3) { animation-delay: .16s; }
+.motion-refresh .metric { animation: metric-rise .48s ease both; }
+.motion-refresh .metric:nth-child(2) { animation-delay: .04s; }
+.motion-refresh .metric:nth-child(3) { animation-delay: .08s; }
 
-@keyframes grid-drift { from { background-position: 0 0, 0 0; } to { background-position: 42px 42px, 42px 42px; } }
+@keyframes hero-grid-drift { from { background-position: 0 0, 0 0, 0 0; } to { background-position: 0 0, 72px 72px, 72px 72px; } }
 @keyframes halo-breathe { 0%, 100% { opacity: .42; transform: scale(1); } 50% { opacity: .72; transform: scale(1.06); } }
 @keyframes content-rise { from { opacity: .28; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes metric-rise { from { opacity: .35; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -159,7 +149,7 @@ body::before {
     scroll-behavior: auto !important;
     transition-duration: .01ms !important;
   }
-  body::before { display: none; }
+  .hero::before { animation: none; }
 }
 ```
 
