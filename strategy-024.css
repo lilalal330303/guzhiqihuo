@@ -45,6 +45,12 @@ body[data-theme="smallcap"] {
   --ice: #ffe4c9;
   --gold: #f2cc79;
 }
+body[data-theme="fixedplus"] {
+  --accent: #49c6d8;
+  --accent-soft: #c9f2f5;
+  --ice: #d4fbff;
+  --gold: #f0d28b;
+}
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -1106,4 +1112,3 @@ footer a { color: var(--accent); text-decoration: none; }
   .factor h3 { margin-top: 14px; }
   .bar-row { grid-template-columns: 65px 1fr 54px; }
 }
-

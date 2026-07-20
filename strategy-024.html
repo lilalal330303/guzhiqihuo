@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="稳定策略档案库：大容量低回撤价值投资、五福etf、福星etf、小市值策略。">
+  <meta name="description" content="稳定策略档案库：价值投资、五福etf、福星etf、小市值策略、固收+策略。">
   <title>稳定策略档案库｜Quant Research</title>
   <link rel="stylesheet" href="strategy-024.css">
 </head>
@@ -24,7 +24,7 @@
       </nav>
 
       <div class="archive-intro">
-        <p class="section-kicker">STABLE STRATEGY ARCHIVE / 四套成熟版本</p>
+        <p class="section-kicker">STABLE STRATEGY ARCHIVE / 五套成熟版本</p>
         <h1>稳定策略</h1>
         <p>同一套研究模板，统一展示已经固定下来的策略版本、核心逻辑、参数边界与回测口径。切换策略即可查看对应档案。</p>
       </div>
@@ -34,6 +34,7 @@
         <button class="strategy-tab" type="button" role="tab" aria-selected="false" data-strategy="wufu">五福etf</button>
         <button class="strategy-tab" type="button" role="tab" aria-selected="false" data-strategy="fuxing">福星etf</button>
         <button class="strategy-tab" type="button" role="tab" aria-selected="false" data-strategy="smallcap">小市值策略</button>
+        <button class="strategy-tab" type="button" role="tab" aria-selected="false" data-strategy="fixedplus">固收+策略</button>
       </div>
 
       <div class="hero-grid">
@@ -150,7 +151,7 @@
 </div>
 
 <noscript>
-  <div class="noscript">本页面需要启用 JavaScript 才能切换四套策略档案。</div>
+  <div class="noscript">本页面需要启用 JavaScript 才能切换五套策略档案。</div>
 </noscript>
 
 <script>
@@ -494,6 +495,91 @@ const strategies = {
     closingTitle: "高收益档案，也要把回撤写在首页。",
     closingText: "小市值策略固定为 V7 生产基线。后续如果继续研究，只能在不改变原始风格定义的前提下，一次验证一个执行或风险变量。",
     footerName: "小市值策略 · V7 生产基线",
+  },
+  fixedplus: {
+    name: "固收+策略",
+    shortName: "固收+策略",
+    theme: "fixedplus",
+    status: "稳定版 · stable-v1.0 参数锁定",
+    version: "Stable · V1.0",
+    title: "固收+<br><em>稳健配置</em>",
+    lead: "以 511010.XSHG 债券核心为底仓，叠加现金管理、黄金、红利与海外资产卫星仓位；通过风险资产逆波动分配、组合波动率上限和现金缓冲，把收益弹性与回撤边界写进执行层。",
+    period: "稳定版 V1.0",
+    benchmark: "511010.XSHG",
+    evidenceScope: "脚本参数归档 · 收益快照待补录",
+    heroReturn: "6.00<sup>% 目标波动</sup>",
+    heroNote: "稳定版参数锁定 · 目标年化波动率 6%",
+    chartStart: "债券核心",
+    chartEnd: "风险卫星",
+    chartLeft: "60% 511010",
+    chartRight: "35% 风险资产",
+    snapshotNote: "本档案先固定可复核的策略结构和执行边界；当前仓库未附固收+独立长周期收益快照，因此不填入未经核验的收益、回撤或夏普数据。",
+    metrics: [
+      ["债券核心", "60%"],
+      ["现金管理", "5%"],
+      ["风险资产卫星", "35%"],
+      ["目标年化波动", "6%"],
+      ["再平衡周期", "20 交易日"],
+      ["现金缓冲", "2%"]
+    ],
+    extraMetrics: "风险资产按近 60 日波动率倒数分配；最低上市 60 日；100 份整手；停牌、涨跌停和现金不足时跳过或约束交易。",
+    methodTitle: "债券打底，风险预算决定卫星仓位",
+    methodIntro: "固收+稳定版不追求复杂择时，而是先锁定债券核心和现金管理底座，再在黄金、红利和海外资产之间分配风险资产预算。每次调仓前先检查历史波动率与组合实现波动率，超出目标时把风险资产权重转入现金管理 ETF。",
+    principles: [
+      ["01", "核心底仓", "511010.XSHG 配置 60%，511990.XSHG 配置 5%，形成债券与现金管理底座。"],
+      ["02", "风险预算", "518880、510880、513100 组成风险卫星，按近 60 日波动率倒数分配风险预算。"],
+      ["03", "波动率护栏", "组合实现年化波动率超过 6% 时缩减风险资产，并保留 2% 现金缓冲。"]
+    ],
+    flow: [
+      ["01", "建立目标权重", "读取稳定版五资产配置并清理、归一化有效权重。"],
+      ["02", "风险资产预算", "读取近 60 个交易日历史价格，按波动率倒数重新分配风险资产预算。"],
+      ["03", "组合波动检查", "计算组合实现波动率，超出 6% 时把风险资产部分转入现金管理 ETF。"],
+      ["04", "执行再平衡", "每 20 个交易日先卖后买，检查停牌、涨跌停、整手和可用现金。"]
+    ],
+    engineTitle: "固定配置 + 逆波动风险预算",
+    engineIntro: "信号引擎只承担风险预算和执行约束，不用未经验证的择时、趋势或残差动量模块覆盖稳定版原始结构。",
+    factors: [
+      ["60%", "债券核心", "511010.XSHG 作为基准与稳定底仓，目标权重 60%。"],
+      ["5%", "现金管理", "511990.XSHG 作为现金代理，兼顾现金缓冲与超额风险转移。"],
+      ["1/σ", "风险预算", "黄金、红利、海外风险资产按近 60 日年化波动率倒数分配卫星预算。"],
+      ["6%", "波动护栏", "组合实现波动率超过目标时，风险资产按比例缩放并转入现金代理。"]
+    ],
+    formula: "Target = normalize(fixed core + inverse-vol risk budget + volatility cap + 2% cash buffer)",
+    parameterIntro: "这些参数是稳定版的可复现边界，展示的是脚本事实而不是收益承诺。",
+    parameters: [
+      ["版本", "stable-v1.0 · 固收+当前稳定版"],
+      ["基准", "<code>511010.XSHG</code>"],
+      ["目标权重", "511010 60% · 511990 5% · 518880 10% · 510880 12.5% · 513100 12.5%"],
+      ["风险预算窗口", "60 个交易日"],
+      ["目标年化波动", "6%"],
+      ["再平衡周期", "20 个交易日"],
+      ["调仓阈值", "目标权重偏离超过 15%"],
+      ["现金缓冲", "2%"],
+      ["最低上市时间", "60 个自然日"],
+      ["整手约束", "100 份"],
+      ["手续费", "基金开平仓佣金 0.02%，最低 5 元"],
+      ["执行顺序", "先卖后买 · 扣除现金缓冲后买入"]
+    ],
+    evidenceIntro: "目前可核验的证据是脚本版本、资产配置、风险预算和执行护栏；收益快照需在聚宽完成统一区间回测后再补入，避免把配置目标误读为历史表现。",
+    evidence: [
+      ["稳定版本", "stable-v1.0", "策略定位", "固收+稳定版"],
+      ["债券核心", "65% 合计", "风险卫星", "35% 初始配置"],
+      ["风险预算", "60 日逆波动", "波动护栏", "6% 年化目标"],
+      ["调仓周期", "20 交易日", "调仓阈值", "15% 偏离"],
+      ["现金缓冲", "2%", "整手约束", "100 份"],
+      ["收益快照", "待补录", "证据口径", "脚本参数可复核"]
+    ],
+    calloutTitle: "先把边界固定，再补回测证据",
+    calloutText: "固收+策略的核心价值在于风险预算和执行边界。下一次回测应使用统一区间、基准、手续费和初始资金，并单独记录收益、波动、最大回撤与现金占用。",
+    bars: [["债券/现金核心", "65%", "65%", ""], ["风险资产卫星", "35%", "35%", "benchmark"], ["目标波动率", "60%", "6%", "risk"]],
+    notes: [
+      ["适合：追求稳健波动边界", "底仓、现金缓冲和波动率护栏适合希望控制组合波动、又保留有限风险资产弹性的研究账户。", ""],
+      ["适合：按统一口径做回测", "正式使用前应补录聚宽长周期回测，并核对 ETF 上市时间、成交可得性、滑点和现金占用。", ""],
+      ["不适合：把目标波动当收益保证", "6% 是风险目标，不是收益承诺；资产净值仍会受到利率、权益、黄金、海外市场和执行价格影响。", "warn"]
+    ],
+    closingTitle: "稳健不是静止，而是把风险写进每一次调仓。",
+    closingText: "固收+策略固定为 stable-v1.0 参数档案。后续如需迭代，应先补齐统一回测证据，再一次只验证一个风险预算或执行变量。",
+    footerName: "固收+策略 · stable-v1.0"
   }
 };
 
