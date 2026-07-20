@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="大容量低回撤价值投资策略 024 稳定版：四因子质量价值框架、40只持仓、季度调仓与 2014—2026 长周期回测证据。">
+  <title>024 · 大容量低回撤价值投资｜稳定版策略档案</title>
+  <link rel="stylesheet" href="strategy-024.css">
+</head>
+<body>
+<div class="page">
+  <header class="hero" id="overview">
+    <div class="wrap">
+      <nav class="nav" aria-label="策略页导航">
+        <a class="brand" href="index.html">
+          <span class="brand-mark">024</span>
+          <span>Quant Research / Strategy Archive</span>
+        </a>
+        <div class="nav-links">
+          <a href="#method">策略思路</a>
+          <a href="#parameters">参数</a>
+          <a href="#evidence">回测证据</a>
+          <a href="strategy-024-stable.py">脚本</a>
+        </div>
+      </nav>
+
+      <div class="hero-grid">
+        <div>
+          <span class="eyebrow"><i>●</i> 稳定版 · Long Horizon Validated</span>
+          <h1>大容量低回撤<br><em>价值投资</em></h1>
+          <p class="hero-lead">以质量、价值与低波动为核心的多因子选股策略。通过原始四因子评分、40 只分散持仓和季度换仓，在容量约束下追求可复现、可长期运行的超额收益。</p>
+          <div class="hero-actions">
+            <a class="button" href="strategy-024-stable.py" download>下载聚宽脚本 <span>↓</span></a>
+            <a class="button ghost" href="#method">阅读策略档案 <span>↘</span></a>
+          </div>
+          <dl class="mini-facts">
+            <div><dt>验证区间</dt><dd>2014.01 — 2026.07</dd></div>
+            <div><dt>基准</dt><dd>中证 500</dd></div>
+            <div><dt>研究版本</dt><dd>024 · Stable</dd></div>
+          </dl>
+        </div>
+
+        <aside class="hero-card" aria-label="策略累计收益卡片">
+          <div class="card-top">
+            <span class="card-kicker">LONG-HORIZON BACKTEST</span>
+            <span class="status">● 已固定</span>
+          </div>
+          <div class="hero-number">600.67<sup>%</sup></div>
+          <p>策略累计收益 · 2014-01-01 至 2026-07-19</p>
+          <div class="plot" aria-label="策略收益曲线示意图">
+            <div class="plot-fill"></div>
+            <div class="plot-line"></div>
+            <span class="plot-label">2014</span>
+            <span class="plot-label right">2026</span>
+          </div>
+          <div class="card-foot"><span>策略曲线</span><span>CSI 500 benchmark</span></div>
+        </aside>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <section aria-labelledby="metrics-title">
+        <div class="section-heading">
+          <div><p class="section-kicker">01 / Backtest Snapshot</p><h2 id="metrics-title">一眼看懂这套策略</h2></div>
+          <p>以下数据来自聚宽长周期回测快照，初始资金 100 万元，回测区间覆盖 12 年以上。收益数据用于研究复盘，不代表未来表现。</p>
+        </div>
+        <div class="metric-grid">
+          <div class="metric"><span class="metric-label">策略累计收益</span><b class="metric-value">600.67%</b></div>
+          <div class="metric"><span class="metric-label">策略年化收益</span><b class="metric-value">17.31%</b></div>
+          <div class="metric"><span class="metric-label">超额收益</span><b class="metric-value">257.07%</b></div>
+          <div class="metric"><span class="metric-label">最大回撤</span><b class="metric-value">20.70%</b></div>
+          <div class="metric"><span class="metric-label">夏普比率</span><b class="metric-value">0.885</b></div>
+          <div class="metric"><span class="metric-label">信息比率</span><b class="metric-value">0.676</b></div>
+        </div>
+        <p class="metric-note">其他观察：胜率 63.9% · 盈亏比 2.457 · Sortino 1.185 · 策略波动率 15.0% · 基准波动率 25.0% · 盈利次数 717 / 亏损次数 405。</p>
+      </section>
+
+      <section id="method" aria-labelledby="method-title">
+        <div class="two-col">
+          <div>
+            <p class="section-kicker">02 / Investment Thesis</p>
+            <h2 id="method-title">不靠预测，靠结构化地筛选</h2>
+            <p class="body-copy">这套策略的原始思路很克制：从全市场可交易股票中，寻找<strong>盈利质量较好、经营效率较高、估值不贵、波动相对可控</strong>的公司，再用统一的横截面评分排序。策略标题中的“排除小市值因子”，更准确地说，是通过因子组合与大容量持仓结构弱化小市值暴露，而不是额外叠加一个硬性市值门槛。</p>
+            <div class="principles">
+              <div class="principle"><span class="principle-number">01</span><div><h3>质量优先</h3><p>用 ROIC 与毛利率观察企业经营质量和盈利结构。</p></div></div>
+              <div class="principle"><span class="principle-number">02</span><div><h3>价值约束</h3><p>用销售额 / 价格的倒数进入评分，避免只追逐高估值成长。</p></div></div>
+              <div class="principle"><span class="principle-number">03</span><div><h3>波动过滤</h3><p>用 120 日波动率惩罚高波动标的，降低组合路径依赖。</p></div></div>
+            </div>
+          </div>
+          <div class="flow" aria-label="策略执行流程">
+            <div class="flow-step"><span class="flow-icon">01</span><div><b>全市场因子取值</b><span>使用上一交易日可获得的四因子数据，避免未来函数。</span></div></div>
+            <div class="flow-step"><span class="flow-icon">02</span><div><b>横截面 MinMax 标准化</b><span>将不同量纲的因子压缩到同一评分尺度。</span></div></div>
+            <div class="flow-step"><span class="flow-icon">03</span><div><b>原始四因子加减评分</b><span>质量因子加分，价值与波动惩罚项减分，得到总分排名。</span></div></div>
+            <div class="flow-step"><span class="flow-icon">04</span><div><b>季度调仓 + 执行缓冲</b><span>目标持仓 40 只，按前 50 名寻找可成交补位，减少空仓与现金闲置。</span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="formula-section" aria-labelledby="formula-title">
+        <div class="section-heading">
+          <div><p class="section-kicker">03 / Factor Engine</p><h2 id="formula-title">四因子，保持原始公式</h2></div>
+          <p>稳定版的优化集中在执行完整性与容量诊断，核心因子与原始 MinMax 评分公式不改变。</p>
+        </div>
+        <div class="factor-grid">
+          <article class="factor"><span class="factor-sign">+</span><h3>ROIC TTM</h3><p>滚动十二个月投入资本回报率，代表资本使用效率。</p></article>
+          <article class="factor"><span class="factor-sign">+</span><h3>Gross Income Ratio</h3><p>毛利率，作为经营质量与产品议价能力的代理。</p></article>
+          <article class="factor"><span class="factor-sign">−</span><h3>Sales to Price</h3><p>先取销售额 / 价格的倒数，作为估值惩罚项进入总分。</p></article>
+          <article class="factor"><span class="factor-sign">−</span><h3>Variance 120</h3><p>120 日波动率，惩罚价格路径不稳定的标的。</p></article>
+        </div>
+        <div class="formula"><code>Score = MinMax(ROIC) + MinMax(Gross Margin) − MinMax(Price / Sales) − MinMax(Variance120)</code></div>
+      </section>
+
+      <section id="parameters" aria-labelledby="parameters-title">
+        <div class="section-heading">
+          <div><p class="section-kicker">04 / System Parameters</p><h2 id="parameters-title">参数不是装饰，是可复现的边界</h2></div>
+          <p>每一项执行约束都服务于“容量、稳定、可复盘”三个目标。稳定版不再引入复杂的择时或动态风险预算。</p>
+        </div>
+        <dl class="parameter-grid">
+          <div class="parameter"><dt>基准指数</dt><dd><code>000905.XSHG</code> 中证 500</dd></div>
+          <div class="parameter"><dt>目标持仓</dt><dd>40 只</dd></div>
+          <div class="parameter"><dt>调仓频率</dt><dd>季度调仓</dd></div>
+          <div class="parameter"><dt>调仓月份</dt><dd>1 / 4 / 7 / 10 月</dd></div>
+          <div class="parameter"><dt>排名执行范围</dt><dd>前 50 名缓冲</dd></div>
+          <div class="parameter"><dt>价格与数据</dt><dd>真实价格 · 避免未来数据</dd></div>
+          <div class="parameter"><dt>滑点</dt><dd>FixedSlippage(0)</dd></div>
+          <div class="parameter"><dt>交易成本</dt><dd>佣金 0.012% · 印花税 0.1%</dd></div>
+          <div class="parameter"><dt>涨停保护</dt><dd>涨停不卖，打开后检查卖出</dd></div>
+          <div class="parameter"><dt>科创板处理</dt><dd>开仓前跳过市价单风险</dd></div>
+          <div class="parameter"><dt>整手约束</dt><dd>买入数量按 100 股取整</dd></div>
+          <div class="parameter"><dt>容量诊断</dt><dd>20 日成交额参与率记录</dd></div>
+        </dl>
+        <div class="code-band">
+          <div><strong>稳定版聚宽脚本</strong><p>保留原始四因子与评分逻辑，加入前 50 名轻缓冲执行、开仓前检查和调仓审计；可直接复制到聚宽 Python3 策略编辑器。</p></div>
+          <a class="button" href="strategy-024-stable.py" download>获取脚本 <span>↓</span></a>
+        </div>
+      </section>
+
+      <section id="evidence" aria-labelledby="evidence-title">
+        <div class="section-heading">
+          <div><p class="section-kicker">05 / Evidence</p><h2 id="evidence-title">长周期稳定性，优先看路径</h2></div>
+          <p>从 2014 年开始的长周期回测覆盖多轮市场环境。最大回撤发生在 2017-10-27 至 2018-11-09，仍需把回撤承受力纳入实际使用计划。</p>
+        </div>
+        <div class="evidence-grid">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>指标</th><th>数值</th><th>指标</th><th>数值</th></tr></thead>
+              <tbody>
+                <tr><td>回测区间</td><td>2014-01-01 — 2026-07-19</td><td>初始资金</td><td>¥1,000,000</td></tr>
+                <tr><td>策略收益</td><td>600.67%</td><td>基准收益</td><td>96.23%</td></tr>
+                <tr><td>年化收益</td><td>17.31%</td><td>超额收益</td><td>257.07%</td></tr>
+                <tr><td>最大回撤</td><td>20.70%</td><td>夏普比率</td><td>0.885</td></tr>
+                <tr><td>胜率</td><td>63.9%</td><td>盈亏比</td><td>2.457</td></tr>
+                <tr><td>信息比率</td><td>0.676</td><td>Sortino</td><td>1.185</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="evidence-callout">
+            <div class="callout-mark">↗</div>
+            <h3>收益之外的三件事</h3>
+            <p>长周期的价值在于验证策略是否经历过不同环境，而不是把某一个窗口的收益当成承诺。重点观察回撤、超额曲线和执行后的实际持仓数量。</p>
+            <div class="bar-list">
+              <div class="bar-row"><span>策略收益</span><span class="bar-track"><span class="bar-fill" style="display:block;width:100%"></span></span><b>600.67%</b></div>
+              <div class="bar-row"><span>基准收益</span><span class="bar-track"><span class="bar-fill benchmark" style="display:block;width:16%"></span></span><b>96.23%</b></div>
+              <div class="bar-row"><span>回撤</span><span class="bar-track"><span class="bar-fill" style="display:block;width:21%;background:linear-gradient(90deg,#ed6a5a,#ffb36e)"></span></span><b>20.70%</b></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="notes-title">
+        <div class="section-heading">
+          <div><p class="section-kicker">06 / Operating Notes</p><h2 id="notes-title">适合什么，不适合什么</h2></div>
+          <p>把策略当作一个有边界的研究系统，而不是一张只展示收益的海报。</p>
+        </div>
+        <div class="notes-grid">
+          <article class="note"><h3>适合：长周期资金</h3><p>策略按季度调整，换手不以追逐短期行情为目标，更适合能接受阶段性回撤的资金。</p></article>
+          <article class="note"><h3>适合：可复盘的执行</h3><p>每次调仓保留目标数、实际持仓、买入尝试、失败原因、补位股票和现金比例等审计信息。</p></article>
+          <article class="note warn"><h3>不适合：把回测当保证</h3><p>回测存在数据、成交、成本和样本外差异。真实交易前应独立验证，并根据资金规模重新检查容量。</p></article>
+        </div>
+      </section>
+
+      <section class="closing">
+        <div><h2>从一套稳定版本开始，继续做可证伪的研究。</h2><p>这是 024 策略的稳定版档案。后续实验应以此版本为基准，单独记录假设、参数、回测区间、交易清单和下一步研究结论。</p></div>
+        <a class="button" href="strategy-024-stable.py" download>下载稳定版脚本 <span>↓</span></a>
+      </section>
+    </div>
+  </main>
+
+  <footer><div class="wrap">024 · 大容量低回撤价值投资 · 稳定版策略档案　|　<a href="https://www.joinquant.com/post/47566" target="_blank" rel="noreferrer">聚宽原始文章 47566</a>　|　<a href="index.html">返回研究主页</a><br>历史回测不代表未来表现，不构成投资建议。</div></footer>
+</div>
+</body>
+</html>
