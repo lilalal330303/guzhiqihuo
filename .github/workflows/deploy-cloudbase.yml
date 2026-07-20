@@ -38,4 +38,7 @@ jobs:
       - name: Deploy static site to hosting root
         env:
           TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}
-        run: tcb hosting deploy . -e "$TCB_ENV_ID"
+        run: |
+          mkdir -p "$RUNNER_TEMP/cloudbase-site"
+          rsync -a --exclude='.git' --exclude='.github' ./ "$RUNNER_TEMP/cloudbase-site/"
+          tcb hosting deploy "$RUNNER_TEMP/cloudbase-site" -e "$TCB_ENV_ID"
