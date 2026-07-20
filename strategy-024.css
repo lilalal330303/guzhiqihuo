@@ -47,9 +47,10 @@ button { font: inherit; }
   inset: 0;
   pointer-events: none;
   opacity: .2;
-  background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
-  background-size: 72px 72px;
+  background-image: radial-gradient(circle at 78% 20%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 32%), linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+  background-size: auto, 72px 72px, 72px 72px;
   mask-image: linear-gradient(135deg, rgba(0,0,0,.9), transparent 78%);
+  animation: hero-grid-drift 28s linear infinite, halo-breathe 8s ease-in-out infinite;
 }
 .hero::after {
   content: "";
@@ -126,6 +127,71 @@ button { font: inherit; }
   background: var(--accent-soft);
   box-shadow: 0 6px 20px rgba(0,0,0,.12);
   font-weight: 850;
+}
+
+.hero-card,
+.metric,
+.evidence-callout,
+.flow-step,
+.factor,
+.parameter,
+.note {
+  transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease, opacity .45s ease;
+}
+.hero-card:hover,
+.metric:hover,
+.evidence-callout:hover,
+.flow-step:hover {
+  transform: translateY(-3px);
+  border-color: rgba(125, 180, 255, .48);
+  box-shadow: 0 18px 38px rgba(19, 36, 68, .14);
+}
+.strategy-tab {
+  transition: color .25s ease, background .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+.strategy-tab:hover,
+.strategy-tab:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 0 24px rgba(125, 180, 255, .2);
+}
+
+.motion-refresh .hero-grid > div,
+.motion-refresh .hero-card,
+.motion-refresh main > .wrap > section {
+  animation: content-rise .55s ease both;
+}
+.motion-refresh .hero-card { animation-delay: .06s; }
+.motion-refresh main > .wrap > section:nth-child(2) { animation-delay: .1s; }
+.motion-refresh main > .wrap > section:nth-child(3) { animation-delay: .16s; }
+.motion-refresh .metric { animation: metric-rise .48s ease both; }
+.motion-refresh .metric:nth-child(2) { animation-delay: .04s; }
+.motion-refresh .metric:nth-child(3) { animation-delay: .08s; }
+
+@keyframes hero-grid-drift {
+  from { background-position: 0 0, 0 0, 0 0; }
+  to { background-position: 0 0, 72px 72px, 72px 72px; }
+}
+@keyframes halo-breathe {
+  0%, 100% { opacity: .42; transform: scale(1); }
+  50% { opacity: .72; transform: scale(1.06); }
+}
+@keyframes content-rise {
+  from { opacity: .28; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes metric-rise {
+  from { opacity: .35; transform: translateY(8px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  .hero::before { animation: none; }
 }
 
 .hero-grid {

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="稳定策略档案库：大容量低回撤价值投资、五福etf、福星etf、小市值策略。">
   <title>稳定策略档案库｜Quant Research</title>
-  <link rel="stylesheet" href="strategy-%32%34.css">
+  <link rel="stylesheet" href="strategy-024.css">
 </head>
 <body data-theme="value">
 <div class="page">
@@ -351,7 +351,7 @@ const strategies = {
       ["动态替换", "51 次"],
       ["V7I 日权益一致", "100%"]
     ],
-    extraMetrics: "已覆盖主题替换 30 次 · 未覆盖主题替换 21 次 · 最大回撤区间 202" + "4-07-17 — 202" + "4-09-20 · 目标持仓与目标权重均与 V7I 完全一致。",
+    extraMetrics: "已覆盖主题替换 30 次 · 未覆盖主题替换 21 次 · 最大回撤区间 2024-07-17 — 2024-09-20 · 目标持仓与目标权重均与 V7I 完全一致。",
     methodTitle: "主仓负责稳，增强槽负责找增量",
     methodIntro: "福星etf 不把五福与七星简单叠加，而是明确两者的责任边界：五福负责 75% 主仓和弱市防守，七星在 25% 槽位内寻找趋势更强、主题更清晰的增强标的。V7K 的关键修复是把主题门控从硬拦截改为软惩罚，避免误杀历史上有效的已覆盖主题替换。",
     principles: [
@@ -584,6 +584,14 @@ function renderStrategy(key) {
     button.classList.toggle("active", active);
     button.setAttribute("aria-selected", active ? "true" : "false");
   });
+
+  document.body.classList.remove("motion-refresh");
+  void document.body.offsetWidth;
+  document.body.classList.add("motion-refresh");
+  window.clearTimeout(window.__motionRefreshTimer);
+  window.__motionRefreshTimer = window.setTimeout(() => {
+    document.body.classList.remove("motion-refresh");
+  }, 900);
 }
 
 document.querySelectorAll(".strategy-tab").forEach((button) => {
