@@ -24,6 +24,101 @@ except ImportError:
     log = _FallbackLog()
 
 
+AUDIT_LOG_ENABLED = True
+AUDIT_LOG_LEVEL = "full"
+_AUDIT_LEVEL_RANK = {"off": 0, "order": 1, "full": 2}
+
+
+def _audit_scalar(value):
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "1" if value else "0"
+    if isinstance(value, (int, float)):
+        try:
+            number = float(value)
+        except (TypeError, ValueError):
+            return ""
+        if not math.isfinite(number):
+            return ""
+        if isinstance(value, int) or number.is_integer():
+            return str(int(number))
+        return "%.6f" % number
+    return str(value).replace("|", "/").replace("\n", " ").replace("\r", " ")
+
+
+def _audit_line(event, fields):
+    parts = ["JQ_AUDIT", str(event)]
+    for key in sorted(fields):
+        parts.append("%s=%s" % (key, _audit_scalar(fields[key])))
+    return "|".join(parts)
+
+
+def _audit_emit(event, fields, level="full"):
+    if not AUDIT_LOG_ENABLED:
+        return
+    configured = _AUDIT_LEVEL_RANK.get(str(AUDIT_LOG_LEVEL).lower(), 0)
+    required = _AUDIT_LEVEL_RANK.get(str(level).lower(), 2)
+    if configured < required:
+        return
+    try:
+        log.info(_audit_line(event, fields))
+    except Exception:
+        return
+
+
+def _order_field(order, name, default=None):
+    if order is None:
+        return default
+    try:
+        value = getattr(order, name, default)
+        return default if value is None else value
+    except Exception:
+        return default
+
+
+def _order_audit_fields(order):
+    try:
+        requested = abs(int(_order_field(order, "amount", 0) or 0))
+    except (TypeError, ValueError):
+        requested = 0
+    try:
+        filled = abs(int(_order_field(order, "filled", 0) or 0))
+    except (TypeError, ValueError):
+        filled = 0
+    return {
+        "requested": requested,
+        "filled": filled,
+        "remaining": max(0, requested - filled),
+        "status": _order_field(order, "status", ""),
+        "price": _order_field(order, "price", ""),
+        "avg_cost": _order_field(order, "avg_cost", ""),
+        "commission": _order_field(order, "commission", ""),
+        "realized_pnl": _order_field(
+            order,
+            "realized_pnl",
+            _order_field(order, "pnl", ""),
+        ),
+    }
+
+
+def _position_audit_fields(context, code="", direction=0):
+    positions = getattr(context.portfolio, "positions", {})
+    position = positions.get(code) if code else None
+    amount = _position_amount(position, direction) if code and direction else 0
+    return {
+        "code": code,
+        "direction": direction,
+        "amount": amount,
+        "avg_cost": _order_field(position, "avg_cost", ""),
+        "price": _order_field(position, "price", ""),
+        "total_value": getattr(context.portfolio, "total_value", ""),
+        "cash": getattr(context.portfolio, "cash", ""),
+        "available_cash": getattr(context.portfolio, "available_cash", ""),
+        "margin": getattr(context.portfolio, "margin", ""),
+    }
+
+
 SIGNAL_SECURITY = "I8888.XDCE"
 ALLOW_SHORT = True
 POST_2024_START = "2024-01-01"
@@ -598,6 +693,102 @@ def is_order_fully_filled(order):
     return amount > 0 and filled >= amount
 
 
+def _emit_order_audit(context, order, action, code, direction, position_before):
+    audit_date = getattr(context, "previous_date", "")
+    fields = _order_audit_fields(order)
+    position_code, position_direction, position_amount = get_actual_position(context)
+    fields.update(
+        {
+            "date": audit_date,
+            "signal_date": audit_date,
+            "action": action,
+            "code": code,
+            "direction": direction,
+            "position_before": position_before,
+            "position_after": position_amount,
+            "total_value_after": getattr(context.portfolio, "total_value", ""),
+            "available_cash_after": getattr(
+                context.portfolio,
+                "available_cash",
+                getattr(context.portfolio, "cash", ""),
+            ),
+        }
+    )
+    _audit_emit("ORDER", fields, level="order")
+    position_fields = _position_audit_fields(
+        context,
+        position_code,
+        position_direction,
+    )
+    position_fields.update(
+        {
+            "date": audit_date,
+            "signal_date": audit_date,
+            "position_amount": position_amount,
+        }
+    )
+    _audit_emit("POSITION", position_fields, level="order")
+
+
+def _emit_daily_audit(
+    context,
+    signal_date,
+    snapshot,
+    target_contract,
+    current_code,
+    current_direction,
+    current_amount,
+    raw_signal,
+    target_direction,
+    decision,
+    reason,
+):
+    params = snapshot.get("params", g.params) if snapshot else g.params
+    total_value = float(getattr(context.portfolio, "total_value", 0.0))
+    high_water = float(getattr(g, "high_water_value", total_value))
+    drawdown = total_value / high_water - 1.0 if high_water > 0 else 0.0
+    regime_multiplier = snapshot.get("regime_multiplier", 1.0) if snapshot else 1.0
+    trend_multiplier = snapshot.get("trend_multiplier", 1.0) if snapshot else 1.0
+    fields = {
+        "date": signal_date,
+        "regime": "post_2024" if params.get("is_post_2024") else "pre_2024",
+        "raw_signal": raw_signal,
+        "target_direction": target_direction,
+        "target_contract": target_contract,
+        "current_contract": current_code,
+        "current_direction": current_direction,
+        "current_amount": current_amount,
+        "close": snapshot.get("close", "") if snapshot else "",
+        "ma_fast": snapshot.get("ma_fast", "") if snapshot else "",
+        "ma_slow": snapshot.get("ma_slow", "") if snapshot else "",
+        "slope": snapshot.get("slow_slope", "") if snapshot else "",
+        "efficiency": snapshot.get("efficiency_ratio", "") if snapshot else "",
+        "vol_ratio": snapshot.get("volatility_ratio", "") if snapshot else "",
+        "realized_vol": snapshot.get("realized_vol", "") if snapshot else "",
+        "atr": snapshot.get("atr", "") if snapshot else "",
+        "trend_multiplier": trend_multiplier,
+        "regime_multiplier": regime_multiplier,
+        "drawdown_multiplier": getattr(g, "drawdown_multiplier", 1.0),
+        "risk_multiplier": (
+            getattr(g, "drawdown_multiplier", 1.0)
+            * regime_multiplier
+            * trend_multiplier
+        ),
+        "total_value": total_value,
+        "available_cash": getattr(
+            context.portfolio,
+            "available_cash",
+            getattr(context.portfolio, "cash", ""),
+        ),
+        "high_water": high_water,
+        "drawdown": drawdown,
+        "cooldown": getattr(g, "cooldown", 0),
+        "decision": decision,
+        "reason": reason,
+    }
+    _audit_emit("DAILY", fields, level="full")
+
+
 def close_position(context, code, direction):
     if not code:
         return True
@@ -607,6 +798,7 @@ def close_position(context, code, direction):
         return True
     side = "long" if direction > 0 else "short"
     order = order_target(code, 0, side=side)
+    _emit_order_audit(context, order, "close", code, direction, amount)
     refreshed = context.portfolio.positions.get(code)
     remaining = _position_amount(refreshed, direction)
     if remaining == 0 or is_order_fully_filled(order):
@@ -666,6 +858,7 @@ def open_position(context, code, direction, snapshot):
         return False
     side = "long" if direction > 0 else "short"
     order = order_target(code, amount, side=side)
+    _emit_order_audit(context, order, "open", code, direction, 0)
     if not is_order_fully_filled(order):
         log.info("V1.5 entry not fully filled code=%s amount=%s", code, amount)
     else:
@@ -693,18 +886,44 @@ def trade_open(context):
     g.trend_multiplier = 1.0
     g.risk_multiplier = g.drawdown_multiplier
 
+    current_code, current_direction, current_amount = get_actual_position(context)
     snapshot = get_signal_snapshot(signal_date)
     if snapshot is None:
         log.info("V1.5 insufficient signal data date=%s", signal_date)
+        _emit_daily_audit(
+            context,
+            signal_date,
+            None,
+            "",
+            current_code,
+            current_direction,
+            current_amount,
+            0,
+            0,
+            "skip",
+            "insufficient_signal_data",
+        )
         return
     g.params = snapshot["params"].copy()
 
     target_contract = get_target_contract(signal_date)
     if not target_contract:
         log.info("V1.5 no eligible iron ore contract date=%s", signal_date)
+        _emit_daily_audit(
+            context,
+            signal_date,
+            snapshot,
+            "",
+            current_code,
+            current_direction,
+            current_amount,
+            snapshot["signal"],
+            0,
+            "skip",
+            "no_eligible_contract",
+        )
         return
 
-    current_code, current_direction, current_amount = get_actual_position(context)
     raw_signal = snapshot["signal"]
     if raw_signal == 1:
         target_direction = 1
@@ -714,29 +933,103 @@ def trade_open(context):
         target_direction = 0
 
     if current_code:
-        needs_close = (
-            target_direction == 0
-            or current_direction != target_direction
-            or current_code != target_contract
-            or should_force_exit(current_direction, snapshot)
-        )
+        close_reasons = []
+        needs_close = target_direction == 0
+        if needs_close:
+            close_reasons.append("neutral")
+        if not needs_close and current_direction != target_direction:
+            needs_close = True
+            close_reasons.append("target_direction_change")
+        if not needs_close and current_code != target_contract:
+            needs_close = True
+            close_reasons.append("roll")
+        if not needs_close and should_force_exit(current_direction, snapshot):
+            needs_close = True
+            close_reasons.append("stop")
         if needs_close:
             closed = close_position(context, current_code, current_direction)
             if closed:
                 g.tradecode = ""
                 g.pending_contract = target_contract if target_direction else None
                 g.cooldown = g.params["cooldown_days"]
+            audit_code, audit_direction, audit_amount = get_actual_position(context)
+            _emit_daily_audit(
+                context,
+                signal_date,
+                snapshot,
+                target_contract,
+                audit_code,
+                audit_direction,
+                audit_amount,
+                raw_signal,
+                target_direction,
+                "close" if closed else "close_pending",
+                ",".join(close_reasons),
+            )
             return
         g.tradecode = current_code
+        _emit_daily_audit(
+            context,
+            signal_date,
+            snapshot,
+            target_contract,
+            current_code,
+            current_direction,
+            current_amount,
+            raw_signal,
+            target_direction,
+            "hold",
+            "holding_position",
+        )
         return
 
     if g.cooldown > 0:
         g.cooldown -= 1
         log.info("V1.5 cooldown after exit, remaining=%s", g.cooldown)
+        _emit_daily_audit(
+            context,
+            signal_date,
+            snapshot,
+            target_contract,
+            current_code,
+            current_direction,
+            current_amount,
+            raw_signal,
+            target_direction,
+            "skip",
+            "cooldown",
+        )
         return
     if target_direction == 0:
+        _emit_daily_audit(
+            context,
+            signal_date,
+            snapshot,
+            target_contract,
+            current_code,
+            current_direction,
+            current_amount,
+            raw_signal,
+            target_direction,
+            "flat",
+            "neutral_signal",
+        )
         return
 
-    if open_position(context, target_contract, target_direction, snapshot):
+    submitted = open_position(context, target_contract, target_direction, snapshot)
+    if submitted:
         g.tradecode = target_contract
         g.pending_contract = None
+    _emit_daily_audit(
+        context,
+        signal_date,
+        snapshot,
+        target_contract,
+        current_code,
+        current_direction,
+        current_amount,
+        raw_signal,
+        target_direction,
+        "open" if submitted else "skip",
+        "entry_submitted" if submitted else "entry_blocked",
+    )
