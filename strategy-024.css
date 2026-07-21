@@ -51,6 +51,12 @@ body[data-theme="fixedplus"] {
   --ice: #d4fbff;
   --gold: #f0d28b;
 }
+body[data-theme="sizeswitch"] {
+  --accent: #f28b6b;
+  --accent-soft: #ffd8c9;
+  --ice: #ffe2d7;
+  --gold: #f0c978;
+}
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }

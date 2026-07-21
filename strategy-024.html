@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="稳定策略档案库：价值投资、五福etf、福星etf、小市值策略、固收+策略。">
+  <meta name="description" content="稳定策略档案库：价值投资、五福etf、福星etf、小市值策略、固收+策略、大小切换策略。">
   <title>稳定策略档案库｜Quant Research</title>
   <link rel="stylesheet" href="strategy-024.css">
 </head>
@@ -24,7 +24,7 @@
       </nav>
 
       <div class="archive-intro">
-        <p class="section-kicker">STABLE STRATEGY ARCHIVE / 五套成熟版本</p>
+        <p class="section-kicker">STABLE STRATEGY ARCHIVE / 六套成熟版本</p>
         <h1>稳定策略</h1>
         <p>同一套研究模板，统一展示已经固定下来的策略版本、核心逻辑、参数边界与回测口径。切换策略即可查看对应档案。</p>
       </div>
@@ -34,6 +34,7 @@
         <button class="strategy-tab" type="button" role="tab" aria-selected="false" data-strategy="wufu">五福etf</button>
         <button class="strategy-tab" type="button" role="tab" aria-selected="false" data-strategy="fuxing">福星etf</button>
         <button class="strategy-tab" type="button" role="tab" aria-selected="false" data-strategy="smallcap">小市值策略</button>
+        <button class="strategy-tab" type="button" role="tab" aria-selected="false" data-strategy="sizeswitch">大小切换策略</button>
         <button class="strategy-tab" type="button" role="tab" aria-selected="false" data-strategy="fixedplus">固收+策略</button>
       </div>
 
@@ -151,7 +152,7 @@
 </div>
 
 <noscript>
-  <div class="noscript">本页面需要启用 JavaScript 才能切换五套策略档案。</div>
+  <div class="noscript">本页面需要启用 JavaScript 才能切换六套策略档案。</div>
 </noscript>
 
 <script>
@@ -495,6 +496,91 @@ const strategies = {
     closingTitle: "高收益档案，也要把回撤写在首页。",
     closingText: "小市值策略固定为 V7 生产基线。后续如果继续研究，只能在不改变原始风格定义的前提下，一次验证一个执行或风险变量。",
     footerName: "小市值策略 · V7 生产基线",
+  },
+  sizeswitch: {
+    name: "大小切换策略",
+    shortName: "大小切换策略",
+    theme: "sizeswitch",
+    status: "稳定版 · V3.0 原始固化",
+    version: "V3.0 · Original Replica",
+    title: "大小盘<em>反复横跳</em>",
+    lead: "根据中证 2000 与中证 500 的 20 日平均收益比切换小盘 / 大盘分支，月初轮动、5 只持仓、昨日涨停保护，冻结原始风格切换逻辑作为稳定基线。",
+    period: "2020.01 — 2026.07",
+    benchmark: "000985.XSHG · 中证全指",
+    evidenceScope: "聚宽历史基线截图",
+    heroReturn: "832.02<sup>% 累计收益</sup>",
+    heroNote: "原始固化版历史基线 · 2020-01-01 至 2026-07-18",
+    chartStart: "2020",
+    chartEnd: "2026",
+    chartLeft: "策略 832.02%",
+    chartRight: "基准 26.04%",
+    snapshotNote: "以下数据来自大小盘反复横跳 V3.0 原始固化版的历史聚宽基线截图：2020-01-01 至 2026-07-18，初始资金 100 万元，分钟级回测。该页用于归档证据，不把未重新运行的参数实验当成新结果。",
+    metrics: [
+      ["策略累计收益", "832.02%"],
+      ["策略年化收益", "42.23%"],
+      ["超额收益", "639.49%"],
+      ["最大回撤", "25.55%"],
+      ["夏普比率", "1.936"],
+      ["胜率", "0.589"]
+    ],
+    extraMetrics: "基准收益 26.04% · Alpha 0.385 · Beta 0.776 · 盈利 / 亏损次数 155 / 108 · 日均超额收益 0.14% · 超额最大回撤 26.13% · 超额收益夏普比率 1.398 · 策略 / 基准波动率 0.281 / 0.202。",
+    methodTitle: "风格切换，不是风格预测",
+    methodIntro: "这套策略的核心是让大盘与小盘分支轮流承担组合暴露：用中证 2000 与中证 500 的历史收益强弱比决定当前分支，再沿用各自原始候选池和排序规则。稳定版的价值在于把信号、持仓数量、调仓时间和执行保护冻结下来，避免把回测收益归因到后续尚未验证的趋势、防守或滞后模块。",
+    principles: [
+      ["01", "风格比值", "用中证 2000 与中证 500 的 20 日横截面平均收益比判断当前偏小盘还是偏大盘。"],
+      ["02", "原始分支", "SMALL 与 BIG 保留原始候选筛选与排序，不额外叠加趋势、波动率或 risk-off。"],
+      ["03", "月频执行", "每月第一个交易日调仓，目标持仓 5 只，保留昨日涨停股处理和基础交易约束。"]
+    ],
+    flow: [
+      ["01", "计算风格信号", "读取 399303.XSHE 与 399905.XSHE 的历史收盘数据，计算 20 日均值比。"],
+      ["02", "选择分支", "比值大于 1.2 选择 BIG，否则选择 SMALL；信号不可用时保持当前持仓。"],
+      ["03", "生成目标列表", "沿用对应分支的原始候选列表与排序，选出 5 只目标股票。"],
+      ["04", "月初调仓", "先处理可卖持仓，再按 100 股整手下单；涨停保护和订单审计保留。"]
+    ],
+    engineTitle: "20 日风格比值 × 原始分支选股",
+    engineIntro: "V3.0 原始固化版只做必要的接口兼容和数据形状适配，避免把收益优先基线改造成另一套策略。",
+    factors: [
+      ["BIG / SMALL", "风格分支", "中证 2000 与中证 500 收益比决定大盘或小盘分支。"],
+      ["20 日", "信号窗口", "用近 20 个交易日的历史收盘序列构造风格判断。"],
+      ["5 只", "集中持仓", "两个分支默认共同使用 5 只目标持仓，保留原始集中度。"],
+      ["0 滑点", "执行基线", "采用原始交易成本和零固定滑点，作为历史基线口径。"]
+    ],
+    formula: "Branch = BIG if mean(399303, 20d) / mean(399905, 20d) > 1.2 else SMALL",
+    parameterIntro: "下列参数属于 V3.0 原始固化基线；V3.1 仍是参数实验版，不在此稳定档案中自动择优。",
+    parameters: [
+      ["版本", "V3.0 · ORIGINAL_REPLICA"],
+      ["基准", "<code>000985.XSHG</code> 中证全指"],
+      ["风格指数", "<code>399303.XSHE</code> 中证 2000 · <code>399905.XSHE</code> 中证 500"],
+      ["风格窗口", "20 个交易日"],
+      ["风格阈值", "比值 > 1.2 选择 BIG，否则 SMALL"],
+      ["目标持仓", "5 只股票"],
+      ["调仓频率", "每月第一个交易日"],
+      ["调仓时间", "09:30"],
+      ["执行任务", "09:05 准备 · 14:00 涨停打开检查 · 14:30 收盘钩子"],
+      ["价格与数据", "真实价格 · 开启避免未来数据"],
+      ["滑点与成本", "FixedSlippage(0) · 原始股票交易成本"],
+      ["整手约束", "100 股整手 · 保留昨日涨停保护"]
+    ],
+    evidenceIntro: "以下收益指标来自历史聚宽基线截图，作为策略固化时的证据锚点；V3.1 的阈值、窗口、持仓数量和权重实验尚未在此页替代 V3.0。",
+    evidence: [
+      ["回测区间", "2020-01-01 — 2026-07-18", "初始资金", "¥1,000,000"],
+      ["策略收益", "832.02%", "策略年化收益", "42.23%"],
+      ["超额收益", "639.49%", "基准收益", "26.04%"],
+      ["最大回撤", "25.55%", "夏普比率", "1.936"],
+      ["Alpha / Beta", "0.385 / 0.776", "胜率", "0.589"],
+      ["盈利 / 亏损次数", "155 / 108", "策略 / 基准波动率", "0.281 / 0.202"]
+    ],
+    calloutTitle: "风格切换的收益，也要看回撤路径",
+    calloutText: "原始固化版历史基线显示策略累计收益 832.02%、年化 42.23%，相对 26.04% 的基准取得 639.49% 超额收益；25.55% 最大回撤说明风格切换并不是低回撤策略，实际配置仍需承受明显风格周期。",
+    bars: [["策略收益", "100%", "832.02%", ""], ["基准收益", "26%", "26.04%", "benchmark"], ["最大回撤", "26%", "25.55%", "risk"]],
+    notes: [
+      ["适合：风格轮动研究", "适合希望同时观察大盘与小盘风格、并能承受阶段性风格逆风的研究账户。", ""],
+      ["适合：以基线为起点", "后续实验应一次只改一个变量，并分别记录风格分支、目标列表、交易数量和分段收益。", ""],
+      ["不适合：把高收益当低风险", "历史基线的最大回撤为 25.55%，不能与价值投资或固收+档案的风险画像混用。", "warn"]
+    ],
+    closingTitle: "先固定风格来源，再讨论下一次切换。",
+    closingText: "大小切换策略固定为 V3.0 原始固化版档案。V3.1 仅作为研究实验线保留；后续若继续优化，应以 V3.0 为基准，一次验证一个参数或执行变量。",
+    footerName: "大小切换策略 · V3.0 原始固化"
   },
   fixedplus: {
     name: "固收+策略",
