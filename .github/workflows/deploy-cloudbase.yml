@@ -40,5 +40,5 @@ jobs:
           TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}
         run: |
           mkdir -p "$RUNNER_TEMP/cloudbase-site"
-          rsync -a --exclude='.git' --exclude='.github' ./ "$RUNNER_TEMP/cloudbase-site/"
+          rsync -a             --exclude='.git'             --exclude='.github'             --exclude='presentations/crazy-level-reskin/crazy-level-reskin-style-analysis.pptx'             ./ "$RUNNER_TEMP/cloudbase-site/"
           tcb hosting deploy "$RUNNER_TEMP/cloudbase-site" -e "$TCB_ENV_ID"
