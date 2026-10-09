@@ -186,7 +186,7 @@
     <h1>量化研究<br><span style="color:var(--mint)">信息库</span></h1>
     <p class="hero-copy">把小红书、知乎以及聚宽等国内量化平台资料整理成可快速查询、持续追加的本地研究台。</p>
     <div class="hero-meta">
-        <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-10-09</strong></span>
+        <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-10-10</strong></span>
       <span class="meta-pill">来源 <strong>小红书 / 知乎 / 聚宽</strong></span>
       <span class="meta-pill">使用方式 <strong>本地打开 · 无需服务器</strong></span>
       <span class="meta-pill">精选保留 <strong id="curatedMeta">—</strong></span>
@@ -251,9 +251,9 @@
     // 平台信息追加到 ADDITIONAL_PLATFORM_DATA；页面会先按来源/标题去重，再按分类和日期排序。
     // 每日维护游标：自动任务必须按连续自然日推进，不能只依赖“前一天”。
     const DAILY_MAINTENANCE_STATE = {
-      lastRunDate: "2026-10-09",
-      lastProcessedThrough: "2026-10-08",
-      lastProcessedRange: "2026-10-08—2026-10-08",
+      lastRunDate: "2026-10-10",
+      lastProcessedThrough: "2026-10-09",
+      lastProcessedRange: "2026-10-09—2026-10-09",
       lastRunStats: {
         "2026-10-07": { searched: 54, qualified: 6, eliminated: 41, duplicates: 0, riskScreened: 7, linkFailed: 0 },
         "2026-10-08": {
@@ -268,6 +268,20 @@
             "小红书": { searched: 1, qualified: 0, eliminated: 0, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
             "知乎": { searched: 24, qualified: 0, eliminated: 24, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
             "聚宽": { searched: 61, qualified: 6, eliminated: 42, duplicates: 0, riskScreened: 13, linkFailed: 0, accessFailures: 0 }
+          }
+        },
+        "2026-10-09": {
+          searched: 90,
+          qualified: 5,
+          eliminated: 58,
+          duplicates: 0,
+          riskScreened: 2,
+          linkFailed: 0,
+          accessFailures: 1,
+          byPlatform: {
+            "小红书": { searched: 1, qualified: 0, eliminated: 0, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
+            "知乎": { searched: 24, qualified: 0, eliminated: 24, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
+            "聚宽": { searched: 65, qualified: 5, eliminated: 58, duplicates: 0, riskScreened: 2, linkFailed: 0, accessFailures: 0 }
           }
         }
       }
@@ -1991,6 +2005,11 @@
     });
 
     const ADDITIONAL_PLATFORM_DATA = [
+      addPlatformRow("jq-daily-20261009-a064b142", "聚宽", "策略回测代码", "低回撤ETF配置：波动率风险平价叠加趋势过滤", "以国债、红利低波和黄金ETF为资产池，用60日波动率倒数做风险平价，再用200日EMA趋势状态降低风险资产权重，缺口回补国债，并在季度月用8%偏离阈值触发调仓；帖子还提到次日确认和自动重试。", "B", "明明量化", ["策略回测代码", "ETF配置", "风险平价", "波动率", "EMA趋势", "低频调仓", "克隆数=6", "低克隆"], "帖子关联可复用回测，克隆数为6（低克隆）；正文未给出完整费后绩效表，需独立核对信号时点、缺口回补、交易成本、滑点、容量和多阶段结果。", "https://www.joinquant.com/view/community/detail/a064b1424ad5cabeb5f48dfe76b1700f", "2026-10-09"),
+      addPlatformRow("jq-daily-20261009-49c0908a", "聚宽", "策略回测代码", "Buffett Alpha A股融合：周线状态切换与多因子选股", "将质量、价值、安全和规模四类因子组合，并以中证500周线MA5/10/20、MA20方向和MACD划分牛市、震荡和熊市；加入8天状态冷却、至少5天调仓间隔、Top240候选、缓冲池、2%再平衡阈值，以及停牌和涨跌停跳过下单。", "B", "今天收入过千了么？", ["策略回测代码", "多因子", "质量", "价值", "风险控制", "状态切换", "缓冲池", "克隆数=0", "低克隆"], "帖子提供较完整的规则和费用设定，并关联回测；克隆数为0，尚未形成社区复核。需重点核对财报可得时点、周线信号滞后、因子暴露、容量、成本和滚动样本外结果。", "https://www.joinquant.com/view/community/detail/49c0908ad9a27345cbd5bb3b49c0c045", "2026-10-09"),
+      addPlatformRow("jq-daily-20261009-3f2c287a", "聚宽", "策略回测代码", "大小盘ETF轮动二创：19项代码与选股改动记录", "作者基于《大小外择时小市值3.0》改编，说明完整代码头部列出19项结构、选股、口径和问题修复改动，并给出新的回测入口；适合按改动清单逐项做差分复现，而不是只比较最终净值。", "B", "K9832", ["策略回测代码", "ETF轮动", "大小盘", "代码复现", "差分验证", "选股", "克隆数=3", "低克隆"], "克隆数为3（低克隆）；帖子主要是改动索引，未给出完整可比绩效表。复现时应逐项锁定股票池、调仓日、价格口径、费用、滑点和基准，避免把多处改动的合并效果误归因于单一规则。", "https://www.joinquant.com/view/community/detail/3f2c287a37487996bf04c7291c9b641d", "2026-10-09"),
+      addPlatformRow("jq-daily-20261009-10f4eeb8", "聚宽", "策略回测代码", "大小盘价格比择时：动态分位阈值与低频切换", "策略用大小盘指数价格比作为单一择时指标，以历史序列20%分位设动态阈值，回测区间覆盖2014-07-22至2026-09-30；作者披露前500个交易日回放、约45分钟运行时间，并强调参数保持接近实务设置。", "B", "璐璐202006", ["策略回测代码", "大小盘轮动", "价格比", "择时", "动态阈值", "低频", "克隆数=7", "低克隆"], "克隆数为7（低克隆）；作者明确参数并非追求最优，仍需核对指数构造、阈值估计窗口、信号执行延迟、运行效率、成本和不同起止区间稳定性。", "https://www.joinquant.com/view/community/detail/10f4eeb8490d61dbc1565099291cc311", "2026-10-09"),
+      addPlatformRow("jq-daily-20261009-ee7d4ed7", "聚宽", "策略回测代码", "中盘质量成长与红利低波双因子轮动", "规则为持有6只股票、每20个交易日轮动一次，股票池限定100—500亿元市值，结合高ROE、低PE、低负债和高股息属性做筛选；帖子关联聚宽回测入口，可作为简洁因子组合基线。", "C", "nimg", ["策略回测代码", "因子轮动", "质量", "红利低波", "ROE", "PE", "低负债", "克隆数=3", "低克隆", "方法为主"], "克隆数为3（低克隆）；正文较短且没有完整绩效表，属于研究基线而非已验证结论。需补充财报点时、行业中性、组合集中度、交易成本、流动性和滚动样本外检验。", "https://www.joinquant.com/view/community/detail/ee7d4ed77da07e13c6c8bab5b7b43e54", "2026-10-09"),
       addPlatformRow("jq-daily-20261008-etf-discount-filter", "聚宽", "风险与待验证", "ETF折价轮动：流动性、折价深度与防接飞刀过滤", "策略用前一日成交额、基金规模和单位净值筛选ETF，09:31:01按现价相对昨日单位净值的折价排序，最多保留4只并按折价绝对值分配权重；同时加入冲高幅度、MA5/10/20空头排列和KDJ死叉过滤。", "A", "WQLALI", ["风险与待验证", "策略回测代码", "ETF", "折价", "流动性", "均线过滤", "KDJ", "克隆数=8"], "评论指出候选品种日成交额偏低，实际成交可能成为主要约束；需复核流动性门槛、盘口深度、净值时点、滑点、容量和订单成交。", "https://www.joinquant.com/view/community/detail/0ae7f4d759875c84b47d905f9ac11129", "2026-10-08"),
       addPlatformRow("jq-daily-20261008-jq-mcp", "聚宽", "策略/思路", "jq-mcp：用浏览器会话编排聚宽策略、编译与回测", "项目把策略管理、代码编译校验、回测提交、成交持仓和指标读取封装成MCP工具，由本地Go服务、浏览器插件和已登录页面组成闭环；权限留在浏览器，服务端只监听本机并用随机令牌通信，适合研究自动化与凭据隔离。", "B", "RuenChen", ["策略/思路", "聚宽工程", "MCP", "AI Agent", "编译校验", "回测编排", "浏览器自动化", "工程经验"], "依赖已登录浏览器、插件兼容性和页面接口稳定性；需审查本地权限、令牌生命周期、批量任务确认、异常中断和积分消耗。", "https://www.joinquant.com/view/community/detail/5e6156f7480fbc6e5cdbf8f0f1809e14", "2026-10-08"),
       addPlatformRow("jq-daily-20261008-drawdown-recovery", "聚宽", "策略/思路", "净值回撤分段工具：同时记录谷底、恢复日期与恢复耗时", "文章给出可直接放入研究环境的pandas函数，把净值序列拆成回撤曲线和回撤事件表，分别记录前高、谷底、恢复日期、观察间隔和样本末未恢复状态；同时校验日期唯一递增、正净值、缺失值和外部申赎处理。", "A", "anonymous95", ["策略/思路", "回撤分析", "pandas", "净值诊断", "恢复时间", "数据校验", "研究工具"], "工具只描述输入净值的路径特征，不证明策略有效；需统一观测频率、现金与申赎口径、缺失处理和样本起点后再用于策略比较。", "https://www.joinquant.com/view/community/detail/b65ee2432ee7f050b4c99a9b8f0e56f7", "2026-10-08"),
