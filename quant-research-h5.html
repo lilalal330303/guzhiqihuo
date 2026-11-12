@@ -186,7 +186,7 @@
     <h1>量化研究<br><span style="color:var(--mint)">信息库</span></h1>
     <p class="hero-copy">把小红书、知乎以及聚宽等国内量化平台资料整理成可快速查询、持续追加的本地研究台。</p>
     <div class="hero-meta">
-    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-10</strong></span>
+    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-12</strong></span>
       <span class="meta-pill">来源 <strong>小红书 / 知乎 / 聚宽</strong></span>
       <span class="meta-pill">使用方式 <strong>本地打开 · 无需服务器</strong></span>
       <span class="meta-pill">精选保留 <strong id="curatedMeta">—</strong></span>
@@ -251,10 +251,38 @@
     // 平台信息追加到 ADDITIONAL_PLATFORM_DATA；页面会先按来源/标题去重，再按分类和日期排序。
     // 每日维护游标：自动任务必须按连续自然日推进，不能只依赖“前一天”。
     const DAILY_MAINTENANCE_STATE = {
-      lastRunDate: "2026-11-10",
-      lastProcessedThrough: "2026-11-09",
-      lastProcessedRange: "2026-11-09—2026-11-09",
+      lastRunDate: "2026-11-12",
+      lastProcessedThrough: "2026-11-11",
+      lastProcessedRange: "2026-11-10—2026-11-11",
       lastRunStats: {
+        "2026-11-11": {
+          searched: 26,
+          qualified: 0,
+          eliminated: 24,
+          duplicates: 0,
+          riskScreened: 0,
+          linkFailed: 0,
+          accessFailures: 2,
+          byPlatform: {
+            "小红书": { searched: 1, qualified: 0, eliminated: 0, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
+            "知乎": { searched: 24, qualified: 0, eliminated: 24, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
+            "聚宽": { searched: 1, qualified: 0, eliminated: 0, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 }
+          }
+        },
+        "2026-11-10": {
+          searched: 26,
+          qualified: 0,
+          eliminated: 24,
+          duplicates: 0,
+          riskScreened: 0,
+          linkFailed: 0,
+          accessFailures: 2,
+          byPlatform: {
+            "小红书": { searched: 1, qualified: 0, eliminated: 0, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
+            "知乎": { searched: 24, qualified: 0, eliminated: 24, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
+            "聚宽": { searched: 1, qualified: 0, eliminated: 0, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 }
+          }
+        },
         "2026-11-09": {
           searched: 26,
           qualified: 0,
