@@ -186,7 +186,7 @@
     <h1>量化研究<br><span style="color:var(--mint)">信息库</span></h1>
     <p class="hero-copy">把小红书、知乎以及聚宽等国内量化平台资料整理成可快速查询、持续追加的本地研究台。</p>
     <div class="hero-meta">
-    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-12</strong></span>
+    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-13</strong></span>
       <span class="meta-pill">来源 <strong>小红书 / 知乎 / 聚宽</strong></span>
       <span class="meta-pill">使用方式 <strong>本地打开 · 无需服务器</strong></span>
       <span class="meta-pill">精选保留 <strong id="curatedMeta">—</strong></span>
@@ -251,10 +251,24 @@
     // 平台信息追加到 ADDITIONAL_PLATFORM_DATA；页面会先按来源/标题去重，再按分类和日期排序。
     // 每日维护游标：自动任务必须按连续自然日推进，不能只依赖“前一天”。
     const DAILY_MAINTENANCE_STATE = {
-      lastRunDate: "2026-11-12",
-      lastProcessedThrough: "2026-11-11",
-      lastProcessedRange: "2026-11-10—2026-11-11",
+      lastRunDate: "2026-11-13",
+      lastProcessedThrough: "2026-11-12",
+      lastProcessedRange: "2026-11-12—2026-11-12",
       lastRunStats: {
+        "2026-11-12": {
+          searched: 127,
+          qualified: 6,
+          eliminated: 118,
+          duplicates: 0,
+          riskScreened: 2,
+          linkFailed: 0,
+          accessFailures: 1,
+          byPlatform: {
+            "小红书": { searched: 1, qualified: 0, eliminated: 0, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
+            "知乎": { searched: 24, qualified: 0, eliminated: 24, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
+            "聚宽": { searched: 102, qualified: 6, eliminated: 94, duplicates: 0, riskScreened: 2, linkFailed: 0, accessFailures: 0 }
+          }
+        },
         "2026-11-11": {
           searched: 26,
           qualified: 0,
@@ -3304,6 +3318,12 @@
        addPlatformRow("jq-daily-20261019-813f81aa", "聚宽", "策略回测代码", "五资产恒定比例加波动率调节：一个拿得住的长期配置策略", "以沪深300、红利低波、黄金、国债和纳指ETF构成25%、20%、20%、20%、15%的组合，季度再平衡、设置5%交易带，并用小幅波动率调节控制组合风险。", "A", "磊子学习量化", ["策略回测代码", "资产配置", "ETF", "恒定比例", "季度再平衡", "波动率调节", "克隆数=3", "低克隆"], "克隆数为3（低克隆）；历史区间受资产共同上涨阶段影响，需复核汇率、ETF溢价、交易带、现金收益和多阶段回撤。", "https://www.joinquant.com/view/community/detail/813f81aa790da545661cd7ef076a18bd", "2026-10-19"),
        addPlatformRow("jq-daily-20261019-f0aabdf8", "聚宽", "策略回测代码", "红利低波：用量化方法筛出会下蛋的鹅", "用PE、股息率、ROE和过去一年收益波动率筛选大市值股票，给出PE小于15、股息率大于2.5%、ROE大于10%等可执行条件与聚宽代码。", "B", "肚儿宣起", ["策略回测代码", "红利低波", "股息率", "ROE", "低波动", "基本面", "克隆数=0", "低克隆"], "克隆数为0（低克隆）；财务发布日期、分红确认、行业集中和低波动因子窗口需保持点时一致并做分阶段检验。", "https://www.joinquant.com/view/community/detail/f0aabdf87320b9b82f772fb7841fbb44", "2026-10-19"),
        addPlatformRow("jq-daily-20261019-029414c1", "聚宽", "策略回测代码", "不想选股？用大小盘轮动让市场帮你挑方向", "比较沪深300与中证500过去20个交易日的相对涨幅，持有更强指数对应ETF并按规则切换，提供聚宽代码、手续费和不空仓的执行逻辑。", "B", "喜马科技", ["策略回测代码", "大小盘轮动", "相对强弱", "沪深300", "中证500", "ETF", "克隆数=0", "低克隆"], "克隆数为0（低克隆）；相对强弱窗口、切换日成交、ETF跟踪误差和单边市场下的集中暴露需复核。", "https://www.joinquant.com/view/community/detail/029414c1785705b919a1ca155c840d75", "2026-10-19"),
+      addPlatformRow("jq-daily-20261112-11b96dda", "聚宽", "有效观点", "策略日志通过QQ邮箱发送：从单一通知到可追溯告警", "针对平台异常时微信通知不可用的问题，给出QQ邮箱SMTP授权码、发件端配置、收件端解析与策略日志发送链路，适合作为策略运行状态的备用告警通道。", "B", "呀呀呀嘿", ["有效观点", "实盘工程", "日志告警", "QQ邮箱", "SMTP", "故障兜底", "克隆数=0", "低克隆"], "属于通知与运维工程经验，不是收益策略；授权码应单独保管，需增加失败重试、脱敏、频率限制和告警自监控。", "https://www.joinquant.com/view/community/detail/11b96ddaceccb8216b265a0f5077070e", "2026-11-12"),
+      addPlatformRow("jq-daily-20261112-015c8ce9", "聚宽", "策略/思路", "66组回测的投票器：为什么胜率不能单独决定是否交易", "用66组策略结果比较胜率与跑赢基准的关系，强调把收益、基准超额、回撤、交易次数和市场阶段放到同一张评估表中，并用组合投票或一致性规则决定是否进入交易清单。", "B", "hcn刘大大", ["策略/思路", "回测评估", "胜率", "基准对照", "组合投票", "研究流程", "克隆数=0", "低克隆"], "样本数量与策略生成过程需要独立复核；不能把胜率、投票结果或单次筛选直接当作有效性证明，应补充样本外、成本和相关性分析。", "https://www.joinquant.com/view/community/detail/015c8ce9d7ad1a6da5b2ab7b07ce07d1", "2026-11-12"),
+      addPlatformRow("jq-daily-20261112-8e7a212c", "聚宽", "策略回测代码", "涨停基因小市值PT版：在风格承压期拆解成本与流动性", "围绕微盘策略在2026年结构性行情中的承压表现，拆解科技虹吸、买卖价差与冲击成本等影响，并以涨停基因、低市值和PT执行条件构造可复核的策略版本。", "A", "先途投研观", ["策略回测代码", "微盘股", "涨停基因", "交易成本", "流动性", "PT", "克隆数=11", "中克隆"], "克隆数为11（中克隆）；微盘容量、涨跌停成交、冲击成本和风格切换会显著改变结果，需独立核对点时股票池与分阶段表现。", "https://www.joinquant.com/view/community/detail/8e7a212cbc1b97186e4ff28ee46a82b2", "2026-11-12"),
+      addPlatformRow("jq-daily-20261112-108f58b7", "聚宽", "有效观点", "回测自查清单：从幸存者偏差到成交假设逐项排查", "把当前成分股回看历史、样本范围变化、复权与成交假设等常见偏差拆成检查项，建议逐项记录数据口径、信号时点、交易成本、样本分段和结果解释，作为研究前的复核流程。", "B", "bb1997", ["有效观点", "回测审计", "数据质量", "成交假设", "样本划分", "研究流程", "克隆数=0", "低克隆"], "克隆数为0（低克隆）；这是方法与审计框架，不是已验证收益策略，需按具体数据源、撮合规则和成本模型逐项复现。", "https://www.joinquant.com/view/community/detail/108f58b7ddb429969a13c28e3f6a5ef7", "2026-11-12"),
+      addPlatformRow("jq-daily-20261112-cd20706f", "聚宽", "策略回测代码", "板块轮动：用30日上榜次数识别主线再挑龙头", "以板块近30日上榜次数识别相对活跃方向，再在板块内按强度和规则筛选龙头，关联聚宽回测入口，适合作为板块信号、股票池构造和轮动执行的复现模板。", "B", "gaozheng", ["策略回测代码", "板块轮动", "上榜次数", "龙头筛选", "股票池", "回测入口", "克隆数=5", "中克隆"], "克隆数为5（中克隆）；板块成分、上榜口径、信号到成交的时点和涨跌停可交易性需独立复核，课程作业属性不等于实盘有效。", "https://www.joinquant.com/view/community/detail/cd20706f5994946c8346d05d71a67abf", "2026-11-12"),
+      addPlatformRow("jq-daily-20261112-ede51d83", "聚宽", "有效观点", "定投的底层构造与隐患：把资金路径和起点依赖拆开", "将定投拆成投入频率、资金流、持仓成本、估值区间和退出规则，提醒比较不同起始日期、市场路径与现金安排，而不是只看单一累计收益，适合作为定投研究的指标框架。", "B", "llm_local", ["有效观点", "定投", "资金路径", "起点依赖", "估值", "风险边界", "克隆数=0", "低克隆"], "克隆数为0（低克隆）；结论对起始时点、分红、现金收益和估值口径敏感，需用多个滚动窗口与基准对照复核。", "https://www.joinquant.com/view/community/detail/ede51d83a7060ed8c840368bd1f39b23", "2026-11-12"),
        // 聚宽新增策略条目保留在此数组，后续每日增量追加到 ADDITIONAL_PLATFORM_DATA。
        ];
 
