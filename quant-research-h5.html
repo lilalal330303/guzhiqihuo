@@ -186,7 +186,7 @@
     <h1>量化研究<br><span style="color:var(--mint)">信息库</span></h1>
     <p class="hero-copy">把小红书、知乎以及聚宽等国内量化平台资料整理成可快速查询、持续追加的本地研究台。</p>
     <div class="hero-meta">
-    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-17</strong></span>
+    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-18</strong></span>
       <span class="meta-pill">来源 <strong>小红书 / 知乎 / 聚宽</strong></span>
       <span class="meta-pill">使用方式 <strong>本地打开 · 无需服务器</strong></span>
       <span class="meta-pill">精选保留 <strong id="curatedMeta">—</strong></span>
@@ -251,10 +251,24 @@
     // 平台信息追加到 ADDITIONAL_PLATFORM_DATA；页面会先按来源/标题去重，再按分类和日期排序。
     // 每日维护游标：自动任务必须按连续自然日推进，不能只依赖“前一天”。
     const DAILY_MAINTENANCE_STATE = {
-      lastRunDate: "2026-11-17",
-      lastProcessedThrough: "2026-11-16",
-      lastProcessedRange: "2026-11-16—2026-11-16",
+      lastRunDate: "2026-11-18",
+      lastProcessedThrough: "2026-11-17",
+      lastProcessedRange: "2026-11-17—2026-11-17",
       lastRunStats: {
+        "2026-11-17": {
+          searched: 115,
+          qualified: 8,
+          eliminated: 106,
+          duplicates: 0,
+          riskScreened: 0,
+          linkFailed: 0,
+          accessFailures: 1,
+          byPlatform: {
+            "小红书": { searched: 1, qualified: 0, eliminated: 0, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
+            "知乎": { searched: 12, qualified: 0, eliminated: 12, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
+            "聚宽": { searched: 102, qualified: 8, eliminated: 94, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 }
+          }
+        },
         "2026-11-16": {
           searched: 115,
           qualified: 10,
@@ -3390,6 +3404,14 @@
       addPlatformRow("jq-daily-20261116-04d7ec1b", "聚宽", "风险与待验证", "数了10669次主力净流入：净流出组胜率60%，净流入组中位数是零", "研究2017—2025年每季度末抽取全市场样本，包含退市股票，共36个观察日、每次随机抽取300只，比较主力净流入与后续收益；结果显示净流出组胜率约60%，净流入组后续收益中位数为零。", "A", "OBOB", ["风险与待验证", "资金流向", "事件研究", "分组统计", "退市样本", "负向证据", "克隆数=0", "低克隆"], "观察日和随机抽样数量有限，资金流口径、后续收益窗口和分组阈值会影响结论；需扩大滚动样本、固定抽样协议并补充成本与置信区间。", "https://www.joinquant.com/view/community/detail/04d7ec1b0d07e0ad670c6ecfb5674ce4", "2026-11-16"),
       addPlatformRow("jq-daily-20261116-926739ce", "聚宽", "有效观点", "第一次克隆策略就踩了三个坑，记录一下", "记录新手复现策略时的执行检查：若策略使用run_daily或run_weekly却选择分钟级回测，定时函数可能被重复触发；应先核对回测频率、调度函数、日志和成交假设，再检查曲线是否可信。", "B", "风的旋轮158", ["有效观点", "策略复现", "回测工程", "run_daily", "run_weekly", "频率配置", "日志排查", "克隆数=0", "低克隆"], "这是工程排错经验，不是策略收益证据；还需结合另外两个坑逐项复现，并核对撮合、费用、滑点和信号触发次数。", "https://www.joinquant.com/view/community/detail/926739ce3017667c6df82fa4af27859a", "2026-11-16"),
       addPlatformRow("jq-daily-20261116-2af4da5f", "聚宽", "策略/思路", "ETF 轮动打分里，我最后加的不是动量，是 R²", "在ETF轮动评分中先对价格取对数，再让近期观测权重从1线性递增到2，最后将斜率年化并乘以R²；R²用于区分平滑趋势与噪声上涨，可作为动量评分的稳健性改造方向。", "B", "风的旋轮158", ["策略/思路", "ETF轮动", "R²", "对数价格", "加权回归", "动量评分", "克隆数=0", "低克隆"], "参数包括窗口、权重斜率和R²阈值，需检查因果实现、窗口扰动、换手、交易成本和不同市场阶段的收益贡献。", "https://www.joinquant.com/view/community/detail/2af4da5f926b21f3bdcae76226aa6510", "2026-11-16"),
+      addPlatformRow("jq-daily-20261117-42ca0955", "聚宽", "策略回测代码", "从etf择时轮动到etf多资产配置", "策略采用四资产等权配置并按季度再平衡，研究方向为Multi-Asset Allocation；帖子给出V2.0实验版本、10万元初始资金和可复现入口，适合作为低频资产配置基线。", "B", "phantom567", ["策略回测代码", "多资产配置", "ETF", "等权", "季度再平衡", "资产配置", "克隆数=1", "低克隆"], "需补齐四类资产、基准、交易成本、再平衡触发和分阶段回撤口径；低频组合仍要核对ETF溢价、汇率和实际成交约束。", "https://www.joinquant.com/view/community/detail/42ca09550245ef168436c74ad64d6465", "2026-11-17"),
+      addPlatformRow("jq-daily-20261117-dad63457", "聚宽", "策略回测代码", "手搓创成长增强ETF，三年平均年化收益31.8%，交易频率低", "用昨日收盘的N日动量比较股票ETF与债券ETF，动量定义为昨日收盘价/ N日前收盘价 - 1，采用前复权并加入迟滞缓冲，只有动量差超过阈值才换仓，减少接近零点的来回切换。", "B", "招财二虎", ["策略回测代码", "ETF轮动", "动量", "迟滞缓冲", "前复权", "低频交易", "克隆数=1", "低克隆"], "标题绩效需要独立核验；需固定信号到成交的时间差、N窗口、缓冲阈值、费用和ETF流动性，并做滚动样本与不同市场阶段检验。", "https://www.joinquant.com/view/community/detail/dad63457e84ad03c7e27912b999592ab", "2026-11-17"),
+      addPlatformRow("jq-daily-20261117-5dc05fbd", "聚宽", "有效观点", "聚宽研究环境 文件夹打包教程（附代码）求点赞，感谢！！！", "针对研究Notebook中的文件管理，说明将 /home/jquser/ 下指定文件夹打包为zip并通过文件面板下载的流程，覆盖研究环境根目录、压缩命令和导出步骤，适合做数据与代码备份。", "B", "Lu265", ["有效观点", "研究工程", "Notebook", "文件打包", "数据备份", "代码管理", "克隆数=0", "低克隆"], "属于研究环境工程经验，不是交易策略；需注意路径权限、压缩包完整性、敏感数据脱敏和定期备份验证。", "https://www.joinquant.com/view/community/detail/5dc05fbda3806678994c3fcda88c2922", "2026-11-17"),
+      addPlatformRow("jq-daily-20261117-9d1c523a", "聚宽", "策略回测代码", "【分享】涨停池+连板高度+炸板率的收盘复盘脚本", "给出收盘复盘脚本的统计口径：拉取全市场日线筛选收盘价等于涨停价的标的构成涨停池，并向前回溯连续涨停天数计算连板高度，同时统计炸板率，形成可重复的盘后市场状态表。", "B", "somnus、m", ["策略回测代码", "涨停池", "连板高度", "炸板率", "收盘复盘", "市场状态", "克隆数=0", "低克隆"], "统计口径依赖涨停价字段、停牌和特殊处理股票过滤；需核对交易日、涨跌停规则、未成交涨停与样本覆盖，不能把盘后统计直接当作收益策略。", "https://www.joinquant.com/view/community/detail/9d1c523a60b020f6b8d07fbb02ec4da7", "2026-11-17"),
+      addPlatformRow("jq-daily-20261117-80d30987", "聚宽", "有效观点", "涨的是板块还是个股：轮动的错觉", "把组合收益拆成行业配置、行业内选股和交互项三部分，提醒用归因表区分板块上涨与个股选择贡献，避免把单个持仓的偶然上涨误判成稳定的轮动能力。", "B", "wusichao", ["有效观点", "收益归因", "行业配置", "个股选择", "交互项", "轮动研究", "克隆数=0", "低克隆"], "这是收益归因框架，不是已验证策略；需统一行业分类、基准、持仓权重、换手和归因窗口，并做滚动分解确认贡献稳定性。", "https://www.joinquant.com/view/community/detail/80d3098793d7556d1ca95cde12b7778f", "2026-11-17"),
+      addPlatformRow("jq-daily-20261117-e3584762", "聚宽", "有效观点", "成本感知动作价值优化（一）", "研究笔记比较相同预测输入下的动作价值决策方案，报告成本后收益、Sharpe、最大回撤和费用换手变化，并以费用与换手压缩为优化目标，提示信号质量之外还应把交易成本直接纳入决策。", "A", "墨石", ["有效观点", "成本建模", "动作价值", "换手优化", "Sharpe", "最大回撤", "克隆数=0", "低克隆"], "报告中的年化差异和约45%的费用换手压缩需独立复核；应锁定相同预测输入、撮合、滑点、持仓约束和样本外区间，避免把实现差异误归因于模型。", "https://www.joinquant.com/view/community/detail/e3584762e7680d822551013bbc78a194", "2026-11-17"),
+      addPlatformRow("jq-daily-20261117-57d3cdeb", "聚宽", "有效观点", "红利股，值得放进你的长期观察名单", "从财政转型、制度分红和长期资金配置三个角度解释红利风格的长期逻辑，强调红利更适合作为长期底仓而非追涨题材，可作为红利策略的经济逻辑与风险边界线索。", "B", "九渊之上", ["有效观点", "红利", "长期配置", "股息", "风格逻辑", "底仓", "克隆数=0", "低克隆"], "正文偏宏观与风格解释，未提供可比策略绩效；落地时需补充股息口径、分红可得日、行业集中、估值和阶段性回撤。", "https://www.joinquant.com/view/community/detail/57d3cdeba905529cd759d230811fbc87", "2026-11-17"),
+      addPlatformRow("jq-daily-20261117-bf2ba586", "聚宽", "有效观点", "极端行情具象化了", "统一用138天约4.5个月窗口，并以复利CAGR描述不同阶段的区间跌幅和年化斜率，建立沪深300、中证800、创业板指的极端行情对照表，便于统一口径比较风险。", "B", "吉姆的回测", ["有效观点", "极端行情", "风险统计", "CAGR", "区间对照", "沪深300", "中证800", "克隆数=0", "低克隆"], "这是历史风险描述与口径规范，不是收益策略；需检查窗口选择、分红复权、指数版本和区间重叠，并补充最大回撤与恢复期。", "https://www.joinquant.com/view/community/detail/bf2ba586d0eccf4ba3b0d02e944714de", "2026-11-17"),
        // 聚宽新增策略条目保留在此数组，后续每日增量追加到 ADDITIONAL_PLATFORM_DATA。
        ];
 
