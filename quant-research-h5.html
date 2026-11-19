@@ -80,6 +80,10 @@
     .chip:hover, .chip.active { border-color: rgba(85,230,186,.65); color: var(--mint); background: var(--mint-soft); }
     .table-panel { overflow: hidden; }
     .table-wrap { overflow-x: auto; border-radius: var(--radius); }
+    .pagination { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; padding: 14px; border-top: 1px solid var(--line); }
+    .pagination[hidden] { display: none; }
+    .pagination .button:disabled { opacity: .4; cursor: default; transform: none; filter: none; }
+    .pagination-status { color: var(--muted); text-align: center; font-size: 12px; }
     table { width: 100%; border-collapse: collapse; min-width: 980px; }
     thead th { position: sticky; top: 0; z-index: 1; padding: 15px 16px; border-bottom: 1px solid var(--line); background: rgba(7, 16, 29, 0.86); color: #7890ad; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-align: left; text-transform: uppercase; backdrop-filter: blur(8px); }
     td { padding: 17px 16px; border-bottom: 1px solid rgba(173,201,232,.1); vertical-align: top; }
@@ -228,6 +232,11 @@
         </table>
       </div>
       <div class="empty" id="emptyState"><strong>没有匹配记录</strong><span>换个关键词，或点击“清空筛选”查看全部信息。</span></div>
+      <nav class="pagination" id="pagination" aria-label="结果分页" hidden>
+        <button class="button secondary" id="prevPage" type="button">上一页</button>
+        <span class="pagination-status" id="pageStatus" aria-live="polite"></span>
+        <button class="button secondary" id="nextPage" type="button">下一页</button>
+      </nav>
     </section>
 
     <section class="panel maintenance" id="maintenance">
@@ -3835,6 +3844,15 @@
     const EVIDENCE_TEXT = { A: "较完整", B: "方法线索", C: "待验证" };
     const $ = (id) => document.getElementById(id);
     const state = { titleSearch: "", search: "", source: "", category: "", date: "" };
+    const PAGE_SIZE = 30;
+    let page = 1;
+    let matches = QUANT_DATA;
+    let searchTimer;
+    const searchIndex = QUANT_DATA.map((record) => ({
+      record,
+      title: record.title.toLowerCase(),
+      text: [record.platform, record.title, record.summary, record.author, record.risk, ...record.tags].join(" ").toLowerCase()
+    }));
     const template = `{
   id: "new-record-id",
   platform: "平台名",
@@ -3895,42 +3913,40 @@
         return a.localeCompare(b, "zh-CN");
       });
     };
-    function unique(values) { return [...new Set(values)].sort((a, b) => a.localeCompare(b, "zh-CN")); }
     function filteredRecords() {
       const titleQuery = state.titleSearch.trim().toLowerCase();
       const query = state.search.trim().toLowerCase();
-      return QUANT_DATA.filter((record) => {
-        const isTitleMatch = !titleQuery || record.title.toLowerCase().includes(titleQuery);
-        const text = [record.platform, record.title, record.summary, record.author, record.risk, ...record.tags].join(" ").toLowerCase();
-        return isTitleMatch &&
-          (!query || text.includes(query)) &&
-          (!state.source || record.platform === state.source) &&
-          (!state.category || record.category === state.category) &&
-          (!state.date || record.date === state.date);
-      });
+      if (!titleQuery && !query && !state.source && !state.category && !state.date) return QUANT_DATA;
+      return searchIndex.filter(({ record, title, text }) =>
+        (!state.source || record.platform === state.source) &&
+        (!state.category || record.category === state.category) &&
+        (!state.date || record.date === state.date) &&
+        (!titleQuery || title.includes(titleQuery)) &&
+        (!query || text.includes(query))
+      ).map(({ record }) => record);
     }
-    function renderStats(records) {
+    function initFiltersAndStats() {
+      const categoryCounts = new Map();
+      const platformCounts = new Map();
+      const dateCounts = new Map();
+      let evidenceCount = 0;
+      function increment(counts, key) { counts.set(key, (counts.get(key) || 0) + 1); }
+      for (const record of QUANT_DATA) {
+        increment(categoryCounts, record.category);
+        increment(platformCounts, record.platform);
+        increment(dateCounts, String(record.date || "未标注"));
+        if (record.evidence === "A") evidenceCount++;
+      }
+      const categories = [...categoryCounts.keys()].sort((a, b) => a.localeCompare(b, "zh-CN"));
       $("totalCount").textContent = QUANT_DATA.length;
-      $("visibleCount").textContent = records.length;
-      $("highEvidenceCount").textContent = QUANT_DATA.filter((record) => record.evidence === "A").length;
-      $("categoryCount").textContent = unique(QUANT_DATA.map((record) => record.category)).length;
+      $("highEvidenceCount").textContent = evidenceCount;
+      $("categoryCount").textContent = categories.length;
       $("curatedMeta").textContent = QUANT_DATA.length;
       $("droppedMeta").textContent = ALL_QUANT_DATA.length - QUANT_DATA.length;
       $("rawCountNote").textContent = ALL_QUANT_DATA.length;
       $("curatedCountNote").textContent = QUANT_DATA.length;
-      const filterBadges = [];
-      if (state.titleSearch) filterBadges.push(`标题: ${state.titleSearch}`);
-      if (state.search) filterBadges.push(`全局: ${state.search}`);
-      if (state.source) filterBadges.push(`来源: ${state.source}`);
-      if (state.category) filterBadges.push(`分类: ${state.category}`);
-      if (state.date) filterBadges.push(`日期: ${state.date}`);
-      $("resultHint").textContent = filterBadges.length ? `当前显示 ${records.length} 条 · ${filterBadges.join("；")}` : `当前显示 ${records.length} 条 · 支持标题筛选、全文搜索、来源 / 分类 / 日期筛选`;
-    }
-    function renderFilters() {
-      const categories = unique(QUANT_DATA.map((record) => record.category));
-      const categoryCounts = new Map(categories.map((category) => [category, QUANT_DATA.filter((record) => record.category === category).length]));
       const platforms = sortedPlatforms(QUANT_DATA);
-      const dates = [...new Set(QUANT_DATA.map((record) => String(record.date || "未标注")))].sort((a, b) => {
+      const dates = [...dateCounts.keys()].sort((a, b) => {
         const aKnown = /^\d{4}-\d{2}-\d{2}$/.test(a);
         const bKnown = /^\d{4}-\d{2}-\d{2}$/.test(b);
         if (aKnown && bKnown) return b.localeCompare(a);
@@ -3938,18 +3954,22 @@
         if (bKnown) return 1;
         return a.localeCompare(b, "zh-CN");
       });
-      $("quickFilters").innerHTML = `<button class="chip ${state.category === "" ? "active" : ""}" type="button" data-category="">全部 <strong>${QUANT_DATA.length}</strong></button>` + categories.map((category) => `<button class="chip ${state.category === category ? "active" : ""}" type="button" data-category="${escapeHtml(category)}">${escapeHtml(category)} <strong>${categoryCounts.get(category)}</strong></button>`).join("");
-      $("sourceSelect").innerHTML = `<option value="">全部来源</option>` + platforms.map((platform) => `<option value="${escapeHtml(platform)}">${escapeHtml(platform)} (${QUANT_DATA.filter((record) => record.platform === platform).length})</option>`).join("");
-      $("dateSelect").innerHTML = `<option value="">全部日期</option>` + dates.map((date) => `<option value="${escapeHtml(date)}">${escapeHtml(date)} (${QUANT_DATA.filter((record) => String(record.date || "未标注") === date).length})</option>`).join("");
-      if (!platforms.includes(state.source)) state.source = "";
-      if (!dates.includes(state.date)) state.date = "";
-      $("sourceSelect").value = state.source;
-      $("dateSelect").value = state.date;
+      $("quickFilters").innerHTML = `<button class="chip" type="button" data-category="">全部 <strong>${QUANT_DATA.length}</strong></button>` + categories.map((category) => `<button class="chip" type="button" data-category="${escapeHtml(category)}">${escapeHtml(category)} <strong>${categoryCounts.get(category)}</strong></button>`).join("");
+      $("sourceSelect").innerHTML = `<option value="">全部来源</option>` + platforms.map((platform) => `<option value="${escapeHtml(platform)}">${escapeHtml(platform)} (${platformCounts.get(platform)})</option>`).join("");
+      $("dateSelect").innerHTML = `<option value="">全部日期</option>` + dates.map((date) => `<option value="${escapeHtml(date)}">${escapeHtml(date)} (${dateCounts.get(date)})</option>`).join("");
     }
     function renderRecords() {
-      const records = filteredRecords();
-      renderStats(records);
-      renderFilters();
+      const total = matches.length;
+      const pageCount = Math.ceil(total / PAGE_SIZE);
+      const start = (page - 1) * PAGE_SIZE;
+      const records = matches.slice(start, start + PAGE_SIZE);
+      const range = total ? `第 ${start + 1}–${start + records.length} 条` : "没有匹配记录";
+      $("visibleCount").textContent = records.length;
+      $("resultHint").textContent = `共 ${total} 条匹配 · ${range}`;
+      $("pagination").hidden = pageCount <= 1;
+      $("pageStatus").textContent = pageCount > 1 ? `第 ${page} / ${pageCount} 页 · ${range}` : "";
+      $("prevPage").disabled = page <= 1;
+      $("nextPage").disabled = page >= pageCount;
       $("recordBody").innerHTML = records.map((record) => `
         <tr>
           <td data-label="分类"><div class="category">${escapeHtml(record.category)}</div></td>
@@ -3963,13 +3983,45 @@
         </tr>`).join("");
       $("emptyState").style.display = records.length ? "none" : "block";
     }
+    function applyFilters() {
+      clearTimeout(searchTimer);
+      page = 1;
+      matches = filteredRecords();
+      for (const button of $("quickFilters").querySelectorAll("[data-category]")) {
+        const active = button.dataset.category === state.category;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      }
+      renderRecords();
+    }
+    function goToPage(step) {
+      const next = page + step;
+      if (next < 1 || next > Math.ceil(matches.length / PAGE_SIZE)) return;
+      page = next;
+      renderRecords();
+      const table = $("recordBody").closest(".table-panel");
+      const toolbar = $("quickFilters").closest(".toolbar");
+      const top = table.getBoundingClientRect().top + window.scrollY - toolbar.offsetHeight - 20;
+      window.scrollTo({ top, behavior: "instant" });
+    }
+    function bindSearch(id, key) {
+      const input = $(id);
+      function schedule() {
+        state[key] = input.value;
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(applyFilters, 120);
+      }
+      input.addEventListener("compositionstart", () => clearTimeout(searchTimer));
+      input.addEventListener("compositionend", schedule);
+      input.addEventListener("input", (event) => { if (!event.isComposing) schedule(); });
+    }
     function resetFilters() {
       state.titleSearch = state.search = state.source = state.category = state.date = "";
       $("titleSearchInput").value = "";
       $("searchInput").value = "";
       $("sourceSelect").value = "";
       $("dateSelect").value = "";
-      renderRecords();
+      applyFilters();
     }
     function showToast(message) {
       const toast = $("toast");
@@ -3989,16 +4041,19 @@
         showToast("新增记录模板已复制");
       } catch (error) { showToast("复制失败，请手动复制模板"); }
     }
-    $("titleSearchInput").addEventListener("input", (event) => { state.titleSearch = event.target.value; renderRecords(); });
-    $("searchInput").addEventListener("input", (event) => { state.search = event.target.value; renderRecords(); });
-    $("sourceSelect").addEventListener("change", (event) => { state.source = event.target.value; renderRecords(); });
-    $("dateSelect").addEventListener("change", (event) => { state.date = event.target.value; renderRecords(); });
+    bindSearch("titleSearchInput", "titleSearch");
+    bindSearch("searchInput", "search");
+    $("sourceSelect").addEventListener("change", (event) => { state.source = event.target.value; applyFilters(); });
+    $("dateSelect").addEventListener("change", (event) => { state.date = event.target.value; applyFilters(); });
     $("resetButton").addEventListener("click", resetFilters);
     $("copyTemplateButton").addEventListener("click", copyTemplate);
     $("copyTemplateButton2").addEventListener("click", copyTemplate);
-    $("quickFilters").addEventListener("click", (event) => { const button = event.target.closest("[data-category]"); if (!button) return; state.category = button.dataset.category; renderRecords(); });
+    $("quickFilters").addEventListener("click", (event) => { const button = event.target.closest("[data-category]"); if (!button) return; state.category = button.dataset.category; applyFilters(); });
+    $("prevPage").addEventListener("click", () => goToPage(-1));
+    $("nextPage").addEventListener("click", () => goToPage(1));
     $("templateCode").textContent = template;
-    renderRecords();
+    initFiltersAndStats();
+    resetFilters();
   </script>
 </body>
 </html>
