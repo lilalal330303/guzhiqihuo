@@ -190,7 +190,7 @@
     <h1>量化研究<br><span style="color:var(--mint)">信息库</span></h1>
     <p class="hero-copy">把小红书、知乎以及聚宽等国内量化平台资料整理成可快速查询、持续追加的本地研究台。</p>
     <div class="hero-meta">
-    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-19</strong></span>
+    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-20</strong></span>
       <span class="meta-pill">来源 <strong>小红书 / 知乎 / 聚宽</strong></span>
       <span class="meta-pill">使用方式 <strong>本地打开 · 无需服务器</strong></span>
       <span class="meta-pill">精选保留 <strong id="curatedMeta">—</strong></span>
@@ -260,10 +260,24 @@
     // 平台信息追加到 ADDITIONAL_PLATFORM_DATA；页面会先按来源/标题去重，再按分类和日期排序。
     // 每日维护游标：自动任务必须按连续自然日推进，不能只依赖“前一天”。
     const DAILY_MAINTENANCE_STATE = {
-      lastRunDate: "2026-11-19",
-      lastProcessedThrough: "2026-11-18",
-      lastProcessedRange: "2026-11-18—2026-11-18",
+      lastRunDate: "2026-11-20",
+      lastProcessedThrough: "2026-11-19",
+      lastProcessedRange: "2026-11-19—2026-11-19",
       lastRunStats: {
+        "2026-11-19": {
+          searched: 118,
+          qualified: 7,
+          eliminated: 102,
+          duplicates: 1,
+          riskScreened: 8,
+          linkFailed: 0,
+          accessFailures: 1,
+          byPlatform: {
+            "小红书": { searched: 6, qualified: 0, eliminated: 6, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
+            "知乎": { searched: 11, qualified: 0, eliminated: 11, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
+            "聚宽": { searched: 101, qualified: 7, eliminated: 85, duplicates: 1, riskScreened: 8, linkFailed: 0, accessFailures: 0 }
+          }
+        },
         "2026-11-18": {
           searched: 114,
           qualified: 9,
@@ -3444,6 +3458,13 @@
       addPlatformRow("jq-daily-20261118-98e4e118", "聚宽", "有效观点", "RSRS 两份策略代码看起来相似，为什么回测收益差很多？", "以两份RSRS择时代码结果差异为切入点，建议逐项核对回归窗口、标准化、信号计算与成交日、数据复权、基准和费用，说明相似代码的实现细节足以造成显著结果差异。", "B", "Ptempo", ["有效观点", "RSRS", "代码审计", "信号时点", "回归窗口", "复权", "交易成本", "克隆数=0", "低克隆"], "需逐行对照数据源、缺失值、标准化方向、调仓触发和撮合规则；只有在统一口径后才可比较两份结果。", "https://www.joinquant.com/view/community/detail/98e4e1188310ebfa5623b04c6f1e73b4", "2026-11-18"),
       addPlatformRow("jq-daily-20261118-9f903879", "聚宽", "策略/思路", "小市值行业轮动的实现细节：几个容易踩的坑", "围绕按行业挑选最小市值股票的实现，强调688、8xx、ST、停牌和上市年限等过滤条件应在股票池构造阶段统一处理，而不是在循环中随意跳过，适合作为小市值行业轮动代码审计清单。", "B", "蓦然世间路", ["策略/思路", "小市值", "行业轮动", "股票池", "过滤规则", "ST", "停牌", "点时数据", "克隆数=0", "低克隆"], "帖子不提供绩效结论；需核对过滤顺序、行业成分时点、次新股规则、涨跌停与成交约束，并用固定股票池复算。", "https://www.joinquant.com/view/community/detail/9f903879d8b2d0d172666b60edfad091", "2026-11-18"),
       addPlatformRow("jq-daily-20261118-45306848", "聚宽", "有效观点", "最怕普跌共振，你的缓冲仓位别只是摆设", "指出不同策略与板块在平稳期相关性较低，但压力期相关性可能同时上升；组合风控应加入条件相关性、压力情景、现金或缓冲仓位以及集中度上限，而不是只看平时相关性矩阵。", "B", "吉姆的回测", ["有效观点", "组合风控", "相关性", "压力测试", "缓冲仓位", "现金管理", "集中度", "克隆数=0", "低克隆"], "这是风险管理框架，不是收益策略；需明确压力情景、相关性估计窗口、现金收益、缓冲触发和恢复规则，并做历史滚动验证。", "https://www.joinquant.com/view/community/detail/4530684861dfe4220a0047c82c614f3c", "2026-11-18"),
+      addPlatformRow("jq-daily-20261119-74db755c", "聚宽", "有效观点", "“花式保壳”套路失灵，小市值策略是否会受到影响？", "将小市值组合区分为壳价值博弈与基本面筛选两类，建议把持续经营能力、审计意见和内控缺陷纳入尾部剔除条件，用以检验退市环境变化是否改变规模因子收益来源。", "B", "Ptempo", ["有效观点","小市值","退市风险","审计意见","股票池"], "属于机制假设，未给出组合验证；应按公告可得时间打标、保留退市样本，并对比加过滤前后的行业暴露和净收益。", "https://www.joinquant.com/view/community/detail/74db755cb6c9390de19807ca61b97746", "2026-11-19"),
+      addPlatformRow("jq-daily-20261119-a4e70d33", "聚宽", "有效观点", "因子有效性的时变特征与衰减机制研究", "给出区分风格逆风与因子结构性失效的研究框架：检查原有溢价机制是否减弱、资金拥挤和交易摩擦是否上升，以及同口径结果能否跨市场复现。", "B", "miniwar", ["有效观点","因子衰减","拥挤度","样本外","策略监控"], "方法论文章，无实证绩效；应用前应事先固定判定窗口、容量与成本口径，并避免仅依据一段回撤认定失效。", "https://www.joinquant.com/view/community/detail/a4e70d33a12497f898423bbbff016607", "2026-11-19"),
+      addPlatformRow("jq-daily-20261119-84fdf9ba", "聚宽", "有效观点", "市盈率TTM怎么算？财务数据API：扣非利润与同行估值实算", "用上一年第四季度与本年前三季度累计利润组成 TTM，以同日未复权收盘价和有明确基准日的股数计算参考市值，分别对比归母与扣非口径；附 Python 复算和利润敏感性分析。", "A", "Walter_量化老白", ["有效观点","估值因子","市盈率TTM","财务口径","Python"], "案例仅含两家公司，固定基准股数不是交易日精确股本；历史研究还需核对财报首次发布时间、股本变动与非正盈利处理。", "https://www.joinquant.com/view/community/detail/84fdf9bafc8997787172a652213be29d", "2026-11-19"),
+      addPlatformRow("jq-daily-20261119-7d78f5b3", "聚宽", "有效观点", "AI 投研进阶：券商 Harness 设计核心思路", "把投研流程拆成取数、数据冲突检查、确定性财务计算、反方复核和人工签发；每份资料保留来源、发布时间和获取时间，来源数值冲突时挂起待核。", "B", "华山2016", ["有效观点","投研工程","数据溯源","确定性计算","人工复核"], "设计思路而非已上线系统；需验证权限隔离、冲突阻断、计算复跑和发布审核是否在实际流程中生效。", "https://www.joinquant.com/view/community/detail/7d78f5b3bcdccd36fd9d99ebe5afe7ee", "2026-11-19"),
+      addPlatformRow("jq-daily-20261119-c41a3a1d", "聚宽", "策略/思路", "动量与反转：一对“相爱相杀”的因子", "以周至月级反转和 3–12 个月动量为不同研究尺度，提出先以中期动量构造强势股票池、再在池内比较短期反转入场，与两种单信号做分层对照。", "B", "量化守门员", ["策略/思路","动量","短期反转","双窗口","分层检验"], "未提供统一口径实证；需评估市场结构、换手成本和信号重叠，并检验 V 形反转、持续下跌阶段的表现。", "https://www.joinquant.com/view/community/detail/c41a3a1db604956583775af14d7d689e", "2026-11-19"),
+      addPlatformRow("jq-daily-20261119-59b2b8e7", "聚宽", "有效观点", "多因子模型：如何把“盘感”变成一条流水线", "从相关性去冗余出发，用五组或十组收益单调性、IC 与 IC_IR、按行业或市值分层和跨时段扰动检验因子，再在组合端约束行业、市值和风格暴露。", "B", "量化守门员", ["有效观点","多因子","因子共线性","分组检验","IC","敞口控制"], "属于评估流程，无可比收益结果；正交化与权重应仅用当时可用的样本估计，并计入调仓成本。", "https://www.joinquant.com/view/community/detail/59b2b8e75b5486ec5c443266c0404ca8", "2026-11-19"),
+      addPlatformRow("jq-daily-20261119-e8aace69", "聚宽", "策略/思路", "高股息策略最大的坑，是你买到了“假的高股息”", "在股息率排序前检查分红是否有净利润和经营现金流覆盖，并对比加入中期动量、行业上限后的组合；同时核验分红计算口径和基本面过滤后是否仍保持股息率排序。", "B", "Qiaoge", ["策略/思路","红利","股息率","现金流覆盖","行业集中度","克隆数=9","低克隆"], "引用的社区回测未独立复算；须统一股息可见日、复权方式和排序，检查负利润、一次性分红与交易成本。", "https://www.joinquant.com/view/community/detail/e8aace69d1c35e14d37579e1a53ffdd2", "2026-11-19"),
        // 聚宽新增策略条目保留在此数组，后续每日增量追加到 ADDITIONAL_PLATFORM_DATA。
        ];
 
