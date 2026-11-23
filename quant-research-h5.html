@@ -190,7 +190,7 @@
     <h1>量化研究<br><span style="color:var(--mint)">信息库</span></h1>
     <p class="hero-copy">把小红书、知乎以及聚宽等国内量化平台资料整理成可快速查询、持续追加的本地研究台。</p>
     <div class="hero-meta">
-    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-23</strong></span>
+    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-24</strong></span>
       <span class="meta-pill">来源 <strong>小红书 / 知乎 / 聚宽</strong></span>
       <span class="meta-pill">使用方式 <strong>本地打开 · 无需服务器</strong></span>
       <span class="meta-pill">精选保留 <strong id="curatedMeta">—</strong></span>
@@ -260,50 +260,64 @@
     // 平台信息追加到 ADDITIONAL_PLATFORM_DATA；页面会先按来源/标题去重，再按分类和日期排序。
     // 每日维护游标：自动任务必须按连续自然日推进，不能只依赖“前一天”。
     const DAILY_MAINTENANCE_STATE = {
-      lastRunDate: "2026-11-23",
-      lastProcessedThrough: "2026-11-22",
-      lastProcessedRange: "2026-11-22—2026-11-22",
+      lastRunDate: "2026-11-24",
+      lastProcessedThrough: "2026-11-23",
+      lastProcessedRange: "2026-11-20—2026-11-23",
       lastRunStats: {
-        "2026-11-22": {
-          searched: 139,
-          qualified: 0,
-          eliminated: 138,
+        "2026-11-23": {
+          searched: 69,
+          qualified: 6,
+          eliminated: 56,
           duplicates: 0,
-          riskScreened: 0,
-          linkFailed: 1,
+          riskScreened: 7,
+          linkFailed: 0,
           accessFailures: 1,
           byPlatform: {
-            "小红书": { searched: 5, qualified: 0, eliminated: 5, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
-            "知乎": { searched: 18, qualified: 0, eliminated: 17, duplicates: 0, riskScreened: 0, linkFailed: 1, accessFailures: 0 },
-            "聚宽": { searched: 116, qualified: 0, eliminated: 116, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 }
+            "小红书": { searched: 3, qualified: 0, eliminated: 3, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
+            "知乎": { searched: 12, qualified: 0, eliminated: 12, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
+            "聚宽": { searched: 54, qualified: 6, eliminated: 41, duplicates: 0, riskScreened: 7, linkFailed: 0, accessFailures: 0 }
+          }
+        },
+        "2026-11-22": {
+          searched: 44,
+          qualified: 5,
+          eliminated: 34,
+          duplicates: 1,
+          riskScreened: 4,
+          linkFailed: 0,
+          accessFailures: 1,
+          byPlatform: {
+            "小红书": { searched: 4, qualified: 0, eliminated: 4, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
+            "知乎": { searched: 5, qualified: 0, eliminated: 5, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
+            "聚宽": { searched: 35, qualified: 5, eliminated: 25, duplicates: 1, riskScreened: 4, linkFailed: 0, accessFailures: 0 }
           }
         },
         "2026-11-21": {
-          searched: 138,
-          qualified: 0,
-          eliminated: 138,
+          searched: 44,
+          qualified: 4,
+          eliminated: 34,
           duplicates: 0,
-          riskScreened: 0,
+          riskScreened: 6,
           linkFailed: 0,
           accessFailures: 1,
           byPlatform: {
-            "小红书": { searched: 2, qualified: 0, eliminated: 2, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
-            "知乎": { searched: 20, qualified: 0, eliminated: 20, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
-            "聚宽": { searched: 116, qualified: 0, eliminated: 116, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 }
+            "小红书": { searched: 3, qualified: 0, eliminated: 3, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
+            "知乎": { searched: 6, qualified: 0, eliminated: 6, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
+            "聚宽": { searched: 35, qualified: 4, eliminated: 25, duplicates: 0, riskScreened: 6, linkFailed: 0, accessFailures: 0 }
           }
         },
         "2026-11-20": {
-          searched: 121,
-          qualified: 0,
-          eliminated: 121,
-          duplicates: 0,
-          riskScreened: 0,
+          searched: 75,
+          qualified: 5,
+          eliminated: 60,
+          duplicates: 2,
+          riskScreened: 8,
           linkFailed: 0,
           accessFailures: 1,
           byPlatform: {
-            "小红书": { searched: 5, qualified: 0, eliminated: 5, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
-            "知乎": { searched: 0, qualified: 0, eliminated: 0, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
-            "聚宽": { searched: 116, qualified: 0, eliminated: 116, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 }
+            "小红书": { searched: 3, qualified: 0, eliminated: 3, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
+            "知乎": { searched: 6, qualified: 0, eliminated: 6, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
+            "聚宽": { searched: 66, qualified: 5, eliminated: 51, duplicates: 2, riskScreened: 8, linkFailed: 0, accessFailures: 0 }
           }
         },
         "2026-11-19": {
@@ -3507,6 +3521,26 @@
       addPlatformRow("jq-daily-20261119-c41a3a1d", "聚宽", "策略/思路", "动量与反转：一对“相爱相杀”的因子", "以周至月级反转和 3–12 个月动量为不同研究尺度，提出先以中期动量构造强势股票池、再在池内比较短期反转入场，与两种单信号做分层对照。", "B", "量化守门员", ["策略/思路","动量","短期反转","双窗口","分层检验"], "未提供统一口径实证；需评估市场结构、换手成本和信号重叠，并检验 V 形反转、持续下跌阶段的表现。", "https://www.joinquant.com/view/community/detail/c41a3a1db604956583775af14d7d689e", "2026-11-19"),
       addPlatformRow("jq-daily-20261119-59b2b8e7", "聚宽", "有效观点", "多因子模型：如何把“盘感”变成一条流水线", "从相关性去冗余出发，用五组或十组收益单调性、IC 与 IC_IR、按行业或市值分层和跨时段扰动检验因子，再在组合端约束行业、市值和风格暴露。", "B", "量化守门员", ["有效观点","多因子","因子共线性","分组检验","IC","敞口控制"], "属于评估流程，无可比收益结果；正交化与权重应仅用当时可用的样本估计，并计入调仓成本。", "https://www.joinquant.com/view/community/detail/59b2b8e75b5486ec5c443266c0404ca8", "2026-11-19"),
       addPlatformRow("jq-daily-20261119-e8aace69", "聚宽", "策略/思路", "高股息策略最大的坑，是你买到了“假的高股息”", "在股息率排序前检查分红是否有净利润和经营现金流覆盖，并对比加入中期动量、行业上限后的组合；同时核验分红计算口径和基本面过滤后是否仍保持股息率排序。", "B", "Qiaoge", ["策略/思路","红利","股息率","现金流覆盖","行业集中度","克隆数=9","低克隆"], "引用的社区回测未独立复算；须统一股息可见日、复权方式和排序，检查负利润、一次性分红与交易成本。", "https://www.joinquant.com/view/community/detail/e8aace69d1c35e14d37579e1a53ffdd2", "2026-11-19"),
+      addPlatformRow("jq-daily-20261120-5a390c05", "聚宽", "策略/思路", "动量窗口拉到 40 天，收益从 814% 掉到 61%", "固定七只资产、双周调仓和单持仓，单独比较 20、40、60 日动量；更长窗口下回撤反而上升，并延迟全负时切换债券的信号。", "B", "二月黄", ["附聚宽回测","参数敏感性","ETF动量","克隆数=0"], "窗口结果仅适用于所测标的和区间，应分别测试排序窗口与防守触发窗口。", "https://www.joinquant.com/view/community/detail/5a390c055132305f0b291c903c4501c9", "2026-11-20"),
+      addPlatformRow("jq-daily-20261120-c03f12a9", "聚宽", "策略/思路", "四策略资金分仓", "用子策略持仓表和标的归属表双向登记，按资金配额分开选股与记账；盘后分别记录子策略浮盈曲线，用于追踪组合贡献。", "B", "Shiliu0316", ["附聚宽回测","多策略分仓","组合归因","克隆数=5"], "原例只启用了两条策略腿；需核对成交回报、跨策略重复持仓和账本与实有资产的差异。", "https://www.joinquant.com/view/community/detail/c03f12a964fe8e0f586c37bfb6def294", "2026-11-20"),
+      addPlatformRow("jq-daily-20261120-5c4228a4", "聚宽", "有效观点", "港股回购数据怎么核对？用行情数据API和公告算股数", "将回购计划、成交、注销和发行分开记账，用股本变动勾稽期末股份；接口汇总与公告交易金额口径不明时并列保存，不强行合并。", "B", "Walter_老白", ["回购数据","股本勾稽","公告","克隆数=0"], "仅为个案；跨期回购和注销可分属不同期间，历史事件研究需保留披露时间和原始凭据。", "https://www.joinquant.com/view/community/detail/5c4228a47dba9ad0746349329be48a45", "2026-11-20"),
+      addPlatformRow("jq-daily-20261120-ce25badf", "聚宽", "有效观点", "分层回测怎么读：因子分组的正确姿势", "按因子值分层构建组合，检查各组收益排序是否大体单调、分段是否稳定、收益差是否集中于少数极端分组，不以单一 IC 或头尾价差替代整组诊断。", "B", "wusichao", ["因子分组","单调性","分层回测","克隆数=0"], "分组边界、行业暴露、权重和成本应统一；图形单调不等同于独立样本可复现。", "https://www.joinquant.com/view/community/detail/ce25badfa49f852f496e5549ff5e99e7", "2026-11-20"),
+      addPlatformRow("jq-daily-20261120-c1245858", "聚宽", "有效观点", "无标签跨板块/行业动态关系几何与路径研究", "由历史共动估计时变关系，不预设行业标签；分别保留当前关系状态、资产之间的对应与到达路径，检验路径是否改善对有限期状态切换的预测。", "B", "墨石", ["动态关系","因子研究","滚动网络","克隆数=0"], "属研究设计，应与仅用当前状态的基线对照，并验证滚动估计、成本与样本外稳健性。", "https://www.joinquant.com/view/community/detail/c12458585d02352ca574084e8d1d51a2", "2026-11-20"),
+      addPlatformRow("jq-daily-20261121-36305259", "聚宽", "策略/思路", "自有现金流指数V2，收益提升5%", "保持原选股和月度调仓框架，分批取财报并校验报告期；用过去四季度现金流构造自由现金流率，过滤低流动性标的并限制单股权重。", "B", "allyouneed", ["附聚宽回测","自由现金流","财报分批查询","月度调仓","克隆数=93"], "收益为作者复跑结果；复现时先核对财报请求是否截断、行业剔除口径和真实成交处理。", "https://www.joinquant.com/view/community/detail/363052599db2b6222178e212599531ea", "2026-11-21"),
+      addPlatformRow("jq-daily-20261121-ebd44a1a", "聚宽", "策略/思路", "年化 42%小市值六因子动态加权选股（保序版）", "按第一次出现的顺序去重候选股，再截取评分前五；作者对照发现集合去重会改变候选排序，保序版两次回测的逐日净值一致。", "B", "allyouneed", ["附聚宽回测","回测复现","保序去重","动态因子权重","克隆数=2"], "可复现不等于收益可靠；需额外核对训练收益区间、微盘流动性与冲击成本。", "https://www.joinquant.com/view/community/detail/ebd44a1aef2f585a2b4ee5694cef3dd3", "2026-11-21"),
+      addPlatformRow("jq-daily-20261121-be09abef", "聚宽", "策略/思路", "给原油设个上限，收益从2086%砍到957%，回撤只少4个点", "固定十二只 ETF 的原有轮动条件，对原油或油气信号分别加 30% 和 50% 仓位上限，余额进入债券。两档下最大回撤相同，但收益不同。", "B", "二月黄", ["附聚宽回测","仓位上限","原油敞口","单变量对照","克隆数=2"], "回撤发生区间随规则变化；应比较风险归因、修复期和不同市场阶段，而不是只看单一峰值。", "https://www.joinquant.com/view/community/detail/be09abef3ea29c63029b8aeec3272a66", "2026-11-21"),
+      addPlatformRow("jq-daily-20261121-d87d72d6", "聚宽", "有效观点", "聚宽策略迁移 Q-MT 技术要点：系列2", "区分初始化、逐根 K 线回调与定时回调；指出把累计状态直接写入 ContextInfo 的字段可能遇到回滚，应把持久状态和回调参数分开管理。", "B", "量化策略开发", ["迁移工程","回调生命周期","状态管理","克隆数=0"], "属于平台迁移线索；不同版本及回测与实盘触发方式需分别复核。", "https://www.joinquant.com/view/community/detail/d87d72d67df43c19221c4edfba447af0", "2026-11-21"),
+      addPlatformRow("jq-daily-20261122-7465652c", "聚宽", "策略/思路", "4只ETF低波策略，6年回撤仅9%", "以四只不同类别 ETF 为固定池，使用过去 60 个交易日的波动协方差估算最小方差权重，按月再平衡、单只上限 50%，并与红利低波做成本后对照。", "B", "JeromeWGQ", ["附聚宽回测","最小方差","资产配置","协方差","克隆数=1"], "标题和正文的区间长度口径不同；复验需使用原回测日期，并检查协方差估计、溢价和成交条件。", "https://www.joinquant.com/view/community/detail/7465652c91f00eb0573be14984db9033", "2026-11-22"),
+      addPlatformRow("jq-daily-20261122-bbcc78ee", "聚宽", "策略/思路", "成长加速 + 现金流质量：小盘成长季度轮动", "用当时已公告的财报建立股票池，以本季同比减上季同比估算增长加速度，叠加现金流质量、估值和波动率进行分位打分，季度持有十只并限制行业集中。", "B", "量化养老婆", ["附聚宽回测","季度轮动","财报时点","行业约束","克隆数=3"], "需核对财务快照时点、波动率目标执行和小盘股可成交性；未独立复跑。", "https://www.joinquant.com/view/community/detail/bbcc78eee12e328543edcc0d9830a30b", "2026-11-22"),
+      addPlatformRow("jq-daily-20261122-4f1918b4", "聚宽", "策略/思路", "双周调仓是最好的那个频率，每周和每月都差一大截", "固定十二只 ETF、20 日动量和防守规则，对照每周、双周及每四周调仓；该样本双周结果更好，显示信号与执行频率需要联合验证。", "B", "二月黄", ["附聚宽回测","调仓频率","单变量对照","克隆数=0"], "双周表现可能受调仓相位影响；应滚动更换调仓日，并核对换手和成交成本。", "https://www.joinquant.com/view/community/detail/4f1918b4b3f648e9fbe8da59ce92d871", "2026-11-22"),
+      addPlatformRow("jq-daily-20261122-507e0c95", "聚宽", "策略/思路", "把仓位从1只拆成2只，回撤降了5个点，夏普反而更高", "固定资产池、信号、成本和区间，将动量第一名单持对照前两名等权持仓，观察回撤和夏普改善是否足以抵消收益下降。", "B", "二月黄", ["附聚宽回测","持仓集中度","组合对照","克隆数=0"], "该结论只针对本次资产池和样本；应分阶段复跑，并核对第二名与第一名的相关性。", "https://www.joinquant.com/view/community/detail/507e0c950c71ca2624dc20ef864ec188", "2026-11-22"),
+      addPlatformRow("jq-daily-20261122-49ec2c80", "聚宽", "有效观点", "聚宽策略迁移 PT-rade技术要点分析：系列2", "对照聚宽和 PTrade 的重启状态恢复流程，指出持久化状态可能在初始化之后覆盖同名变量；需要区分跨重启账本、临时变量与重新初始化字段。", "B", "量化策略开发", ["PTrade","持久化","重启一致性","克隆数=0"], "需在所用券商版本用重启测试验证覆盖顺序，尤其是成交与持仓状态。", "https://www.joinquant.com/view/community/detail/49ec2c8096be86165f8bac8c5d8dc69d", "2026-11-22"),
+      addPlatformRow("jq-daily-20261123-9d4c676c", "聚宽", "策略/思路", "把交易成本翻一倍，收益从2072%掉到1583%", "保持轮动信号、交易日和资产池不变，将两边佣金与滑点同时提高一倍，对照年化、最大回撤和夏普，量化这组假设对回测结果的影响。", "B", "二月黄", ["附聚宽回测","成本压力测试","佣金滑点","ETF轮动","克隆数=1"], "单次同时改两项成本不能识别独立贡献；实际滑点应按流动性、成交量和市场阶段估计。", "https://www.joinquant.com/view/community/detail/9d4c676c36edb1c61abec9085e7b9dbc", "2026-11-23"),
+      addPlatformRow("jq-daily-20261123-7defcd50", "聚宽", "策略/思路", "给策略装了个波动率刹车，回撤从37%砍到21%，收益只剩四成", "持仓标的按近 20 日年化波动率缩放仓位，目标为 15%、最高满仓，未分配仓位留现金，与信号相同的满仓版本作对照。", "B", "二月黄", ["附聚宽回测","波动率目标","仓位管理","风险预算","克隆数=1"], "目标波动率不是组合回撤上限；需检查波动估计滞后、调仓间波动跳升和现金收益口径。", "https://www.joinquant.com/view/community/detail/7defcd50cd7f77332797512aab28734c", "2026-11-23"),
+      addPlatformRow("jq-daily-20261123-3ef770b6", "聚宽", "有效观点", "统计股票列表的历史收益率和波动率", "以代码或中文名称整理证券列表，批量生成逐年收益和多个回看期限的年化收益、波动率，并按固定输出路径留档便于复查。", "B", "P5张大猫", ["统计脚本","收益波动率","批量检查","克隆数=0"], "这是统计脚本而非交易策略；须统一价格复权、停牌、有效样本年限和年化换算。", "https://www.joinquant.com/view/community/detail/3ef770b61aa598c14c9f02b5e1b0b496", "2026-11-23"),
+      addPlatformRow("jq-daily-20261123-1ee7f5c0", "聚宽", "有效观点", "统计套利中的协整关系与结构断裂风险", "先判定价差平稳和回复周期，再用持续偏移、回复速度改变与交易条件判别临时价差和结构断裂，建仓前重新验证关系。", "B", "miniwar", ["协整","统计套利","结构断裂","克隆数=0"], "无实证绩效；需要滚动样本、结构断点检验，并单独验证借券成本与实际流动性。", "https://www.joinquant.com/view/community/detail/1ee7f5c0bb8ab8d50f81b41d6d7c44e1", "2026-11-23"),
+      addPlatformRow("jq-daily-20261123-9abe98a2", "聚宽", "有效观点", "高频做市的微结构基础与容量约束", "将双边报价收益拆为价差获取、逆向选择损失和库存暴露，结合队列位置、成交概率、延迟与冲击成本评估容量。", "B", "miniwar", ["市场微结构","队列位置","容量","克隆数=0"], "不是实证策略；日线或普通分钟线无法复原排队成交，应使用订单簿和相应成交模型。", "https://www.joinquant.com/view/community/detail/9abe98a2b817547988410d1cd0dfbd02", "2026-11-23"),
+      addPlatformRow("jq-daily-20261123-410d180a", "聚宽", "有效观点", "比复盘多记一列：交易日志要记多细", "把入场时的信号、理由、预计兑现期限和退出条件与事后盈亏分开记录，复盘时独立归因规则执行质量与偶然涨跌。", "B", "wusichao", ["交易日志","决策记录","复盘","克隆数=0"], "应在决策时记下原始理由，避免用事后信息补写；可先固定字段和每周复盘频率。", "https://www.joinquant.com/view/community/detail/410d180a2f9b9ccdc78da7ab123d85b0", "2026-11-23"),
        // 聚宽新增策略条目保留在此数组，后续每日增量追加到 ADDITIONAL_PLATFORM_DATA。
        ];
 
