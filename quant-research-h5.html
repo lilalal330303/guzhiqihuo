@@ -190,7 +190,7 @@
     <h1>量化研究<br><span style="color:var(--mint)">信息库</span></h1>
     <p class="hero-copy">把小红书、知乎以及聚宽等国内量化平台资料整理成可快速查询、持续追加的本地研究台。</p>
     <div class="hero-meta">
-    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-24</strong></span>
+    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-25</strong></span>
       <span class="meta-pill">来源 <strong>小红书 / 知乎 / 聚宽</strong></span>
       <span class="meta-pill">使用方式 <strong>本地打开 · 无需服务器</strong></span>
       <span class="meta-pill">精选保留 <strong id="curatedMeta">—</strong></span>
@@ -260,10 +260,24 @@
     // 平台信息追加到 ADDITIONAL_PLATFORM_DATA；页面会先按来源/标题去重，再按分类和日期排序。
     // 每日维护游标：自动任务必须按连续自然日推进，不能只依赖“前一天”。
     const DAILY_MAINTENANCE_STATE = {
-      lastRunDate: "2026-11-24",
-      lastProcessedThrough: "2026-11-23",
-      lastProcessedRange: "2026-11-20—2026-11-23",
+      lastRunDate: "2026-11-25",
+      lastProcessedThrough: "2026-11-24",
+      lastProcessedRange: "2026-11-24—2026-11-24",
       lastRunStats: {
+        "2026-11-24": {
+          searched: 65,
+          qualified: 7,
+          eliminated: 53,
+          duplicates: 0,
+          riskScreened: 5,
+          linkFailed: 0,
+          accessFailures: 1,
+          byPlatform: {
+            "小红书": { searched: 6, qualified: 0, eliminated: 6, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
+            "知乎": { searched: 14, qualified: 0, eliminated: 14, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
+            "聚宽": { searched: 45, qualified: 7, eliminated: 33, duplicates: 0, riskScreened: 5, linkFailed: 0, accessFailures: 0 }
+          }
+        },
         "2026-11-23": {
           searched: 69,
           qualified: 6,
@@ -3541,6 +3555,13 @@
       addPlatformRow("jq-daily-20261123-1ee7f5c0", "聚宽", "有效观点", "统计套利中的协整关系与结构断裂风险", "先判定价差平稳和回复周期，再用持续偏移、回复速度改变与交易条件判别临时价差和结构断裂，建仓前重新验证关系。", "B", "miniwar", ["协整","统计套利","结构断裂","克隆数=0"], "无实证绩效；需要滚动样本、结构断点检验，并单独验证借券成本与实际流动性。", "https://www.joinquant.com/view/community/detail/1ee7f5c0bb8ab8d50f81b41d6d7c44e1", "2026-11-23"),
       addPlatformRow("jq-daily-20261123-9abe98a2", "聚宽", "有效观点", "高频做市的微结构基础与容量约束", "将双边报价收益拆为价差获取、逆向选择损失和库存暴露，结合队列位置、成交概率、延迟与冲击成本评估容量。", "B", "miniwar", ["市场微结构","队列位置","容量","克隆数=0"], "不是实证策略；日线或普通分钟线无法复原排队成交，应使用订单簿和相应成交模型。", "https://www.joinquant.com/view/community/detail/9abe98a2b817547988410d1cd0dfbd02", "2026-11-23"),
       addPlatformRow("jq-daily-20261123-410d180a", "聚宽", "有效观点", "比复盘多记一列：交易日志要记多细", "把入场时的信号、理由、预计兑现期限和退出条件与事后盈亏分开记录，复盘时独立归因规则执行质量与偶然涨跌。", "B", "wusichao", ["交易日志","决策记录","复盘","克隆数=0"], "应在决策时记下原始理由，避免用事后信息补写；可先固定字段和每周复盘频率。", "https://www.joinquant.com/view/community/detail/410d180a2f9b9ccdc78da7ab123d85b0", "2026-11-23"),
+      addPlatformRow("jq-daily-20261124-962a830f", "聚宽", "策略/思路", "加了个15%回撤止损，收益从2072%掉到859%", "用组合历史高点计算回撤，分别对照不设冷却期、强制等待四周和八周的再入场规则。作者的回测中，短期退出几乎没有改善回撤，延长等待则错过了快速反弹。", "B", "二月黄", ["附聚宽回测","组合回撤","再入场","冷却期","克隆数=21"], "结论仅限所测组合与区间；复验应分别检查触发次数、退出与恢复时点以及急跌后反弹情景。", "https://www.joinquant.com/view/community/detail/962a830f59ddaa3ab1a0926c42523e5b", "2026-11-24"),
+      addPlatformRow("jq-daily-20261124-b3332812", "聚宽", "策略/思路", "调仓日从周一挪到周五，收益从2072%掉到520%", "保持代码、资产池和信号不变，把调仓安排依次设在周一、周三和周五，比较风险与收益；再定位净值首次分叉及各自最大回撤区间。", "B", "二月黄", ["附聚宽回测","日历敏感性","调仓时点","路径依赖","克隆数=21"], "择日结果不是日历规律；应比较不同起始日期、假期处理与相互错开的执行组合。", "https://www.joinquant.com/view/community/detail/b333281281d837030e8898b0f86b10d7", "2026-11-24"),
+      addPlatformRow("jq-daily-20261124-f491d828", "聚宽", "策略/思路", "把动量信号做得更全面，收益从2072%掉到32%", "用 20、60、120 日涨幅均值，以及 20 日涨幅除以年化波动率，分别替换单窗口动量基线；对比换仓与收益贡献，区分信号滞后和低波倾斜。", "B", "二月黄", ["附聚宽回测","多周期动量","风险调整动量","基线对照","克隆数=21"], "两组变体的表现来自同一回测样本；需在其他资产池分段复跑，不据此推广到所有动量策略。", "https://www.joinquant.com/view/community/detail/f491d828b5b58c47e3b318587e56563e", "2026-11-24"),
+      addPlatformRow("jq-daily-20261124-1aeffc65", "聚宽", "策略/思路", "ETF轮动回撤3轮实测：四维低相关+急杀熔断，9年378%", "以回归动量作基线，对照反波动双持仓与低相关资产池加短期急跌过滤的版本，再用债券和货基分层防守。帖子列出比较区间、交易成本及回撤区间。", "B", "CoolBot", ["附聚宽回测","低相关资产池","急跌过滤","版本对照","克隆数=2"], "最终版本同时更换多项规则，无法单独归因；需要逐项验证池子、过滤条件和防守替代品。", "https://www.joinquant.com/view/community/detail/1aeffc654bf8770e4a632376bbebc3e6", "2026-11-24"),
+      addPlatformRow("jq-daily-20261124-308888ed", "聚宽", "有效观点", "什么时候该停用一个策略：失效的信号", "用原有收益机制、历史逆风期长短与深度、贡献来源是否漂移以及实际执行是否偏离规则四项证据，区分正常回撤与策略失效。", "B", "wusichao", ["策略监控","收益归因","停用条件","克隆数=0"], "宜提前记录触发门槛及异常复核流程；单一回撤或临时主观判断不足以作停用结论。", "https://www.joinquant.com/view/community/detail/308888ed8be08dcb1fd9dd9536b5addd", "2026-11-24"),
+      addPlatformRow("jq-daily-20261124-7fe7f0e5", "聚宽", "有效观点", "美股历史数据API做日线回测，收盘突破怎样按次日开盘验证？", "日线收盘确认信号后保存当时的突破阈值，用下个交易日的开盘价分别验证直接执行和满足原阈值才执行两种规则，将信号与模拟成交分列。", "B", "Walter_老白", ["信号与执行","日线回测","开盘验收","克隆数=0"], "开盘价只是一种成交代理，样本用于核对事件顺序，不代表策略收益；需补足跳空、费用与停牌情形。", "https://www.joinquant.com/view/community/detail/7fe7f0e5a35e26398f7ce876e93bb748", "2026-11-24"),
+      addPlatformRow("jq-daily-20261124-9ef9f30d", "聚宽", "有效观点", "金融大模型评测：不能只看普通问答分数", "以可追溯的财报数据和多步会计勾稽任务替代短问答打分，给题目固定信息截止点及分值预算，再用不同模型独立验算数字与支持证据。", "B", "tree333", ["金融模型评测","时点校验","证据复核","克隆数=0"], "这是评测工程方法，自动评分仍需专家抽检；应区分版本修订前后的财报并记录计算成本。", "https://www.joinquant.com/view/community/detail/9ef9f30dace821aa56505fec0ed8baf5", "2026-11-24"),
        // 聚宽新增策略条目保留在此数组，后续每日增量追加到 ADDITIONAL_PLATFORM_DATA。
        ];
 
