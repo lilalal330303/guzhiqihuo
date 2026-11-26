@@ -190,7 +190,7 @@
     <h1>量化研究<br><span style="color:var(--mint)">信息库</span></h1>
     <p class="hero-copy">把小红书、知乎以及聚宽等国内量化平台资料整理成可快速查询、持续追加的本地研究台。</p>
     <div class="hero-meta">
-    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-26</strong></span>
+    <span class="meta-pill">数据快照 <strong id="snapshotDate">2026-11-27</strong></span>
       <span class="meta-pill">来源 <strong>小红书 / 知乎 / 聚宽</strong></span>
       <span class="meta-pill">使用方式 <strong>本地打开 · 无需服务器</strong></span>
       <span class="meta-pill">精选保留 <strong id="curatedMeta">—</strong></span>
@@ -260,10 +260,24 @@
     // 平台信息追加到 ADDITIONAL_PLATFORM_DATA；页面会先按来源/标题去重，再按分类和日期排序。
     // 每日维护游标：自动任务必须按连续自然日推进，不能只依赖“前一天”。
     const DAILY_MAINTENANCE_STATE = {
-      lastRunDate: "2026-11-26",
-      lastProcessedThrough: "2026-11-25",
-      lastProcessedRange: "2026-11-25—2026-11-25",
+      lastRunDate: "2026-11-27",
+      lastProcessedThrough: "2026-11-26",
+      lastProcessedRange: "2026-11-26—2026-11-26",
       lastRunStats: {
+        "2026-11-26": {
+          searched: 85,
+          qualified: 7,
+          eliminated: 67,
+          duplicates: 1,
+          riskScreened: 10,
+          linkFailed: 0,
+          accessFailures: 1,
+          byPlatform: {
+            "小红书": { searched: 0, qualified: 0, eliminated: 0, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 1 },
+            "知乎": { searched: 29, qualified: 0, eliminated: 29, duplicates: 0, riskScreened: 0, linkFailed: 0, accessFailures: 0 },
+            "聚宽": { searched: 56, qualified: 7, eliminated: 38, duplicates: 1, riskScreened: 10, linkFailed: 0, accessFailures: 0 }
+          }
+        },
         "2026-11-25": {
           searched: 76,
           qualified: 6,
@@ -3582,6 +3596,13 @@
       addPlatformRow("jq-daily-20261125-79caa79e", "聚宽", "策略/思路", "价格 + 流通市值 双因子轮动", "先过滤板块、低价股和次新股，再分别对股价和流通市值做横截面升序排名，按1.5比1合成分值，等权持有最低20名，每五个交易日轮换。", "B", "养鸡侠", ["附聚宽回测","横截面排名","流通市值","低价因子","克隆数=4"], "正文未列完整卖出条件；以挂载回测核对规则，并格外检查名义股价筛选、流动性、冲击成本和组合容量。", "https://www.joinquant.com/view/community/detail/79caa79e37c0d6b038b6c4bc7eefa05d", "2026-11-25"),
       addPlatformRow("jq-daily-20261125-91047ff8", "聚宽", "策略回测代码", "一个模拟盘位跑三个策略：省下聚宽积分的实战思路", "初始化时按权重拆分子账户现金，每笔订单显式传子账户索引，独立记录各子策略持仓和净值；用最后一个账户吸收舍入差，并分别注册调度。", "B", "天天红a", ["附聚宽回测","子账户","模拟盘工程","调度隔离","克隆数=3"], "侧重模拟盘工程，不是收益证明；需用订单和净值日志核对索引、现金守恒与异常状态下的隔离。", "https://www.joinquant.com/view/community/detail/91047ff895a9c871b13ea0450798c4c1", "2026-11-25"),
       addPlatformRow("jq-daily-20261125-c3742d58", "聚宽", "有效观点", "财务数据辅助回测：财报盘后才披露，新利润哪天才能用？", "把报告期末、监管接收时点、研究系统入库时间和每日选股截止分别建字段，用带时区的时间比较判定当轮能否使用财务数据，并附可复跑示例。", "B", "fengshunge", ["财务数据","时点可用性","版本记录","时区","克隆数=0"], "监管接收时间只是示范用的代理，不等于实际首次公开或供应商到达时间；生产验证应使用自有历史入库日志。", "https://www.joinquant.com/view/community/detail/c3742d5873c99b2ebf77d5b7dcd9ba1b", "2026-11-25"),
+      addPlatformRow("jq-daily-20261126-73890eb3", "聚宽", "策略/思路", "把国债从池子里拿出来，11年半只少赚53个点", "把国债ETF的动量候选角色与防守角色分开：保留原版基线，再将国债移出候选池，对比防守时持国债、黄金或现金。四组的最大回撤没有变化，作者将其定位到风险资产持仓阶段。", "B", "二月黄", ["附聚宽回测","防守资产","ETF轮动","回撤归因","克隆数=39"], "属于特定样本的对照；换用黄金的收益差不能证明它更能避险。复验可先统计防守触发时长，再拆分持仓阶段的亏损贡献。", "https://www.joinquant.com/view/community/detail/73890eb37a62d001b2649896ab72a022", "2026-11-26"),
+      addPlatformRow("jq-daily-20261126-2940dcab", "聚宽", "策略/思路", "用沪深300当总开关，回撤没降反涨到40%", "在跨资产轮动基线上分别引入沪深300的120日和250日均线门槛，跌破则持国债；对照最大回撤、夏普与停交易期间被错过的其他市场行情。", "B", "二月黄", ["附聚宽回测","跨市场轮动","宽基过滤","负向对照","克隆数=39"], "单市场过滤在该样本未有效降低组合回撤，长窗口回撤反而扩大；需按资产归因，并核对信号与执行时点。", "https://www.joinquant.com/view/community/detail/2940dcab5e735e56d7222c94a524f11b", "2026-11-26"),
+      addPlatformRow("jq-daily-20261126-0ce5b303", "聚宽", "策略/思路", "只押一只改成押三只，收益少赚1315个点，回撤只少挨11个点", "固定动量排序与调仓频率，只改变等权持仓数，对照前1、前2、前3名组合。样本内多持仓降低回撤，但增加交易次数并降低绝对收益。", "B", "二月黄", ["附聚宽回测","持仓集中度","等权对照","交易成本","克隆数=39"], "最大回撤改善不代表策略更优；应把相关性、换手与费用变化分开复验，不将样本结果直接用于加杠杆。", "https://www.joinquant.com/view/community/detail/0ce5b303b2a7db911f2cd3a1539a277c", "2026-11-26"),
+      addPlatformRow("jq-daily-20261126-36102373", "聚宽", "策略回测代码", "复现东吴“聪明动量”：有效的是日内反转，不是隔夜动量", "用分钟线拆分隔夜和日内收益，分别比较精选分钟、全天和固定时段；按20日累计、月末信号和次月开盘等权成交，在四个指数及不同持股数下复核。", "B", "Smart_Trader_AFA", ["附聚宽回测","分钟线","因子复现","日内反转","克隆数=9"], "样本只有19个月度截面，且使用固定成分股、分钟数据未复权；原研报的隔夜机制和精选时段增量均未复现。", "https://www.joinquant.com/view/community/detail/36102373fcda4e11027ebc0a9cc818c5", "2026-11-26"),
+      addPlatformRow("jq-daily-20261126-3d468f8c", "聚宽", "有效观点", "外汇行情API核对估值：美元市值没变，日元报表为何少了？", "先用旧汇率换算原币市值的变化，再用新原币市值计算汇率变化的贡献；用两次换算的总差额复核，并记录货币方向、价格与汇率各自的取价时间。", "B", "wwtangkeng", ["跨币种估值","汇率归因","数据对账","取价时点","克隆数=0"], "小时线收盘价只是文中示例，不一定是报表定盘价；归因顺序会改变交互项分配，应固定口径并记录缺值处理。", "https://www.joinquant.com/view/community/detail/3d468f8c1702148de63c02f7a34f26d7", "2026-11-26"),
+      addPlatformRow("jq-daily-20261126-246b8e72", "聚宽", "有效观点", "从回测、模拟到******验证", "用同一版本策略比较不同执行环境的成交时序、涨跌停与停牌处理、固定滑点与冲击成本、复权及公司行动，按环节定位净值差异。", "B", "量化使人欲仙欲死", ["撮合差异","模拟盘","成交约束","成本校准","克隆数=0"], "文章是排查清单，不是验证结果；不同平台与频率的撮合配置不能一概而论，应逐笔对齐委托、成交和拒单记录。", "https://www.joinquant.com/view/community/detail/246b8e72a7a5dd55cc21868ddf627208", "2026-11-26"),
+      addPlatformRow("jq-daily-20261126-92ac1ac8", "聚宽", "有效观点", "固定时间做固定事：再平衡日历的意义", "把再平衡、策略检查、规则评审和交易复盘安排在不同的固定时点；预先定义允许临时干预的事件，并在成交记录之外单列例外原因和决策时间。", "B", "wusichao", ["再平衡","交易日志","例外处理","执行审计","克隆数=0"], "日历可用于检验执行偏差，不证明某个调仓频率更优；频率仍需用交易成本和权重漂移做对照。", "https://www.joinquant.com/view/community/detail/92ac1ac8cd613171a5d0361b389ed7dd", "2026-11-26"),
        // 聚宽新增策略条目保留在此数组，后续每日增量追加到 ADDITIONAL_PLATFORM_DATA。
        ];
 
